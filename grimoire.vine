@@ -131,10 +131,11 @@ Formal productions for the whole data format: vocabulary graduated into grammar,
 > Gated on the vocabulary read-through rather than the full freeze, since productions graduate from vocabulary. Relax if wanted sooner.
 @guidance text/markdown ./spec/grimoire.md
 ---
-[core/freeze] Stamp the core spec (notstarted) @dispatch(mechanical)
+[core/freeze] Stamp the core spec (complete) @dispatch(mechanical)
 Give the document its version. The spec mandates versioning for everything it touches; the stamp is the freeze.
 -> core/vocab-review
-> Revalidate the current specification and its version after the renewed vocabulary review.
+> 2026-07-21: User confirmed the current core specification is frozen as Version 1.0.0.
+> Revalidate the current specification after the renewed vocabulary review.
 @guidance text/markdown ./spec/grimoire.md
 ---
 [core/vocab-review] Vocabulary read-through (complete)
