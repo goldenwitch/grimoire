@@ -1,0 +1,150 @@
+vine 1.2.0
+prefix: grimoire
+title: Grimoire plan for the full vision
+---
+[grimoire] Grimoire v1 (started)
+The full vision: a frozen core specification satisfied by its grammar, projection language, schemas, and layers, with one worked description that exercises all of it.
+-> example/reference
+-> viz/design
+> Scaffolded from dependsOn out of the core skeleton; places not yet defined carry Design-with-the-user nodes.
+> Mechanical nodes are annotated dispatch(mechanical) and carry step-level guidance a weaker agent can execute; design and review stay with the user and Claude.
+> Fauxlden Retriever is a synthetic consumption exercise, not a source of product priorities.
+---
+[example/reference] Reference worked description (notstarted)
+One synthetic whole-system description exercised end to end across every layer and validated by the reference tooling. Its purpose is to keep the language from overfitting before a real consumer exists.
+-> consumers/golden-retriever
+-> layers/cost
+-> layers/hyperparameters
+-> layers/info-flow
+-> layers/mode
+-> layers/placement
+-> layers/provenance
+-> tools/validator
+> Candidate system: the V-JEPA self-distillation setup.
+---
+[tools/validator] Reference validator and canonical serializer (notstarted) @dispatch(mechanical)
+Implements the constraints: addresses, scoping, locality, cuts, checks, canonical serialization. Conforms to the specification; never the definition.
+-> grammar/review
+@guidance text/markdown ./spec/grimoire.md
+@guidance text/markdown ./guidance/tools-validator.md
+---
+[viz/design] Design with the user: visualization (notstarted)
+Visualization is specified separately and nothing exists yet. Views render reprojections; per-layer rendering is the open ground.
+-> projlang/spec
+---
+[layers/info-flow] Information flow layer (notstarted)
+Forward and backward views with honest quantities: invert over selections, exclusions for stop-gradients, declared versus derived reach agreeing as a check.
+-> core/freeze
+-> projlang/spec
+-> schemas/measurement
+-> schemas/shapes
+---
+[layers/hyperparameters] Hyperparameters layer (notstarted)
+Every dial attached to the structure it modulates: typed and domained decorate, schedules as declared functions of symbolic variables, coverage as a check.
+-> core/freeze
+-> projlang/spec
+-> schemas/axes
+---
+[layers/placement] Placement and bandwidth layer (notstarted)
+Placement as decorate on addresses, collectives as elements, bytes-on-wire from shapes plus placement.
+-> core/freeze
+-> projlang/spec
+-> schemas/axes
+-> schemas/shapes
+---
+[layers/cost] Cost layer (notstarted)
+Compositional symbolic accounting over declared axes and aggregation over groups.
+-> core/freeze
+-> projlang/spec
+-> schemas/axes
+-> schemas/shapes
+---
+[layers/provenance] Technique provenance layer (notstarted)
+Citations, stated assumptions, and novelty flags on groups; the novelty surface as a check expected empty.
+-> core/freeze
+-> projlang/spec
+-> schemas/provenance
+---
+[layers/mode] Mode layer (notstarted)
+Per-regime views by selection, mode-local structure as elements, alternatives coexisting at a site every mode can see.
+-> core/freeze
+-> projlang/spec
+---
+[consumers/golden-retriever] Fauxlden Retriever consumption exercise (started)
+A synthetic whole-system description used to consume Grimoire before a real consumer exists. It stress-tests whether the language can describe arbitrary hot-path facts without making r3/r4 terminology, priorities, or mechanisms normative.
+> Fauxlden Retriever is a test fixture, not a product consumer and not a source of layer priority.
+> Use r3/r4 only to exercise the description language against a dense whole-system case; do not promote its vocabulary or architecture into Grimoire without an independent language need.
+> The fixture includes whole-system facts such as tensors, passes, optimizer flags, gradient interventions, seeds, evidence artifacts, placement paths, bandwidth costs, and intentionally undefined behavior.
+> R4 geometry is fixture evidence only: candidate plurality and multi-location reach are separate axes; each candidate lead contains a spacetime tube; every tube advances one frame; paired scoring reads all candidate spacetime; exactly one candidate is selected for execution.
+---
+[projlang/spec] Projection language specification (notstarted)
+The sibling specification: select, invert, decorate; folding by join and chain; checks as cardinality expectations; definition-site opacity; symbolic values.
+-> grammar/build
+-> projlang/design
+---
+[projlang/design] Design with the user: projection language semantics (notstarted)
+Fragment semantics, recursion and stratification, fold behavior at join points, evaluation of symbolic axes.
+-> core/freeze
+> Inherits the transferred question: whether three fragments suffice, and which layer first demands a fourth.
+---
+[schemas/shapes] Design with the user: shapes schema (notstarted)
+Tensor shapes referencing axes by address.
+-> namespaces/minting
+-> schemas/axes
+-> schemas/meta
+@guidance text/markdown ./spec/grimoire.md
+---
+[schemas/axes] Design with the user: axes schema (notstarted)
+Symbolic axes as addressed declarations at definition sites, subject to locality like any declaration. Open question: which element at a definition site carries an axis declaration (the anchoring convention) — not mechanical, needs to be settled with the user rather than drafted and escalated by an agent.
+-> namespaces/minting
+-> schemas/meta
+@guidance text/markdown ./spec/grimoire.md
+---
+[schemas/measurement] Design with the user: measurement-origin schema (notstarted)
+Origin-tagged literals for values measured outside the description.
+-> namespaces/minting
+-> schemas/meta
+@guidance text/markdown ./spec/grimoire.md
+---
+[schemas/provenance] Design with the user: provenance schema (notstarted)
+Citations, stated assumptions, and novelty flags on groups.
+-> namespaces/minting
+-> schemas/meta
+@guidance text/markdown ./spec/grimoire.md
+---
+[schemas/meta] Design with the user: schema definition format (notstarted)
+The format schemas themselves are written in: versioned and machine-checkable.
+-> core/freeze
+---
+[namespaces/minting] Design with the user: namespace minting (notstarted)
+How identifiers are minted so independent authors cannot collide unknowingly.
+-> core/freeze
+---
+[grammar/review] Review the grammar (notstarted)
+Your read of the grammar against the specification: every vocabulary term graduated into a production, canonical serialization defined, nothing invented beyond the requirements.
+-> grammar/build
+@guidance text/markdown ./spec/grimoire.md
+---
+[grammar/build] Grammar of the format (notstarted)
+Formal productions for the whole data format: vocabulary graduated into grammar, addresses, core and layer documents, extension parameters, canonical serialization.
+-> core/vocab-review
+-> namespaces/minting
+-> projlang/design
+-> schemas/meta
+> Built autonomously by Claude to satisfy the specification; lands at grammar/review.
+> Gated on the vocabulary read-through rather than the full freeze, since productions graduate from vocabulary. Relax if wanted sooner.
+@guidance text/markdown ./spec/grimoire.md
+---
+[core/freeze] Stamp the core spec (notstarted) @dispatch(mechanical)
+Give the document its version. The spec mandates versioning for everything it touches; the stamp is the freeze.
+-> core/vocab-review
+> Revalidate the current specification and its version after the renewed vocabulary review.
+@guidance text/markdown ./spec/grimoire.md
+---
+[core/vocab-review] Vocabulary read-through (notstarted)
+Your deliberate read of the Vocabulary section: the definitions that graduate into productions, and the section that churned in every revision. The last human gate. Exclusively a human activity — never dispatched to an agent — performed only when the user explicitly delegates it (trigger phrase: "review and approve if appropriate").
+-> core/spec
+---
+[core/spec] Core specification (reviewing)
+The core data-format specification: pure data, definition sites and scoping, locality, extension parameters, and requirements on the projection language and layers.
+@artifact text/markdown ./spec/grimoire.md
