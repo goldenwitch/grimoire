@@ -89,35 +89,31 @@ Fragment semantics, recursion and stratification, fold behavior at join points, 
 ---
 [schemas/shapes] Design with the user: shapes schema (notstarted)
 Tensor shapes referencing axes by address.
--> namespaces/minting
+-> extension-namespaces/minting
 -> schemas/axes
 -> schemas/meta
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/axes] Design with the user: axes schema (notstarted)
 Symbolic axes as addressed declarations at definition sites, subject to locality like any declaration. Open question: which element at a definition site carries an axis declaration (the anchoring convention) — not mechanical, needs to be settled with the user rather than drafted and escalated by an agent.
--> namespaces/minting
+-> extension-namespaces/minting
 -> schemas/meta
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/measurement] Design with the user: measurement-origin schema (notstarted)
 Origin-tagged literals for values measured outside the description.
--> namespaces/minting
+-> extension-namespaces/minting
 -> schemas/meta
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/provenance] Design with the user: provenance schema (notstarted)
 Citations, stated assumptions, and novelty flags on groups.
--> namespaces/minting
+-> extension-namespaces/minting
 -> schemas/meta
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/meta] Design with the user: schema definition format (notstarted)
 The format schemas themselves are written in: versioned and machine-checkable.
--> core/freeze
----
-[namespaces/minting] Design with the user: namespace minting (notstarted)
-How identifiers are minted so independent authors cannot collide unknowingly.
 -> core/freeze
 ---
 [grammar/review] Review the grammar (notstarted)
@@ -128,7 +124,7 @@ Your read of the grammar against the specification: every vocabulary term gradua
 [grammar/build] Grammar of the format (notstarted)
 Formal productions for the whole data format: vocabulary graduated into grammar, addresses, core and layer documents, extension parameters, canonical serialization.
 -> core/vocab-review
--> namespaces/minting
+-> extension-namespaces/minting
 -> projlang/design
 -> schemas/meta
 > Built autonomously by Claude to satisfy the specification; lands at grammar/review.
@@ -141,10 +137,14 @@ Give the document its version. The spec mandates versioning for everything it to
 > Revalidate the current specification and its version after the renewed vocabulary review.
 @guidance text/markdown ./spec/grimoire.md
 ---
-[core/vocab-review] Vocabulary read-through (notstarted)
+[core/vocab-review] Vocabulary read-through (complete)
 Your deliberate read of the Vocabulary section: the definitions that graduate into productions, and the section that churned in every revision. The last human gate. Exclusively a human activity — never dispatched to an agent — performed only when the user explicitly delegates it (trigger phrase: "review and approve if appropriate").
 -> core/spec
 ---
 [core/spec] Core specification (reviewing)
 The core data-format specification: pure data, definition sites and scoping, locality, extension parameters, and requirements on the projection language and layers.
 @artifact text/markdown ./spec/grimoire.md
+---
+[extension-namespaces/minting] Extension namespace minting (notstarted)
+How extension namespace identifiers are minted so independent authors cannot collide unknowingly.
+-> core/freeze

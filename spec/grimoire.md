@@ -12,15 +12,15 @@
 Each term is defined once, in terms of primitives and other vocabulary. These definitions are intended to graduate into formal productions of the language grammar.
 
 - **description** — a **core graph** together with any set of **layers** over it.
-- **address** — a stable, namespaced identifier, unique within a **description**.
+- **address** — a stable identifier, unique within a **description**.
 - **element** — anything that carries an **address**: a **block**, **port**, **connection**, **group**, or the **description** itself.
 - **block** — an **element** with a human name and zero or more **ports**.
 - **port** — an **element** belonging to exactly one **block**, at which **connections** attach.
 - **connection** — a directed **element** joining exactly two **ports**.
 - **group** — an **element** naming a set of **elements**; **groups** may contain **groups**.
-- **schema** — a versioned, machine-checkable definition of the structure and constraints of the **extension parameters** in one **namespace**.
-- **namespace** — a qualifier for **extension parameters**.
-- **extension parameter** — a structured value attached to an **element**, qualified by a **namespace** and governed by a **schema**.
+- **schema** — a versioned, machine-checkable definition of the structure and constraints of the **extension parameters** in one **extension namespace**.
+- **extension namespace** — a qualifier for **extension parameters**.
+- **extension parameter** — a structured value attached to an **element**, qualified by an **extension namespace** and governed by a **schema**.
 - **projection language** — the sibling specification defining how **projections** are written and evaluated; versioned in its own right.
 - **projection** — a pure, static function from **description**-shaped input to **description**-shaped output, written in the **projection language**, which is specified separately.
 - **layer** — a name unique within a **description**, a set of declared inputs, the **schemas** and **projection language** version it consumes, zero or more **element** definitions, and one **projection**.
@@ -28,13 +28,12 @@ Each term is defined once, in terms of primitives and other vocabulary. These de
 - **definition site** — the one place an **element** is defined: the **core graph**, or exactly one **layer**.
 - **input chain** — a **layer**, its declared inputs, their declared inputs, and so on, down to and including the **core graph**.
 - **reprojection** — the result of applying a **layer**'s **projection** to its declared inputs.
-- **cut** — the **core graph** together with a downward-closed subset of a **description**'s **layers**.
 - **select** — the fragment of the **projection language** that chooses **elements**.
 - **invert** — the fragment of the **projection language** that presents **connections** in reverse direction while preserving their **addresses**.
 - **decorate** — the fragment of the **projection language** that attaches **schema**-governed values.
-- **check** — a **projection** together with an expected cardinality of its result, empty or nonempty. A **check** is not a distinct object.
-- **instance revision** — the version of the described system that a **core graph** represents.
+- **check** — a **projection** together with an expected cardinality of its result, empty or nonempty.
 - **core spec version** — the version of this specification that a **description** conforms to.
+- **cut** — the **core graph** together with selected **layers** and every **layer** in their **input chains**.
 
 ## Purpose
 
@@ -62,7 +61,7 @@ The **core graph** is the abstract definition of the **blocks** — a versioned 
 - A **connection** MUST be directed and MUST join exactly two **ports**. Direction is structure; what a direction means is conferred by **layers**.
 - A **group** MAY contain any **elements**, including **groups**, and MAY serve as a **projection** target standing for its members.
 - The **core graph** MAY contain cycles.
-- A **description** MUST declare its **core spec version** and its **instance revision**.
+- A **description** MUST declare its **core spec version**.
 - The format MUST define a canonical serialization.
 
 ## Definition sites and scoping
@@ -81,8 +80,8 @@ Structure is defined where it is needed. The **core graph** is the bottom of a *
 ## Extension parameters
 
 - Any **element** MAY carry **extension parameters** beyond what this specification defines.
-- Every **extension parameter** MUST be qualified by a **namespace**. **Namespace** identifiers MUST be constructed so that independent authors cannot collide unknowingly.
-- A consumer that does not recognize a **namespace** MUST preserve its parameters unmodified.
+- Every **extension parameter** MUST be qualified by an **extension namespace**. **Extension namespace** identifiers MUST be constructed so that independent authors cannot collide unknowingly.
+- A consumer that does not recognize an **extension namespace** MUST preserve its parameters unmodified.
 - Shared vocabularies SHOULD be standardized **schemas** rather than core primitives; tensor shapes are the intended first case.
 - A symbolic axis is a declaration at a **definition site**, governed by a standardized **schema** and referenced by **address**, subject to the same locality rule as any other declaration: an axis only one view uses lives in that view's **layer**; an axis every view uses lives in the **core graph**.
 - A value measured outside the **description** — a profiled number, an observed norm — MAY be carried as a literal **extension parameter** under a **schema** that records its origin.
@@ -109,7 +108,7 @@ Worked case, illustrative: the backward view is a **projection** — **select** 
 A **layer**, as data:
 
 - A name.
-- Declared inputs: a **core graph** at an **instance revision**, and zero or more other **layers**. Declaring a **layer** grants use of its **reprojection** and visibility of its **definition sites**. Declared inputs MUST form a DAG.
+- Declared inputs: a **core graph**, and zero or more other **layers**. Declaring a **layer** grants use of its **reprojection** and visibility of its **definition sites**. Declared inputs MUST form a DAG.
 - The **schemas** and **projection language** version it consumes.
 - Zero or more **element** definitions — structure this **layer** defines for itself and everything above it.
 - One **projection**.
@@ -117,7 +116,7 @@ A **layer**, as data:
 Intended invariants:
 
 - Grounding: every **element** of a **reprojection** MUST have its **definition site** within the **layer**'s **input chain**.
-- Coherence: a revision of the **core graph** MUST either leave a **layer** valid or visibly invalidate it. Staleness is detectable, never silent.
+- Coherence: a change to any declared input MUST either leave a **layer** valid or visibly invalidate it. Staleness is detectable, never silent.
 - Erasure: any **cut** MUST be a well-formed **description**. A non-**cut** subset degrades visibly: a **layer** whose declared inputs are absent is unresolvable, never silently wrong.
 
 ## What each layer requires of the language

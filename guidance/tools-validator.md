@@ -15,14 +15,14 @@ A tool that parses descriptions, checks every structural MUST in the specificati
 2. Implement the structural checks. Each check cites its spec section and has the fixtures appropriate to its outcome:
    - C1. Every element carries an address, unique within the description.
    - C2. Every connection is directed and joins exactly two ports.
-   - C3. The description declares its core spec version and instance revision.
+   - C3. The description declares its core spec version.
    - C4. Every element has exactly one definition site.
    - C5. Each element conforms to its grammar-defined form at its definition site.
    - C6. Every reference to an element occurs at its definition site or in a layer above it.
    - C7. Locality: each referenced element is defined at a maximal site among those at-or-below all of its references. Ties: accept any maximal legal site; never warn on an authored tie.
    - C8. Unreferenced elements may sit at any site; report them only via the dead-structure query, never as errors.
    - C9. Layer declared inputs form a DAG and every declared input resolves.
-   - C10. Extension parameters: namespace present; preserve unrecognized namespaces byte-exact through parse and serialize.
+   - C10. Extension parameters: extension namespace present; preserve unrecognized extension namespaces byte-exact through parse and serialize.
    - C11. Cut extraction: given a downward-closed subset of layers, emit it as a standalone description and re-validate it (erasure).
    - C12. A non-cut subset is reported as unresolvable at the layers whose inputs are absent — a distinct, visible outcome, not a crash and not silence.
 3. Implement the canonical serializer per the grammar. Properties: parse(serialize(parse(x))) preserves every valid parsed value, and serialize(parse(x)) is a fixpoint for every valid x.
