@@ -77,8 +77,8 @@ A synthetic whole-system description used to consume Grimoire before a real cons
 > The fixture includes whole-system facts such as tensors, passes, optimizer flags, gradient interventions, seeds, evidence artifacts, placement paths, bandwidth costs, and intentionally undefined behavior.
 > R4 geometry is fixture evidence only: candidate plurality and multi-location reach are separate axes; each candidate lead contains a spacetime tube; every tube advances one frame; paired scoring reads all candidate spacetime; exactly one candidate is selected for execution.
 ---
-[projlang/spec] Projection language specification (notstarted)
-The sibling specification: select and invert structural evaluation; global decorate finalization; decoration-only lossy checks; folding by join and chain; definition-site opacity; symbolic values.
+ref [projlang/spec] Projection language implementation (./projlang.vine)
+The implementation graph for reviewed projection-language semantics.
 -> grammar/build
 -> projlang/design
 ---
