@@ -20,7 +20,7 @@ A tool that parses descriptions, checks every structural MUST in the specificati
    - C5. Each element conforms to its grammar-defined form at its definition site.
    - C6. Every reference to an element occurs at its definition site or in a layer above it.
    - C7. Locality: each referenced element is defined at a maximal site among those at-or-below all of its references. Ties: accept any maximal legal site; never warn on an authored tie.
-   - C8. Unreferenced elements may sit at any site; report them only via the dead-structure query, never as errors.
+   - C8. Unreferenced elements may sit at any site; report them only through an explicit finalization decoration and check, never as errors.
    - C9. Layer declared inputs form a DAG and every declared input resolves.
    - C10. Extension parameters: extension namespace present; preserve unrecognized extension namespaces byte-exact through parse and serialize.
    - C11. Cut extraction: given a downward-closed subset of layers, emit it as a standalone description and re-validate it (erasure).

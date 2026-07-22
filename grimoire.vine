@@ -78,14 +78,20 @@ A synthetic whole-system description used to consume Grimoire before a real cons
 > R4 geometry is fixture evidence only: candidate plurality and multi-location reach are separate axes; each candidate lead contains a spacetime tube; every tube advances one frame; paired scoring reads all candidate spacetime; exactly one candidate is selected for execution.
 ---
 [projlang/spec] Projection language specification (notstarted)
-The sibling specification: select, invert, decorate; folding by join and chain; checks as cardinality expectations; definition-site opacity; symbolic values.
+The sibling specification: select and invert structural evaluation; global decorate finalization; decoration-only lossy checks; folding by join and chain; definition-site opacity; symbolic values.
 -> grammar/build
 -> projlang/design
 ---
-[projlang/design] Design with the user: projection language semantics (notstarted)
-Fragment semantics, recursion and stratification, fold behavior at join points, evaluation of symbolic axes.
+[projlang/design] Design with the user: projection language semantics (reviewing)
+Projection-language semantic decisions recorded; concrete selector and value syntax deferred to grammar and schema work.
 -> core/freeze
-> Inherits the transferred question: whether three fragments suffice, and which layer first demands a fourth.
+> 2026-07-21: Select defines a layer's structure; it may generate elements, take references to existing elements, or both.
+> 2026-07-21: A generated select element is an ordinary definition: it supplies everything required of any other element definition at its layer definition site.
+> 2026-07-21: Generated select definitions obey the same reference rules as every other definition; no separate recursion or stratification semantics are required.
+> 2026-07-21: Invert takes a group of elements and reverses the direction sign of every connection in it.
+> 2026-07-21: Decorate is one global finalization phase after all structural select and invert evaluation. Decorations cannot feed structural evaluation. Checks operate only over decorations, are lossy only in their own result, and do not discard finalized data.
+> 2026-07-21: Structural folding joins references by address under the one-definition rule. Decoration identity and constraints belong to extension namespaces and schemas; generated-selector and symbolic-value syntax are deferred until a concrete example requires them.
+@artifact text/markdown ./proposals/projection-language.md
 ---
 [schemas/shapes] Design with the user: shapes schema (notstarted)
 Tensor shapes referencing axes by address.
@@ -131,14 +137,13 @@ Formal productions for the whole data format: vocabulary graduated into grammar,
 > Gated on the vocabulary read-through rather than the full freeze, since productions graduate from vocabulary. Relax if wanted sooner.
 @guidance text/markdown ./spec/grimoire.md
 ---
-[core/freeze] Stamp the core spec (complete) @dispatch(mechanical)
+[core/freeze] Stamp the core spec (notstarted) @dispatch(mechanical)
 Give the document its version. The spec mandates versioning for everything it touches; the stamp is the freeze.
 -> core/vocab-review
-> 2026-07-21: User confirmed the current core specification is frozen as Version 1.0.0.
-> Revalidate the current specification after the renewed vocabulary review.
+> Revalidate the core specification and version after the projection-generation revision.
 @guidance text/markdown ./spec/grimoire.md
 ---
-[core/vocab-review] Vocabulary read-through (complete)
+[core/vocab-review] Vocabulary read-through (notstarted)
 Your deliberate read of the Vocabulary section: the definitions that graduate into productions, and the section that churned in every revision. The last human gate. Exclusively a human activity — never dispatched to an agent — performed only when the user explicitly delegates it (trigger phrase: "review and approve if appropriate").
 -> core/spec
 ---

@@ -23,15 +23,15 @@ Each term is defined once, in terms of primitives and other vocabulary. These de
 - **extension parameter** — a structured value attached to an **element**, qualified by an **extension namespace** and governed by a **schema**.
 - **projection language** — the sibling specification defining how **projections** are written and evaluated; versioned in its own right.
 - **projection** — a pure, static function from **description**-shaped input to **description**-shaped output, written in the **projection language**, which is specified separately.
-- **layer** — a name unique within a **description**, a set of declared inputs, the **schemas** and **projection language** version it consumes, zero or more **element** definitions, and one **projection**.
+- **layer** — a name unique within a **description**, a set of declared inputs, the **schemas** and **projection language** version it consumes, and one **projection**.
 - **core graph** — the root **definition site** of a **description**: the **blocks**, **ports**, **connections**, and **groups** visible to every **layer**, with their **extension parameters**.
 - **definition site** — the one place an **element** is defined: the **core graph**, or exactly one **layer**.
-- **input chain** — a **layer**, its declared inputs, their declared inputs, and so on, down to and including the **core graph**.
+- **input chain** — a **layer**'s declared inputs, their declared inputs, and so on, down to and including the **core graph**.
 - **reprojection** — the result of applying a **layer**'s **projection** to its declared inputs.
-- **select** — the fragment of the **projection language** that chooses **elements**.
-- **invert** — the fragment of the **projection language** that presents **connections** in reverse direction while preserving their **addresses**.
-- **decorate** — the fragment of the **projection language** that attaches **schema**-governed values.
-- **check** — a **projection** together with an expected cardinality of its result, empty or nonempty.
+- **select** — the fragment of the **projection language** that defines a **layer**'s **elements** by generating them, taking references to existing **elements**, or both.
+- **invert** — the fragment of the **projection language** that takes a **group** of **elements** and reverses the direction sign of every **connection** in it.
+- **decorate** — the finalization fragment of the **projection language** that attaches **schema**-governed values after structural evaluation.
+- **check** — a lossy finalization operation over values attached by **decorate**, with an expected cardinality of its result, empty or nonempty.
 - **core spec version** — the version of this specification that a **description** conforms to.
 - **cut** — the **core graph** together with selected **layers** and every **layer** in their **input chains**.
 
@@ -74,7 +74,7 @@ Structure is defined where it is needed. The **core graph** is the bottom of a *
 - Locality: a referenced **element** MUST be defined at a maximal site among those at-or-below every reference to it — equivalently, it MUST NOT be defined below a site its references can already all see. Unrelated referencers force a definition down; the **core graph** is where sharing bottoms out — the meet of the views, not their union.
 - Ties: the maximal site need not be unique. Where several sites are legal, placement is authored. Every legal site is, by construction, at-or-below every referencer, so any **cut** containing a referencer contains the **element** under every legal placement; a tie choice affects only **cuts** in which the **element** is unreferenced.
 - A persistent tie SHOULD be resolved by defining the missing shared **layer** — the meet of the referencers — which is strictly better for **cut** minimality than either corner.
-- An **element** with no references MAY be defined at any site; it burdens only the **cuts** that include its **definition site**. Dead structure is queryable as a **check**.
+- An **element** with no references MAY be defined at any site; it burdens only the **cuts** that include its **definition site**. Dead structure MAY be represented as a value attached by **decorate** and observed by a **check**.
 - Illustration: an inference-only cache is defined in the mode **layer** that views it; a collective is defined in the placement **layer**; a residual stream that every view references lives in the **core graph**.
 
 ## Extension parameters
@@ -92,14 +92,13 @@ A **layer**'s **projection** is written in the **projection language** — a sib
 
 - A **projection** MUST be pure and static: it MUST evaluate against its declared inputs alone. No binding to runs is defined.
 - The algebra MUST be closed: **description**-shaped input, **description**-shaped output, so **projections** compose.
-- A **projection** MUST NOT introduce structure: every **element** of its output MUST have its **definition site** in its **input chain**.
-- A **projection** MUST preserve the **address** of every **element** it outputs.
 - The language MUST NOT expose **definition sites**: a **projection** cannot distinguish where an **element** is defined, so every legal placement yields identical **reprojections**.
-- The language MUST provide at least three fragments: **select**, **invert**, and **decorate**. An explicit **address** list MUST be a valid **select**.
-- Attached values MAY be computed, and results MAY be symbolic in declared axes.
+- The language MUST provide **select** and **invert** for structural evaluation and **decorate** for finalization. An explicit **address** list MUST be a valid **select**.
+- The language MUST have one global finalization phase: all **select** and **invert** evaluation MUST precede every **decorate** and **check** evaluation.
+- Values attached by **decorate** MUST NOT affect structural evaluation. They MAY be computed, and results MAY be symbolic in declared axes.
 - An empty result MUST be a first-class outcome, not an error.
-- A **check** MUST be expressible as a cardinality expectation on a **projection**'s result — expected empty, or expected nonempty.
-- **Reprojections** MUST fold: join by shared **address**, and chain by composition. Conflicting values at one **address** are an error.
+- A **check** MUST operate only over values attached by **decorate**. It is lossy only in its own result and MUST NOT discard or alter finalized data.
+- The structural results of **reprojections** MUST fold: join references by shared **address**, and chain by composition. A competing definition at one **address** is an error. Finalization attaches **extension parameters** to the folded **elements**; their identity and constraints are governed by their **extension namespaces** and **schemas**.
 
 Worked case, illustrative: the backward view is a **projection** — **select** the differentiable subgraph, **invert** its **connections**, exclude the stopped **connections** (a stop-gradient is exactly an exclusion), **decorate** the rest. Reach is reachability in the **reprojection**.
 
@@ -110,12 +109,10 @@ A **layer**, as data:
 - A name.
 - Declared inputs: a **core graph**, and zero or more other **layers**. Declaring a **layer** grants use of its **reprojection** and visibility of its **definition sites**. Declared inputs MUST form a DAG.
 - The **schemas** and **projection language** version it consumes.
-- Zero or more **element** definitions — structure this **layer** defines for itself and everything above it.
-- One **projection**.
+- One **projection**, whose **select** defines the **layer**'s **elements**.
 
 Intended invariants:
 
-- Grounding: every **element** of a **reprojection** MUST have its **definition site** within the **layer**'s **input chain**.
 - Coherence: a change to any declared input MUST either leave a **layer** valid or visibly invalidate it. Staleness is detectable, never silent.
 - Erasure: any **cut** MUST be a well-formed **description**. A non-**cut** subset degrades visibly: a **layer** whose declared inputs are absent is unresolvable, never silently wrong.
 
@@ -128,7 +125,7 @@ The initial **layers**, stated as the features Grimoire must support to express 
 Forward and backward views of one system, with honest quantities.
 
 - **Invert** over **selected** subgraphs, with exclusions composing with **invert** to express stop-gradients.
-- Declared reach as **decorate** on each objective; derived reach as reachability over the **reprojection**; their agreement as a **check**.
+- Declared and derived reach as values attached by **decorate** on each objective; their agreement as a **check**.
 
 ### Hyperparameters
 
@@ -136,7 +133,7 @@ Every dial attached to the structure it modulates.
 
 - **Decorate** on any **address** with typed, domained, defaulted values.
 - Schedules as declared functions of symbolic variables — data describing intended variation, with no evaluation against a run defined anywhere in the format.
-- Coverage as a **check**: no dial without an **address**.
+- Coverage as a **check** over dial values attached by **decorate**: no dial without an **address**.
 
 ### Placement and bandwidth
 
@@ -158,7 +155,7 @@ Compositional, symbolic accounting.
 What each part is, and whether it is new.
 
 - **Decorate** on **groups**: citations, stated assumptions, or a novel flag.
-- The novelty surface as a **check**, expected empty: every **group** lacking provenance.
+- The novelty surface as a **check** over provenance values attached by **decorate**, expected empty: every **group** lacking provenance.
 
 ### Mode
 
