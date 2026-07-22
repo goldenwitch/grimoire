@@ -2,7 +2,7 @@
 
 Status: in progress.
 
-This is the sibling language that defines a **layer**'s **projection**. It is not a runtime language: it describes the represented system statically.
+This is the sibling language that defines a **layer** file's **projection**. One **layer** file is one human viewport. It is not a runtime language: it describes the represented system statically.
 
 ## Evaluation order
 
@@ -22,7 +22,7 @@ Structural evaluation completes before finalization begins. Finalization complet
 
 ### Select
 
-**Select** defines a **layer**'s **elements**. It may generate **elements**, take references to existing **elements**, or both.
+**Select** defines its own **layer** file's **elements**. It may generate **elements**, take references to existing **elements**, or both. It does not define the authored **core graph** or any other **layer**.
 
 A generated **element** is an ordinary definition at the **layer**'s **definition site**. It supplies everything required of any other **element** definition and obeys the same reference rules.
 

@@ -23,7 +23,7 @@ Each term is defined once, in terms of primitives and other vocabulary. These de
 - **extension parameter** — a structured value attached to an **element**, qualified by an **extension namespace** and governed by a **schema**.
 - **projection language** — the sibling specification defining how **projections** are written and evaluated; versioned in its own right.
 - **projection** — a pure, static function from **description**-shaped input to **description**-shaped output, written in the **projection language**, which is specified separately.
-- **layer** — a name unique within a **description**, a set of declared inputs, the **schemas** and **projection language** version it consumes, and one **projection**.
+- **layer** — one file and human viewport in a **description**, with a name unique within that **description**, a set of declared inputs, the **schemas** and **projection language** version it consumes, and one **projection**.
 - **core graph** — the root **definition site** of a **description**: the **blocks**, **ports**, **connections**, and **groups** visible to every **layer**, with their **extension parameters**.
 - **definition site** — the one place an **element** is defined: the **core graph**, or exactly one **layer**.
 - **input chain** — a **layer**'s declared inputs, their declared inputs, and so on, down to and including the **core graph**.
@@ -106,10 +106,11 @@ Worked case, illustrative: the backward view is a **projection** — **select** 
 
 A **layer**, as data:
 
+- One file: one human viewport.
 - A name.
 - Declared inputs: a **core graph**, and zero or more other **layers**. Declaring a **layer** grants use of its **reprojection** and visibility of its **definition sites**. Declared inputs MUST form a DAG.
 - The **schemas** and **projection language** version it consumes.
-- One **projection**, whose **select** defines the **layer**'s **elements**.
+- One **projection**, whose **select** defines that **layer** file's **elements**. The **core graph** remains authored base structure; a **layer**'s **select** does not define the **core graph** or any other **layer**.
 
 Intended invariants:
 
