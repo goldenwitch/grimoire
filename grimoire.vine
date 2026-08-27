@@ -297,8 +297,6 @@ Files: crates/grimoire/src/schemas.rs and crates/grimoire/tests/schemas.rs.
 Translate the reviewed minimal inventory into executable versioned schema instances for axes, shapes, architecture, training, execution, precision, measurement, provenance, and the bounded lineage candidate. Use the provisional author-controlled namespace root and boolean finite-scalar ruling; keep all value bodies inside the closed Grimoire algebra.
 The registry and representative value fixtures are complete-for-review. Textual schema-document parsing and bootstrap integration remain parser follow-up work.
 Accept: Each schema declares allowed element kinds; every valid value in the case-study coverage matrix has a schema account; attachment-kind and value failures are visible; unresolved topology, parameter-update, symbolic-cost, and lineage behavior remains explicit.
-@artifact text/rust ./crates/grimoire/src/schemas.rs
-@artifact text/rust ./crates/grimoire/tests/schemas.rs
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
@@ -308,6 +306,8 @@ Accept: Each schema declares allowed element kinds; every valid value in the cas
 > 2026-08-26: The executable registry is Rust data first; textual schema-document parsing remains downstream of the grammar parser and can falsify the registry shape through fixtures.
 > 2026-08-26: Prototype schema instances keep parameter lineage as a value-level candidate and do not add a new core element kind.
 > 2026-08-26: Representative registry fixtures cover V-JEPA 2 shapes/execution, TiTok sequence topology, BitNet precision, sourced measurements, provenance, and lineage values.
+@artifact text/rust ./crates/grimoire/src/schemas.rs
+@artifact text/rust ./crates/grimoire/tests/schemas.rs
 ---
 [schemas/conformance] Schema conformance fixtures (notstarted)
 Files: schema conformance fixtures named at dispatch.
@@ -338,16 +338,21 @@ Accept: Each failure names its check, location, and relevant identifier; valid t
 -> schemas/instances
 -> tools/validator/parse
 ---
-[tools/validator/serialize] Serialize canonical descriptions (notstarted)
-Files: validator canonical serializer and round-trip fixtures named at dispatch.
-Do: Emit the grammar's canonical serialization with deterministic ordering and byte-preserving extension values. Assert parse(serialize(parse(x))) value preservation and serialize(parse(x)) fixpoint behavior over all valid fixtures.
-Accept: Both serializer properties hold for every valid fixture; serializer failures identify the source value or fixture that violates the property.
+[tools/validator/serialize] Serialize canonical descriptions (started)
+Files: crates/grimoire/src/serialize.rs and crates/grimoire/tests/serialize.rs.
+Emit deterministic canonical text for the current description, core, layer, projection, and closed-value model. Canonicalize recognized values and ordering; emit unknown extension raw spans unchanged. Current fixtures cover core, known and unknown extensions, layers, projections, fixpoint, and malformed opaque bytes.
+Accept: Core, extension, and layered valid fixtures round-trip; unknown payload bytes survive; malformed opaque bytes fail visibly; focused Cargo tests pass.
+@artifact text/rust ./crates/grimoire/src/serialize.rs
+@artifact text/rust ./crates/grimoire/tests/serialize.rs
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
 -> implementation/bootstrap
 -> implementation/language
 -> tools/validator/parse
+> 2026-08-26: The first serializer returns canonical UTF-8 text for the typed model and treats parser-captured unknown extension spans as opaque source fragments.
+> 2026-08-26: Core maps are emitted in address order; recognized products are emitted in deterministic field order until schema declaration order is wired into the registry.
+> 2026-08-26: The serializer rejects opaque payload bytes that cannot be emitted as UTF-8 rather than silently replacing them.
 ---
 [tools/validator/cuts] Validate cuts and erasure (notstarted)
 Files: validator cut extraction and resolution fixtures named at dispatch.
