@@ -99,6 +99,7 @@ Files: Projection-language implementation files named at dispatch.
 Do: Map every reviewed projection-language production to an internal form and its settled stage: select, invert, decorate, or check. Reject any form that needs unruled semantics.
 Accept: Every reviewed production maps to exactly one settled stage; failures identify the source location; no task-local syntax or semantic rule is introduced.
 -> grammar/review
+-> implementation/bootstrap
 -> implementation/language
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
@@ -311,19 +312,23 @@ Do: Exercise valid and invalid values for every concrete schema instance, includ
 Accept: Fixtures prove closed-algebra validation, address-reference validation, absent versus present values, domain failures, and preservation of unrecognized extension namespaces.
 -> schemas/instances
 ---
-[tools/validator/parse] Parse reviewed descriptions (notstarted)
-Files: validator parser implementation and parser fixtures named at dispatch.
-Do: Implement the reviewed grammar exactly, with source locations on rejection and no recovery or accepted dialects. Preserve extension namespaces and values byte-exactly where the grammar requires it.
-Accept: Every reviewed production parses into one internal form; malformed input fails with a location and identifier where available; no parser behavior is invented locally.
+[tools/validator/parse] Parse reviewed descriptions (started)
+Files: crates/grimoire/src/value.rs, schema.rs, model.rs, parser.rs, serialize.rs, validate.rs and focused fixtures.
+Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, and exact parser boundary in Rust. Start with the minimal description/core form, then add layers, extensions, and projection sections while preserving source locations and opaque unknown spans. The bootstrap model slice is complete; parser text handling is now the active slice.
+Accept: The first fixture parses a minimal description into one internal form; malformed input fails with location; no recovery or accepted dialect is introduced; focused Cargo tests pass.
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
+-> implementation/bootstrap
 -> implementation/language
+> 2026-08-26: The validator implementation begins as a library-first Rust crate; parser and serializer share the internal model but never define the specification.
+> 2026-08-26: Parser work starts from the minimal description/core grammar and grows only when a fixture requires the next production.
 ---
 [tools/validator/structure] Validate structural invariants (notstarted)
 Files: validator structural checks and fixtures named at dispatch.
 Do: Implement address uniqueness, directed two-port connections, core-version declaration, one definition site, grammar conformance, reference scope, locality, legal unreferenced elements, layer-input DAG resolution, and extension-namespace preservation.
 Accept: Each failure names its check, location, and relevant identifier; valid ties are accepted without warnings; C1-C10 fixtures cover both success and failure.
+-> implementation/bootstrap
 -> implementation/language
 -> schemas/instances
 -> tools/validator/parse
@@ -335,6 +340,7 @@ Accept: Both serializer properties hold for every valid fixture; serializer fail
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
+-> implementation/bootstrap
 -> implementation/language
 -> tools/validator/parse
 ---
@@ -408,9 +414,10 @@ Accept: Minimal cuts erase and revalidate; non-cuts report absent declared input
 -> tools/validator
 ---
 [implementation/language] Name implementation language (reviewing)
-Prototype implementation language: Rust 2024 using Cargo and the installed Rust 1.94 toolchain. Keep the first crate dependency-light; add libraries only when a fixture proves the standard library is insufficient.
-Accept: The language is named in every mechanical task's dispatch context and focused Cargo checks run from the repository root.
-> 2026-08-26: Prototype implementation language is Rust 2024, chosen to match the neighboring Scry repository and the available rustc/cargo 1.94 toolchain; this choice is reversible before the first public API freeze.
+Prototype implementation language: Rust 2024 using Cargo and rustc 1.94. The executable crate is `crates/grimoire`; library modules remain small and dependency-light. Mechanical work proceeds through focused unit and integration fixtures, with a commit after each validated slice.
+Accept: Cargo check/test runs from the repository root and every implementation task names its owned module or fixture paths.
+> 2026-08-26: Prototype implementation language is Rust 2024, chosen to match the neighboring Scry repository and the available rustc/cargo 1.94 toolchain; reversible before public API freeze.
+> 2026-08-26: The initial executable crate is `crates/grimoire`, a library-first crate with a thin binary only if an end-to-end CLI check later proves useful.
 ---
 [schemas/meta/scalar-domain] Resolve finite scalar refinement (reviewing)
 Prototype ruling: resolve the undefined finite-scalar refinement as the closed boolean scalar `true | false`. Keep positive-integer, finite-number, text, and closed enumeration as separate refinements. Add a fixture that can falsify this choice if the full case set requires another primitive.
@@ -454,3 +461,12 @@ Define the static account for streaming, recurrent, and closed-loop systems. Exe
 > 2026-08-26: Runtime observation, buffering, state progression, action execution, sampling, and replanning remain outside pure projection evaluation.
 > 2026-08-26: A missing runtime-facing producer in a cut is reported as an unresolvable dependent layer, not silently treated as empty or open-loop.
 @artifact text/markdown ./proposals/execution-boundary.md
+---
+[implementation/bootstrap] Bootstrap Rust validator crate (complete)
+Files: crates/grimoire/Cargo.toml, crates/grimoire/src/lib.rs, address.rs, namespace.rs, version.rs, value.rs, schema.rs, model.rs, tests/model.rs.
+Establish the Rust crate and implement the first closed value/schema/address model needed by parser, serializer, and projection slices. Keep APIs explicit and dependency-light.
+Accept: `cargo test -p grimoire` passes with model, finite-value, address, namespace, version, presence, alternative, and schema-validation fixtures; no runtime or external network dependency is introduced.
+-> implementation/language
+> 2026-08-26: The initial executable crate is a dependency-light Rust library under crates/grimoire.
+> 2026-08-26: Internal addresses, namespaces, and semantic versions are typed newtypes with exact string identity and local validation.
+> 2026-08-26: The closed prototype value algebra represents finite-scalar as boolean, products as exact labeled maps, alternatives as one tagged arm, and presence as explicit absent/present values.
