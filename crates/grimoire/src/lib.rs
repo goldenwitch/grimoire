@@ -1,6 +1,7 @@
 mod address;
 mod cut;
 mod evaluate;
+mod information;
 mod model;
 mod namespace;
 mod parser;
@@ -16,6 +17,10 @@ pub use cut::{CutError, extract_cut};
 pub use evaluate::{
     CheckResult, Element, FinalizedReprojection, ProjectionError, StructuralReprojection,
     evaluate_layer,
+};
+pub use information::{
+    BayesianSummary, Channel, ChannelPosterior, ChannelScenario, CredibleInterval, Distribution,
+    InformationError, PosteriorSamples, data_processing_holds,
 };
 pub use model::{
     Block, Connection, CoreGraph, Description, ExtensionParameter, ExtensionValue, Group, Port,

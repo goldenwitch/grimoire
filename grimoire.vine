@@ -565,30 +565,39 @@ Accept: `cargo test -p grimoire` passes with model, finite-value, address, names
 > 2026-08-26: Internal addresses, namespaces, and semantic versions are typed newtypes with exact string identity and local validation.
 > 2026-08-26: The closed prototype value algebra represents finite-scalar as boolean, products as exact labeled maps, alternatives as one tagged arm, and presence as explicit absent/present values.
 ---
-[information/channel-contract] Define Shannon channel semantics (started)
+[information/channel-contract] Define Shannon channel semantics (reviewing)
 Files: proposals/information-flow.md and the aligned specification/proposal records.
-Define the channel interpretation over addressed ports and blocks: source and terminal variables, finite stochastic kernels, source distributions, joint branch semantics, confidence-aware information claims, route-attribution boundaries, and cycle/continuous-variable limits. Keep structural reach, Shannon dependence, causal influence, and gradient flow distinct.
-Accept: One authoritative contract exists for exact finite channel results and uncertain empirical percentage claims; every denominator, terminal set, attribution method, confidence meaning, and unresolved boundary is explicit; no new core element kind or runtime execution semantics is introduced.
+Define the channel interpretation over addressed ports and blocks: source and terminal variables, finite stochastic kernels, source distributions, joint branch semantics, confidence-aware information claims, Bayesian posterior decision support, route-attribution boundaries, and cycle/continuous-variable limits. Keep structural reach, Shannon dependence, agent-relative Bayesian mutual information, causal influence, and gradient flow distinct.
+Accept: One authoritative contract exists for exact finite channel results and uncertain empirical percentage claims; every denominator, terminal set, attribution method, confidence meaning, prior/posterior role, and unresolved boundary is explicit; no new core element kind or runtime execution semantics is introduced.
 -> core/freeze
 -> projlang/spec
 -> schemas/instances
 -> schemas/meta
+> 2026-08-27: Bayesian posterior uncertainty over finite categorical source and channel parameters is the default uncertainty model for downstream decisions; posterior probabilities are distinct from channel probabilities and from the Bayesian mutual-information estimand.
+> 2026-08-27: Scry evidence includes Information Bottleneck, MINE, Contrastive Multiview Coding, and A Bayesian Framework for Information-Theoretic Probing; the sources support the boundary without selecting a universal estimator or relevance definition.
 @artifact text/markdown ./proposals/information-flow.md
 ---
-[information/finite-calculus] Implement finite channel calculus (notstarted)
-Files: crates/grimoire/src/information.rs and focused Rust fixtures.
-Implement validated finite discrete distributions, deterministic and stochastic channels, channel composition, entropy, mutual information, joint terminal information, normalized retention, and data-processing checks. Keep the mathematical kernel independent from text grammar until its laws are stable.
-Accept: Identity, constant, noisy, composition, associativity, data-processing, and joint-branch laws pass; invalid probability tables fail visibly; exact results are distinguished from empirical estimates.
+[information/finite-calculus] Implement finite channel calculus (reviewing)
+Files: crates/grimoire/src/information.rs and crates/grimoire/tests/information.rs.
+Implement validated finite discrete distributions, deterministic and stochastic channels, channel composition, entropy, mutual information, joint terminal information, normalized retention, and data-processing checks. Add a small weighted posterior-scenario path for finite source/channel uncertainty and decision probabilities, keeping exact kernels and posterior claims distinct. Keep the mathematical kernel independent from text grammar until its laws are stable.
+Accept: Identity, constant, noisy, composition, associativity, data-processing, and joint-branch laws pass; invalid probability tables fail visibly; exact results are distinguished from posterior estimates; credible intervals and threshold probabilities are reproducible from supplied posterior weights.
 -> implementation/language
 -> information/channel-contract
+> 2026-08-27: The first Bayesian implementation represents an explicit finite posterior over source/channel scenarios; Bayesian prior updating and empirical sampling are external inputs until a concrete data fixture requires an internal conjugate model.
+@artifact text/rust ./crates/grimoire/src/information.rs
+@artifact text/rust ./crates/grimoire/tests/information.rs
 @guidance text/markdown ./proposals/information-flow.md
 ---
-[information/claims] Model confidence-aware information claims (notstarted)
-Files: crates/grimoire/src/information.rs or a focused claims module, plus Rust fixtures.
-Represent source-terminal information claims with quantity, denominator, estimate, uncertainty interval, confidence or credibility level, method, sample context, and optional route partition. Validate percentage bounds and require a declared attribution basis for additive route shares.
-Accept: Exact claims, interval estimates, normalized retention, joint-terminal claims, and route-share claims have distinguishable representations; malformed intervals, missing denominators, and unexplained confidence values fail visibly.
+[information/claims] Model confidence-aware information claims (started)
+Files: crates/grimoire/src/information.rs and future addressed-claim fixtures.
+Build on the finite posterior summaries to represent source-terminal information claims with quantity, denominator, estimate, uncertainty interval, Bayesian prior/posterior context, credibility level, method, sample context, decision threshold, and optional route partition. Validate percentage bounds and require a declared attribution basis for additive route shares. Keep classical mutual information, posterior uncertainty about it, and agent-relative Bayesian mutual information distinguishable.
+Current implementation provides generic posterior samples, credible intervals, and threshold probabilities; addressed source-terminal claim serialization and route attribution remain next.
+Accept: Exact claims, Bayesian posterior claims, interval estimates, normalized retention, joint-terminal claims, and route-share claims have distinguishable representations; malformed intervals, missing denominators, prior/posterior mismatches, and unexplained confidence values fail visibly.
 -> implementation/language
 -> information/channel-contract
+> 2026-08-27: Generic posterior summaries are implemented before address-bearing claim serialization; the latter remains a separate graph/schema boundary.
+@artifact text/rust ./crates/grimoire/src/information.rs
+@artifact text/rust ./crates/grimoire/tests/information.rs
 @guidance text/markdown ./proposals/information-flow.md
 ---
 [information/graph-composition] Compose channels over addressed graphs (notstarted)

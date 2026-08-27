@@ -11,6 +11,30 @@ and projections. This proposal does not add a new core element kind. It defines
 a channel interpretation over selected addressed structure and records the
 uncertainty of claims that cannot be computed exactly.
 
+## Evidence
+
+The local Scry corpus contains the following indexed sources for this contract:
+
+- [The Information Bottleneck Method](https://arxiv.org/abs/physics/0004057)
+  frames relevant representation as compression of one variable for prediction
+  of another.
+- [Opening the Black Box of Deep Neural Networks via Information](https://arxiv.org/abs/1703.00810)
+  uses layerwise mutual-information quantities and the data-processing view of
+  representations, while exposing estimator and quantization choices.
+- [Mutual Information Neural Estimation](https://arxiv.org/abs/1801.04062)
+  provides a scalable neural estimator for high-dimensional continuous variables
+  and makes estimator tightness and consistency part of the evidence.
+- [Contrastive Multiview Coding](https://arxiv.org/abs/1906.05849) connects
+  shared-view representation learning to mutual information while warning that
+  information maximization alone is not a complete account of representation
+  quality.
+- [A Bayesian Framework for Information-Theoretic Probing](https://arxiv.org/abs/2109.03853)
+  distinguishes finite-data Bayesian information from classical mutual
+  information computed as if the true distribution were known.
+
+The sources support a confidence-aware contract, but they do not make one
+estimator or one notion of relevance universally correct.
+
 ## Goal
 
 Given a source input port `X`, a selected structural reprojection, and explicit
@@ -99,6 +123,21 @@ Confidence must be reported with its meaning. A frequentist confidence level,
 a Bayesian credible level, a bootstrap interval, and an expert assessment are
 not interchangeable. The claim records the method and level rather than
 collapsing them into one unexplained scalar.
+
+For downstream decisions, the prototype defaults to a Bayesian posterior over
+the uncertain source distribution and channel parameters when finite data are
+used. It reports a posterior estimate, a credible interval, and decision
+probabilities such as:
+
+`P(retention_pct(X,Y) >= threshold | data)`
+
+This is a probability over the claim under the stated model and prior. It is
+not the channel probability and it is not classical frequentist confidence.
+
+The name Bayesian mutual information is reserved for an agent-relative
+information quantity whose estimand differs from classical `I(X;Y)`. A
+posterior credible interval around classical mutual information must be labeled
+as uncertainty about classical mutual information, not silently renamed.
 
 Exact finite channel calculations have exact results under their supplied
 model and do not need an empirical confidence interval. An empirical estimate
@@ -208,6 +247,8 @@ The first reference implementation should provide:
 
 - finite discrete distributions with validated nonnegative probabilities;
 - finite stochastic channels and deterministic channels;
+- Bayesian posterior uncertainty for finite categorical source and channel
+  parameters, with credible intervals and threshold probabilities;
 - channel composition over acyclic chains;
 - mutual information and source entropy in bits;
 - normalized terminal retention when the source entropy is nonzero;
@@ -232,6 +273,7 @@ The first fixture family should include:
 - a branch where joint information differs from the sum of marginal values;
 - a merge requiring a conditional query;
 - an exact result versus an empirical interval claim;
+- a Bayesian posterior claim whose decision probability changes with evidence;
 - a finite-horizon recurrent unrolling; and
 - a bare cycle reported as unresolved.
 
@@ -252,12 +294,15 @@ The current prototype decisions are:
   method; they are not inferred by summing edge mutual informations.
 - Exact finite kernels and empirical channel estimates are separate claim
   regimes.
+- For finite empirical channels, Bayesian posterior uncertainty is the default
+  decision-support representation; classical mutual information and
+  agent-relative Bayesian mutual information remain distinct estimands.
 - The first executable regime is finite, discrete, acyclic, and static, with
   finite-horizon unrolling for recurrent examples.
 - Confidence qualifies estimates and records their method; it does not alter
   channel probabilities.
 
 Remaining gaps are continuous estimators, fixed-point channel semantics,
-standard route-attribution methods, and the serialization/registry boundary
-for source-terminal information claims. Each binds only when a fixture needs
-it.
+standard route-attribution methods, prior sensitivity, and the
+serialization/registry boundary for source-terminal information claims. Each
+binds only when a fixture needs it.
