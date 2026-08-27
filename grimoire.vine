@@ -77,11 +77,15 @@ Compositional symbolic accounting over declared axes and aggregation over groups
 -> schemas/axes
 -> schemas/shapes
 ---
-[layers/provenance] Technique provenance layer (notstarted)
-Citations, stated assumptions, and novelty flags on groups; the novelty surface as a check expected empty.
+[layers/provenance] Technique provenance layer (reviewing)
+Files: crates/grimoire/tests/provenance_layer.rs.
+Build the first concrete provenance layer against the closed provenance/1 schema: select a core group, decorate it with citations, assumptions, and novelty, and observe the finalized value through an existing decoration check. Keep provenance out of structural selection and expose group-only attachment failures.
+Accept: A valid provenance layer parses and validates, its check result is visible after evaluation, changing provenance leaves the selected structure unchanged, and an element-kind mismatch fails through schema validation.
 -> core/freeze
 -> projlang/spec
 -> schemas/provenance
+> 2026-08-26: The first provenance layer attaches provenance/1 only to a selected group, matching the proposal's initial convention; novelty remains finalized data and cannot alter selection.
+@artifact text/rust ./crates/grimoire/tests/provenance_layer.rs
 ---
 [layers/mode] Mode layer (notstarted)
 Per-regime views by selection, mode-local structure as elements, alternatives coexisting at a site every mode can see.
@@ -418,8 +422,9 @@ Accept: The suite covers every validator requirement currently implemented and b
 @artifact text/rust ./crates/grimoire/tests/conformance.rs
 ---
 [layers/fixtures] Layer and schema coverage fixtures (notstarted)
-Files: layer fixtures named at dispatch.
-After the indexed-visibility and execution-boundary decisions are settled, encode the initial information-flow, hyperparameter, placement, cost, provenance, and mode layers against the concrete schema family and reviewed projection language. Include empty checks, coverage checks, symbolic axes, local elements, and cut boundaries.
+Files: domain layer fixtures named per subtask, beginning with crates/grimoire/tests/provenance_layer.rs.
+After the indexed-visibility and execution-boundary decisions are settled, encode the initial information-flow, hyperparameter, placement, cost, provenance, and mode layers against the concrete schema family and reviewed projection language. Include empty checks, coverage checks, symbolic axes, local elements, and cut boundaries. Each deferred boundary must remain a visible fixture outcome rather than acquire guessed runtime semantics.
+Current slice: provenance selects a core group, decorates it with provenance/1, validates the group-only attachment, and checks finalized data without structural feedback.
 Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; settled architectural decisions are exercised; any intentionally deferred boundary is recorded as an explicit deferred outcome rather than hidden in prose; decorations never feed structural selection; fixtures remain static and runtime-free.
 -> architecture/indexed-visibility
 -> execution/boundary
@@ -431,6 +436,7 @@ Accept: Every initial layer has one valid fixture and one relevant visible failu
 -> layers/provenance
 -> projlang/spec
 -> schemas/conformance
+@artifact text/rust ./crates/grimoire/tests/provenance_layer.rs
 ---
 [example/core-graph] Reference shared architecture graph (reviewing)
 Files: crates/grimoire/tests/reference_core.rs.
