@@ -108,22 +108,37 @@ Tensor shapes referencing axes by address.
 -> schemas/meta
 @guidance text/markdown ./spec/grimoire.md
 ---
-[schemas/axes] Design with the user: axes schema (notstarted)
-Symbolic axes as addressed declarations at definition sites, subject to locality like any declaration. Open question: which element at a definition site carries an axis declaration (the anchoring convention) — not mechanical, needs to be settled with the user rather than drafted and escalated by an agent.
+[schemas/axes] Design with the user: axes schema (reviewing)
+Artifact: proposals/axes-schema.md.
+Define symbolic axis values as name plus optional description. Use first-class address references and normal locality; fixed extents remain shape values. The initial fixture anchors declarations on dimension-owning ports.
+@artifact text/markdown ./proposals/axes-schema.md
 -> extension-namespaces/minting
 -> schemas/meta
+> 2026-08-26: Axis values are product{name:text, description:optional(text)}; names are labels and do not imply time, height, width, batch, token, or feature semantics.
+> 2026-08-26: Fixed extents belong to shapes, not axis declarations, so one symbolic axis can support multiple model variants and cuts.
+> 2026-08-26: The first anchoring fixture places an axis declaration on a dimension-owning port; broader group anchoring remains an explicit gap.
 @guidance text/markdown ./spec/grimoire.md
 ---
-[schemas/measurement] Design with the user: measurement-origin schema (notstarted)
-Origin-tagged literals for values measured outside the description.
+[schemas/measurement] Design with the user: measurement-origin schema (reviewing)
+Artifact: proposals/measurement-schema.md.
+Define sourced literal measurements as value, unit, and mandatory source record with origin, optional locator, and optional protocol. Keep symbolic costs and configured training values outside measurement.
+@artifact text/markdown ./proposals/measurement-schema.md
 -> extension-namespaces/minting
 -> schemas/meta
+> 2026-08-26: Every measurement carries a literal integer or finite-number value, text unit, and mandatory source record.
+> 2026-08-26: Source records require origin and may carry locator and protocol; the base schema does not normalize or convert units.
+> 2026-08-26: Measurements are finalized values and cannot feed structural selection; symbolic costs belong to projection arithmetic.
 @guidance text/markdown ./spec/grimoire.md
 ---
-[schemas/provenance] Design with the user: provenance schema (notstarted)
-Citations, stated assumptions, and novelty flags on groups.
+[schemas/provenance] Design with the user: provenance schema (reviewing)
+Artifact: proposals/provenance-schema.md.
+Define provenance as citation sequence, assumption sequence, and required novelty state. Initially attach it to groups and expose unclassified groups through the provenance layer's finalization check.
+@artifact text/markdown ./proposals/provenance-schema.md
 -> extension-namespaces/minting
 -> schemas/meta
+> 2026-08-26: Provenance values are product{citations:seq(text), assumptions:seq(text), novelty:enum(novel,existing,adapted,unclassified)}.
+> 2026-08-26: The initial attachment target is groups, matching the core provenance layer; element-level attachment remains a sized gap.
+> 2026-08-26: Provenance is finalized data and cannot feed structural selection; novelty checks observe only finalized provenance values.
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/meta] Design with the user: schema definition format (reviewing)
@@ -168,11 +183,11 @@ The core data-format specification: pure data, definition sites and scoping, loc
 [extension-namespaces/minting] Extension namespace minting (reviewing)
 Artifact: proposals/extension-namespaces.md.
 Mint extension namespaces using author-controlled absolute https URIs with unique paths below the controlled origin. Keep namespace identity exact and offline; validate recognized schema versions fail-closed; preserve unknown namespace payloads byte-exactly through parse and serialize.
-@artifact text/markdown ./proposals/extension-namespaces.md
 -> core/freeze
 > 2026-08-26: Extension namespace collision resistance comes from an author-controlled absolute https URI and a unique path below that origin; no registry, dereference, redirect resolution, or alias normalization participates in validation.
 > 2026-08-26: Namespace identity is exact and offline; schema name and version are subordinate to the namespace and are not global bare names.
 > 2026-08-26: A consumer that does not recognize a namespace retains its complete payload as opaque bytes; canonical serialization applies only to recognized schema values.
+@artifact text/markdown ./proposals/extension-namespaces.md
 ---
 [schemas/inventory] Minimal schema inventory (reviewing)
 Artifact: proposals/schema-inventory.md.
