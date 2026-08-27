@@ -11,8 +11,10 @@ The full vision: a frozen core specification satisfied by its grammar, projectio
 > Mechanical nodes are annotated dispatch(mechanical) and carry step-level guidance a weaker agent can execute; design and review stay with the user and Claude.
 > Fauxlden Retriever is a synthetic consumption exercise, not a source of product priorities.
 ---
-[example/reference] Reference worked description (notstarted)
-One synthetic whole-system description exercised end to end across every layer and validated by the reference tooling. Its purpose is to keep the language from overfitting before a real consumer exists.
+[example/reference] Reference worked description (complete)
+Files: crates/grimoire/tests/reference_validation.rs, reference_core.rs, information_targets.rs, consumer_targets.rs, fauxlden_retriever.rs, the domain layer fixtures, and the attached case-study proposals.
+Use the V-JEPA 2 and frontier architecture cases as the canonical worked-description coverage. The end-to-end reference_validation fixture composes one shared addressed core with pretraining, action-conditioned prediction, anticipation, VidQA, planning, hyperparameter, provenance, placement, cost, mode, execution, information, low-bit, and lineage views; supporting fixtures cover cross-paper consumers and the synthetic Fauxlden consumption exercise. Validate the complete static description, evaluate each layer, round-trip canonical text, exercise representative cuts and C12 non-cuts, and run explicit host-side placement and cost reports. Keep architecture facts, training/configuration values, sourced measurements, provenance, parameter lineage, finite reference channels, and runtime/continuous deferred outcomes in their separate boundaries.
+Accept: The complete reference description parses, validates, evaluates, serializes, and cuts; representative cuts revalidate and missing declared inputs fail as C12; shared addresses fold only where justified; observed paper families remain distinguishable; synthetic consumer facts remain opaque and non-normative; placement/cost/channel analyses require explicit inputs; no unresolved parameter-update, generated-index, continuous-estimator, causal, fixed-point, or runtime boundary receives invented semantics.
 -> architecture/vocabulary
 -> consumers/golden-retriever
 -> example/validation
@@ -26,7 +28,14 @@ One synthetic whole-system description exercised end to end across every layer a
 -> schemas/instances
 -> schemas/inventory
 -> tools/validator
-> Candidate system: V-JEPA 2, including its action-free representation pretraining, action-conditioned world model, downstream probes, language alignment, and goal-conditioned planning boundary.
+> 2026-08-27: reference_validation.rs is the canonical whole-system executable fixture; it composes existing domain and paper-family checkpoints instead of duplicating their local coverage.
+> 2026-08-27: V-JEPA 2 is the primary observed worked system because it exercises shared representation, masked pretraining, action-conditioned prediction, downstream consumers, VidQA, and static planning in one address space.
+> 2026-08-27: The reference description treats structure, finalized metadata, sourced measurements, host-side analyses, and deferred runtime/parameter relations as distinct artifacts.
+> 2026-08-27: Cross-paper cases and Fauxlden are consumption evidence; their terms do not become frozen core vocabulary, schemas, or product priorities.
+> 2026-08-27: A complete static reference does not imply complete empirical measurement: continuous neural channels, runtime loops, parameter updates, causal interventions, fixed points, and compact indexed syntax remain explicit gaps.
+@artifact text/rust ./crates/grimoire/tests/reference_validation.rs
+@artifact text/rust ./crates/grimoire/tests/consumer_targets.rs
+@artifact text/rust ./crates/grimoire/tests/fauxlden_retriever.rs
 @guidance text/markdown ./proposals/v-jepa-2-case-studies.md
 @guidance text/markdown ./proposals/frontier-architecture-case-studies.md
 ---
