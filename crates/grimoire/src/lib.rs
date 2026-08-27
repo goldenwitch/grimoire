@@ -19,8 +19,10 @@ pub use evaluate::{
     evaluate_layer,
 };
 pub use information::{
-    BayesianSummary, Channel, ChannelPosterior, ChannelScenario, CredibleInterval, Distribution,
-    InformationError, PosteriorSamples, data_processing_holds,
+    BayesianSummary, Channel, ChannelGraph, ChannelLink, ChannelNode, ChannelPosterior,
+    ChannelScenario, ClaimEstimate, CredibleInterval, Distribution, InformationClaim,
+    InformationDenominator, InformationError, InformationQuantity, PosteriorSamples,
+    RouteAllocationClaim, RouteShare, data_processing_holds,
 };
 pub use model::{
     Block, Connection, CoreGraph, Description, ExtensionParameter, ExtensionValue, Group, Port,

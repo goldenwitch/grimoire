@@ -1,10 +1,15 @@
 use grimoire::{
-    Channel, ChannelPosterior, ChannelScenario, Distribution, InformationError, PosteriorSamples,
-    data_processing_holds,
+    BayesianSummary, Channel, ChannelPosterior, ChannelScenario, ClaimEstimate, CredibleInterval,
+    Distribution, InformationClaim, InformationDenominator, InformationError, InformationQuantity,
+    PosteriorSamples, RouteAllocationClaim, RouteShare, data_processing_holds,
 };
 
 fn binary_source() -> Distribution {
     Distribution::uniform(2).unwrap_or_else(|error| panic!("{error}"))
+}
+
+fn address(value: &str) -> grimoire::Address {
+    grimoire::Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
 }
 
 fn assert_close(actual: f64, expected: f64) {
@@ -207,5 +212,156 @@ fn invalid_credible_level_fails_visibly() {
     assert!(matches!(
         samples.credible_interval(0.0),
         Err(InformationError::InvalidCredibility { .. })
+    ));
+}
+
+#[test]
+fn information_claims_bind_estimates_to_source_and_terminals() {
+    let exact = InformationClaim::exact(
+        address("@input/out"),
+        vec![address("@head/out")],
+        InformationQuantity::MutualInformation,
+        None,
+        0.75,
+        "finite-channel".to_owned(),
+        "synthetic law fixture".to_owned(),
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(exact.source, address("@input/out"));
+    assert_eq!(exact.terminals, vec![address("@head/out")]);
+    assert!(matches!(exact.estimate, ClaimEstimate::Exact(value) if value == 0.75));
+
+    let summary = BayesianSummary {
+        estimate: 0.75,
+        interval: CredibleInterval {
+            lower: 0.0,
+            upper: 1.0,
+            credibility: 0.9,
+        },
+        threshold: 0.5,
+        probability_at_least: 0.75,
+    };
+    let bayesian = InformationClaim::bayesian(
+        address("@input/out"),
+        vec![address("@head/out"), address("@decoder/out")],
+        InformationQuantity::RetentionFraction,
+        Some(InformationDenominator::SourceEntropyBits(1.0)),
+        summary,
+        "posterior-scenarios".to_owned(),
+        "finite posterior fixture".to_owned(),
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(bayesian.terminals.len(), 2);
+    assert!(matches!(bayesian.estimate, ClaimEstimate::Bayesian(_)));
+}
+
+#[test]
+fn retention_claims_require_a_positive_source_entropy_denominator() {
+    let missing = InformationClaim::exact(
+        address("@input/out"),
+        vec![address("@head/out")],
+        InformationQuantity::RetentionFraction,
+        None,
+        0.75,
+        "finite-channel".to_owned(),
+        "fixture".to_owned(),
+    );
+    assert!(matches!(missing, Err(InformationError::MissingDenominator)));
+
+    let unexpected = InformationClaim::exact(
+        address("@input/out"),
+        vec![address("@head/out")],
+        InformationQuantity::MutualInformation,
+        Some(InformationDenominator::SourceEntropyBits(1.0)),
+        0.75,
+        "finite-channel".to_owned(),
+        "fixture".to_owned(),
+    );
+    assert!(matches!(
+        unexpected,
+        Err(InformationError::UnexpectedDenominator)
+    ));
+}
+
+#[test]
+fn route_allocation_claims_require_a_declared_partition_and_sum() {
+    let claim = RouteAllocationClaim::new(
+        address("@input/out"),
+        InformationDenominator::SourceEntropyBits(1.0),
+        "two terminal routes".to_owned(),
+        "conditional-ablation".to_owned(),
+        vec![
+            RouteShare {
+                route: vec![address("@left")],
+                estimate: ClaimEstimate::Exact(0.6),
+            },
+            RouteShare {
+                route: vec![address("@right")],
+                estimate: ClaimEstimate::Exact(0.4),
+            },
+        ],
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(claim.shares.len(), 2);
+
+    let invalid = RouteAllocationClaim::new(
+        address("@input/out"),
+        InformationDenominator::SourceEntropyBits(1.0),
+        "two terminal routes".to_owned(),
+        "conditional-ablation".to_owned(),
+        vec![
+            RouteShare {
+                route: vec![address("@left")],
+                estimate: ClaimEstimate::Exact(0.6),
+            },
+            RouteShare {
+                route: vec![address("@right")],
+                estimate: ClaimEstimate::Exact(0.5),
+            },
+        ],
+    );
+    assert!(matches!(
+        invalid,
+        Err(InformationError::RouteSharesDoNotSum { .. })
+    ));
+}
+
+#[test]
+fn claim_validation_rejects_duplicate_terminals_and_bad_posterior_intervals() {
+    let duplicate = InformationClaim::exact(
+        address("@input/out"),
+        vec![address("@head/out"), address("@head/out")],
+        InformationQuantity::MutualInformation,
+        None,
+        0.75,
+        "finite-channel".to_owned(),
+        "fixture".to_owned(),
+    );
+    assert!(matches!(
+        duplicate,
+        Err(InformationError::DuplicateClaimTerminal(_))
+    ));
+
+    let bad_summary = InformationClaim::bayesian(
+        address("@input/out"),
+        vec![address("@head/out")],
+        InformationQuantity::MutualInformation,
+        None,
+        BayesianSummary {
+            estimate: 0.8,
+            interval: CredibleInterval {
+                lower: 0.1,
+                upper: 0.2,
+                credibility: 0.9,
+            },
+            threshold: 0.5,
+            probability_at_least: 0.8,
+        },
+        "posterior".to_owned(),
+        "fixture".to_owned(),
+    );
+    assert!(matches!(
+        bad_summary,
+        Err(InformationError::InvalidClaimEstimate { .. })
     ));
 }

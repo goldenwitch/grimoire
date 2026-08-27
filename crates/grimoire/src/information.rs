@@ -1,4 +1,7 @@
 use core::fmt;
+use std::collections::{BTreeMap, BTreeSet};
+
+use crate::{Address, Element, StructuralReprojection};
 
 const PROBABILITY_TOLERANCE: f64 = 1e-12;
 
@@ -349,6 +352,185 @@ pub struct BayesianSummary {
     pub probability_at_least: f64,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum InformationQuantity {
+    Entropy,
+    MutualInformation,
+    ConditionalMutualInformation,
+    RetentionFraction,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum InformationDenominator {
+    SourceEntropyBits(f64),
+    Explicit { value: f64, unit: String },
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum ClaimEstimate {
+    Exact(f64),
+    Bayesian(BayesianSummary),
+}
+
+impl ClaimEstimate {
+    #[must_use]
+    pub fn value(&self) -> f64 {
+        match self {
+            Self::Exact(value) => *value,
+            Self::Bayesian(summary) => summary.estimate,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct InformationClaim {
+    pub source: Address,
+    pub terminals: Vec<Address>,
+    pub quantity: InformationQuantity,
+    pub denominator: Option<InformationDenominator>,
+    pub estimate: ClaimEstimate,
+    pub method: String,
+    pub evidence: String,
+}
+
+impl InformationClaim {
+    pub fn new(
+        source: Address,
+        terminals: Vec<Address>,
+        quantity: InformationQuantity,
+        denominator: Option<InformationDenominator>,
+        estimate: ClaimEstimate,
+        method: String,
+        evidence: String,
+    ) -> Result<Self, InformationError> {
+        if terminals.is_empty() {
+            return Err(InformationError::EmptyClaimTerminals);
+        }
+        if let Some(duplicate) = find_duplicate(&terminals) {
+            return Err(InformationError::DuplicateClaimTerminal(duplicate));
+        }
+        if method.trim().is_empty() {
+            return Err(InformationError::EmptyClaimMethod);
+        }
+        if evidence.trim().is_empty() {
+            return Err(InformationError::EmptyClaimEvidence);
+        }
+        validate_denominator(quantity, denominator.as_ref())?;
+        validate_claim_estimate(quantity, &estimate)?;
+        Ok(Self {
+            source,
+            terminals,
+            quantity,
+            denominator,
+            estimate,
+            method,
+            evidence,
+        })
+    }
+
+    pub fn exact(
+        source: Address,
+        terminals: Vec<Address>,
+        quantity: InformationQuantity,
+        denominator: Option<InformationDenominator>,
+        value: f64,
+        method: String,
+        evidence: String,
+    ) -> Result<Self, InformationError> {
+        Self::new(
+            source,
+            terminals,
+            quantity,
+            denominator,
+            ClaimEstimate::Exact(value),
+            method,
+            evidence,
+        )
+    }
+
+    pub fn bayesian(
+        source: Address,
+        terminals: Vec<Address>,
+        quantity: InformationQuantity,
+        denominator: Option<InformationDenominator>,
+        summary: BayesianSummary,
+        method: String,
+        evidence: String,
+    ) -> Result<Self, InformationError> {
+        Self::new(
+            source,
+            terminals,
+            quantity,
+            denominator,
+            ClaimEstimate::Bayesian(summary),
+            method,
+            evidence,
+        )
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct RouteShare {
+    pub route: Vec<Address>,
+    pub estimate: ClaimEstimate,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct RouteAllocationClaim {
+    pub source: Address,
+    pub denominator: InformationDenominator,
+    pub partition: String,
+    pub method: String,
+    pub shares: Vec<RouteShare>,
+}
+
+impl RouteAllocationClaim {
+    pub fn new(
+        source: Address,
+        denominator: InformationDenominator,
+        partition: String,
+        method: String,
+        shares: Vec<RouteShare>,
+    ) -> Result<Self, InformationError> {
+        if partition.trim().is_empty() {
+            return Err(InformationError::EmptyRoutePartition);
+        }
+        if method.trim().is_empty() {
+            return Err(InformationError::EmptyClaimMethod);
+        }
+        if shares.is_empty() {
+            return Err(InformationError::EmptyRouteShares);
+        }
+        validate_denominator(InformationQuantity::RetentionFraction, Some(&denominator))?;
+        let mut share_sum = 0.0;
+        let mut routes = Vec::new();
+        for share in &shares {
+            if share.route.is_empty() {
+                return Err(InformationError::EmptyRoute);
+            }
+            if routes
+                .iter()
+                .any(|route: &Vec<Address>| route == &share.route)
+            {
+                return Err(InformationError::DuplicateRoute);
+            }
+            routes.push(share.route.clone());
+            validate_claim_estimate_bounds(&share.estimate, 0.0, 1.0)?;
+            share_sum += share.estimate.value();
+        }
+        if (share_sum - 1.0).abs() > PROBABILITY_TOLERANCE {
+            return Err(InformationError::RouteSharesDoNotSum { sum: share_sum });
+        }
+        Ok(Self {
+            source,
+            denominator,
+            partition,
+            method,
+            shares,
+        })
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChannelScenario {
     pub source: Distribution,
@@ -397,6 +579,362 @@ impl ChannelPosterior {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct ChannelNode {
+    pub address: Address,
+    pub block: Address,
+    pub input_ports: Vec<Address>,
+    pub output_port: Address,
+    pub channel: Channel,
+}
+
+impl ChannelNode {
+    pub fn new(
+        address: Address,
+        block: Address,
+        input_ports: Vec<Address>,
+        output_port: Address,
+        channel: Channel,
+    ) -> Result<Self, InformationError> {
+        if input_ports.is_empty() {
+            return Err(InformationError::EmptyNodeInputs(address));
+        }
+        if input_ports.contains(&output_port) {
+            return Err(InformationError::DuplicateGraphPort(output_port));
+        }
+        if let Some(duplicate) = find_duplicate(&input_ports) {
+            return Err(InformationError::DuplicateGraphPort(duplicate));
+        }
+        Ok(Self {
+            address,
+            block,
+            input_ports,
+            output_port,
+            channel,
+        })
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ChannelLink {
+    pub source: Address,
+    pub destination: Address,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ChannelGraph {
+    nodes: BTreeMap<Address, ChannelNode>,
+    links: Vec<ChannelLink>,
+    visible_ports: Option<BTreeSet<Address>>,
+}
+
+impl ChannelGraph {
+    pub fn new(nodes: Vec<ChannelNode>, links: Vec<ChannelLink>) -> Result<Self, InformationError> {
+        if nodes.is_empty() {
+            return Err(InformationError::EmptyGraph);
+        }
+        let mut node_map = BTreeMap::new();
+        let mut graph_ports = BTreeSet::new();
+        let mut input_ports = BTreeSet::new();
+        for node in nodes {
+            let node_address = node.address.clone();
+            if node_map.insert(node_address.clone(), node).is_some() {
+                return Err(InformationError::DuplicateGraphNode(node_address));
+            }
+        }
+        for node in node_map.values() {
+            if !graph_ports.insert(node.output_port.clone()) {
+                return Err(InformationError::DuplicateGraphPort(
+                    node.output_port.clone(),
+                ));
+            }
+            for port in &node.input_ports {
+                if !graph_ports.insert(port.clone()) {
+                    return Err(InformationError::DuplicateGraphPort(port.clone()));
+                }
+                input_ports.insert(port.clone());
+            }
+        }
+        let mut destinations = BTreeMap::new();
+        let mut link_pairs = BTreeSet::new();
+        for link in &links {
+            if !input_ports.contains(&link.destination) {
+                return Err(InformationError::UnknownDestinationPort(
+                    link.destination.clone(),
+                ));
+            }
+            if destinations
+                .insert(link.destination.clone(), link.source.clone())
+                .is_some()
+            {
+                return Err(InformationError::MultipleIncomingLinks(
+                    link.destination.clone(),
+                ));
+            }
+            if !link_pairs.insert((link.source.clone(), link.destination.clone())) {
+                return Err(InformationError::DuplicateGraphLink {
+                    source: link.source.clone(),
+                    destination: link.destination.clone(),
+                });
+            }
+        }
+        Ok(Self {
+            nodes: node_map,
+            links,
+            visible_ports: None,
+        })
+    }
+
+    pub fn channel_to_terminal(
+        &self,
+        source_port: &Address,
+        source: &Distribution,
+        terminal: &Address,
+    ) -> Result<Channel, InformationError> {
+        self.check_visible_port(source_port)?;
+        self.check_visible_port(terminal)?;
+        let mut resolver = GraphResolver::new(self, source_port, source)?;
+        resolver.resolve_port(terminal)
+    }
+
+    pub fn from_reprojection(
+        reprojection: &StructuralReprojection,
+        nodes: Vec<ChannelNode>,
+    ) -> Result<Self, InformationError> {
+        for node in &nodes {
+            if !matches!(
+                reprojection.elements.get(&node.block),
+                Some(Element::Block(_))
+            ) {
+                return Err(InformationError::MissingGraphElement(node.block.clone()));
+            }
+            for port in node
+                .input_ports
+                .iter()
+                .chain(std::iter::once(&node.output_port))
+            {
+                if !matches!(reprojection.elements.get(port), Some(Element::Port(_))) {
+                    return Err(InformationError::MissingGraphElement(port.clone()));
+                }
+            }
+        }
+        let links = reprojection
+            .elements
+            .values()
+            .filter_map(|element| match element {
+                Element::Connection(connection) => Some(ChannelLink {
+                    source: connection.source.clone(),
+                    destination: connection.destination.clone(),
+                }),
+                Element::Description(_)
+                | Element::Block(_)
+                | Element::Port(_)
+                | Element::Group(_) => None,
+            })
+            .collect();
+        let mut graph = Self::new(nodes, links)?;
+        graph.visible_ports = Some(
+            reprojection
+                .elements
+                .iter()
+                .filter(|(_, element)| matches!(element, Element::Port(_)))
+                .map(|(address, _)| address.clone())
+                .collect(),
+        );
+        Ok(graph)
+    }
+
+    pub fn from_layer(
+        description: &crate::Description,
+        layer_name: &str,
+        nodes: Vec<ChannelNode>,
+    ) -> Result<Self, InformationError> {
+        let reprojection = crate::evaluate_layer(description, layer_name)
+            .map_err(|error| InformationError::ProjectionEvaluation(error.to_string()))?;
+        Self::from_reprojection(&reprojection.structural, nodes)
+    }
+
+    pub fn joint_channel_to_terminals(
+        &self,
+        source_port: &Address,
+        source: &Distribution,
+        terminals: &[Address],
+    ) -> Result<Channel, InformationError> {
+        if terminals.is_empty() {
+            return Err(InformationError::EmptyTerminalSet);
+        }
+        if let Some(duplicate) = find_duplicate(terminals) {
+            return Err(InformationError::DuplicateClaimTerminal(duplicate));
+        }
+        self.check_visible_port(source_port)?;
+        for terminal in terminals {
+            self.check_visible_port(terminal)?;
+        }
+        let mut resolver = GraphResolver::new(self, source_port, source)?;
+        let mut joint = resolver.resolve_port(&terminals[0])?;
+        for terminal in &terminals[1..] {
+            let branch = resolver.resolve_port(terminal)?;
+            joint = joint.conditionally_independent_branch(&branch)?;
+        }
+        Ok(joint)
+    }
+
+    pub fn information_claim(
+        &self,
+        source_port: &Address,
+        source: &Distribution,
+        terminal: &Address,
+        method: String,
+        evidence: String,
+    ) -> Result<InformationClaim, InformationError> {
+        let channel = self.channel_to_terminal(source_port, source, terminal)?;
+        let value = channel.mutual_information_bits(source)?;
+        InformationClaim::exact(
+            source_port.clone(),
+            vec![terminal.clone()],
+            InformationQuantity::MutualInformation,
+            None,
+            value,
+            method,
+            evidence,
+        )
+    }
+
+    pub fn joint_information_claim(
+        &self,
+        source_port: &Address,
+        source: &Distribution,
+        terminals: &[Address],
+        method: String,
+        evidence: String,
+    ) -> Result<InformationClaim, InformationError> {
+        let channel = self.joint_channel_to_terminals(source_port, source, terminals)?;
+        let value = channel.mutual_information_bits(source)?;
+        InformationClaim::exact(
+            source_port.clone(),
+            terminals.to_vec(),
+            InformationQuantity::MutualInformation,
+            None,
+            value,
+            method,
+            evidence,
+        )
+    }
+
+    fn check_visible_port(&self, port: &Address) -> Result<(), InformationError> {
+        if self
+            .visible_ports
+            .as_ref()
+            .is_some_and(|ports| !ports.contains(port))
+        {
+            return Err(InformationError::UnvisiblePort(port.clone()));
+        }
+        Ok(())
+    }
+}
+
+struct GraphResolver<'graph> {
+    graph: &'graph ChannelGraph,
+    source_port: Address,
+    source: &'graph Distribution,
+    incoming: BTreeMap<Address, Address>,
+    input_nodes: BTreeMap<Address, Address>,
+    output_nodes: BTreeMap<Address, Address>,
+    state: BTreeMap<Address, VisitState>,
+    channels: BTreeMap<Address, Channel>,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum VisitState {
+    Visiting,
+    Complete,
+}
+
+impl<'graph> GraphResolver<'graph> {
+    fn new(
+        graph: &'graph ChannelGraph,
+        source_port: &Address,
+        source: &'graph Distribution,
+    ) -> Result<Self, InformationError> {
+        let mut incoming = BTreeMap::new();
+        for link in &graph.links {
+            incoming.insert(link.destination.clone(), link.source.clone());
+        }
+        let mut input_nodes = BTreeMap::new();
+        let mut output_nodes = BTreeMap::new();
+        for node in graph.nodes.values() {
+            for port in &node.input_ports {
+                input_nodes.insert(port.clone(), node.address.clone());
+            }
+            output_nodes.insert(node.output_port.clone(), node.address.clone());
+        }
+        Ok(Self {
+            graph,
+            source_port: source_port.clone(),
+            source,
+            incoming,
+            input_nodes,
+            output_nodes,
+            state: BTreeMap::new(),
+            channels: BTreeMap::new(),
+        })
+    }
+
+    fn resolve_port(&mut self, port: &Address) -> Result<Channel, InformationError> {
+        if port == &self.source_port {
+            return Channel::identity(self.source.cardinality());
+        }
+        if let Some(node_address) = self.output_nodes.get(port).cloned() {
+            self.resolve_node(&node_address)?;
+            return self
+                .channels
+                .get(port)
+                .cloned()
+                .ok_or_else(|| InformationError::UnreachableTerminal(port.clone()));
+        }
+        if self.input_nodes.contains_key(port) {
+            let upstream = self
+                .incoming
+                .get(port)
+                .cloned()
+                .ok_or_else(|| InformationError::MissingGraphInput(port.clone()))?;
+            return self.resolve_port(&upstream);
+        }
+        Err(InformationError::UnreachableTerminal(port.clone()))
+    }
+
+    fn resolve_node(&mut self, node_address: &Address) -> Result<(), InformationError> {
+        match self.state.get(node_address) {
+            Some(VisitState::Complete) => return Ok(()),
+            Some(VisitState::Visiting) => return Err(InformationError::CyclicGraph),
+            None => {}
+        }
+        self.state
+            .insert(node_address.clone(), VisitState::Visiting);
+        let node = self
+            .graph
+            .nodes
+            .get(node_address)
+            .ok_or_else(|| InformationError::UnreachableNode(node_address.clone()))?
+            .clone();
+        let mut input_channel: Option<Channel> = None;
+        for input_port in &node.input_ports {
+            let branch = self.resolve_port(input_port)?;
+            input_channel = Some(match input_channel {
+                None => branch,
+                Some(existing) => existing.conditionally_independent_branch(&branch)?,
+            });
+        }
+        let input_channel =
+            input_channel.ok_or_else(|| InformationError::EmptyNodeInputs(node.address.clone()))?;
+        let output_channel = input_channel.compose(&node.channel)?;
+        self.channels.insert(node.output_port, output_channel);
+        self.state
+            .insert(node_address.clone(), VisitState::Complete);
+        Ok(())
+    }
+}
+
 fn validate_probability_vector(
     probabilities: &[f64],
     context: &'static str,
@@ -434,6 +972,94 @@ fn weighted_quantile(weighted_values: &[(f64, f64)], quantile: f64) -> f64 {
         }
     }
     weighted_values.last().map_or(0.0, |(value, _)| *value)
+}
+
+fn find_duplicate(values: &[Address]) -> Option<Address> {
+    for (index, value) in values.iter().enumerate() {
+        if values[..index].contains(value) {
+            return Some(value.clone());
+        }
+    }
+    None
+}
+
+fn validate_denominator(
+    quantity: InformationQuantity,
+    denominator: Option<&InformationDenominator>,
+) -> Result<(), InformationError> {
+    if quantity != InformationQuantity::RetentionFraction && denominator.is_some() {
+        return Err(InformationError::UnexpectedDenominator);
+    }
+    if quantity == InformationQuantity::RetentionFraction && denominator.is_none() {
+        return Err(InformationError::MissingDenominator);
+    }
+    if let Some(denominator) = denominator {
+        let value = match denominator {
+            InformationDenominator::SourceEntropyBits(value) => *value,
+            InformationDenominator::Explicit { value, .. } => *value,
+        };
+        if !value.is_finite() || value <= PROBABILITY_TOLERANCE {
+            return Err(InformationError::InvalidDenominator { value });
+        }
+    }
+    Ok(())
+}
+
+fn validate_claim_estimate(
+    quantity: InformationQuantity,
+    estimate: &ClaimEstimate,
+) -> Result<(), InformationError> {
+    validate_claim_estimate_bounds(estimate, 0.0, f64::INFINITY)?;
+    if quantity == InformationQuantity::RetentionFraction {
+        validate_claim_estimate_bounds(estimate, 0.0, 1.0)?;
+    }
+    Ok(())
+}
+
+fn validate_claim_estimate_bounds(
+    estimate: &ClaimEstimate,
+    lower_bound: f64,
+    upper_bound: f64,
+) -> Result<(), InformationError> {
+    match estimate {
+        ClaimEstimate::Exact(value) => {
+            if !value.is_finite() || *value < lower_bound || *value > upper_bound {
+                return Err(InformationError::InvalidClaimValue { value: *value });
+            }
+        }
+        ClaimEstimate::Bayesian(summary) => {
+            if !summary.estimate.is_finite()
+                || summary.estimate < lower_bound
+                || summary.estimate > upper_bound
+            {
+                return Err(InformationError::InvalidClaimValue {
+                    value: summary.estimate,
+                });
+            }
+            if !summary.interval.lower.is_finite()
+                || !summary.interval.upper.is_finite()
+                || summary.interval.lower > summary.interval.upper
+                || summary.interval.lower < lower_bound
+                || summary.interval.upper > upper_bound
+                || summary.estimate < summary.interval.lower - PROBABILITY_TOLERANCE
+                || summary.estimate > summary.interval.upper + PROBABILITY_TOLERANCE
+            {
+                return Err(InformationError::InvalidClaimEstimate {
+                    message: "posterior estimate is outside its credible interval",
+                });
+            }
+            validate_credibility(summary.interval.credibility)?;
+            if !summary.threshold.is_finite()
+                || !summary.probability_at_least.is_finite()
+                || !(0.0..=1.0).contains(&summary.probability_at_least)
+            {
+                return Err(InformationError::InvalidClaimEstimate {
+                    message: "posterior decision probability is invalid",
+                });
+            }
+        }
+    }
+    Ok(())
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -480,6 +1106,46 @@ pub enum InformationError {
     InvalidCredibility {
         value: f64,
     },
+    EmptyClaimTerminals,
+    DuplicateClaimTerminal(Address),
+    EmptyClaimMethod,
+    EmptyClaimEvidence,
+    MissingDenominator,
+    UnexpectedDenominator,
+    InvalidDenominator {
+        value: f64,
+    },
+    InvalidClaimValue {
+        value: f64,
+    },
+    InvalidClaimEstimate {
+        message: &'static str,
+    },
+    EmptyRoutePartition,
+    EmptyRouteShares,
+    EmptyRoute,
+    DuplicateRoute,
+    RouteSharesDoNotSum {
+        sum: f64,
+    },
+    EmptyNodeInputs(Address),
+    DuplicateGraphPort(Address),
+    EmptyGraph,
+    DuplicateGraphNode(Address),
+    UnknownDestinationPort(Address),
+    MultipleIncomingLinks(Address),
+    DuplicateGraphLink {
+        source: Address,
+        destination: Address,
+    },
+    EmptyTerminalSet,
+    UnreachableTerminal(Address),
+    MissingGraphInput(Address),
+    CyclicGraph,
+    UnreachableNode(Address),
+    MissingGraphElement(Address),
+    ProjectionEvaluation(String),
+    UnvisiblePort(Address),
 }
 
 impl fmt::Display for InformationError {
@@ -531,6 +1197,97 @@ impl fmt::Display for InformationError {
             }
             Self::InvalidCredibility { value } => {
                 write!(formatter, "credibility must be in (0, 1], got {value}")
+            }
+            Self::EmptyClaimTerminals => formatter.write_str("information claim needs a terminal"),
+            Self::DuplicateClaimTerminal(address) => {
+                write!(formatter, "information claim repeats terminal `{address}`")
+            }
+            Self::EmptyClaimMethod => {
+                formatter.write_str("information claim method must not be empty")
+            }
+            Self::EmptyClaimEvidence => {
+                formatter.write_str("information claim evidence must not be empty")
+            }
+            Self::MissingDenominator => {
+                formatter.write_str("retention claim needs a positive denominator")
+            }
+            Self::UnexpectedDenominator => {
+                formatter.write_str("only retention claims may have a denominator")
+            }
+            Self::InvalidDenominator { value } => {
+                write!(
+                    formatter,
+                    "information claim denominator is invalid: {value}"
+                )
+            }
+            Self::InvalidClaimValue { value } => {
+                write!(formatter, "information claim value is invalid: {value}")
+            }
+            Self::InvalidClaimEstimate { message } => formatter.write_str(message),
+            Self::EmptyRoutePartition => formatter.write_str("route partition must not be empty"),
+            Self::EmptyRouteShares => formatter.write_str("route allocation needs a share"),
+            Self::EmptyRoute => formatter.write_str("route share must name an address route"),
+            Self::DuplicateRoute => formatter.write_str("route allocation repeats a route"),
+            Self::RouteSharesDoNotSum { sum } => {
+                write!(formatter, "route shares sum to {sum}, not one")
+            }
+            Self::EmptyNodeInputs(address) => {
+                write!(formatter, "channel node `{address}` needs an input port")
+            }
+            Self::DuplicateGraphPort(address) => {
+                write!(formatter, "channel graph reuses port `{address}`")
+            }
+            Self::EmptyGraph => formatter.write_str("channel graph must not be empty"),
+            Self::DuplicateGraphNode(address) => {
+                write!(formatter, "channel graph repeats node `{address}`")
+            }
+            Self::UnknownDestinationPort(address) => {
+                write!(
+                    formatter,
+                    "channel link targets unknown input port `{address}`"
+                )
+            }
+            Self::MultipleIncomingLinks(address) => {
+                write!(
+                    formatter,
+                    "channel input port `{address}` has multiple incoming links"
+                )
+            }
+            Self::DuplicateGraphLink {
+                source,
+                destination,
+            } => write!(
+                formatter,
+                "channel graph repeats link `{source}` -> `{destination}`"
+            ),
+            Self::EmptyTerminalSet => formatter.write_str("channel query needs a terminal"),
+            Self::UnreachableTerminal(address) => {
+                write!(formatter, "channel terminal `{address}` is unreachable")
+            }
+            Self::MissingGraphInput(address) => {
+                write!(formatter, "channel input `{address}` has no source")
+            }
+            Self::CyclicGraph => formatter.write_str("channel query reaches a cycle"),
+            Self::UnreachableNode(address) => {
+                write!(formatter, "channel node `{address}` is not reachable")
+            }
+            Self::MissingGraphElement(address) => {
+                write!(
+                    formatter,
+                    "channel graph references missing element `{address}`"
+                )
+            }
+            Self::ProjectionEvaluation(message) => {
+                write!(
+                    formatter,
+                    "channel graph layer evaluation failed: {message}"
+                )
+            }
+            Self::UnvisiblePort(address) => {
+                write!(
+                    formatter,
+                    "channel query uses port outside the selected layer: `{address}`"
+                )
             }
         }
     }

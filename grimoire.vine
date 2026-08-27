@@ -588,30 +588,38 @@ Accept: Identity, constant, noisy, composition, associativity, data-processing, 
 @artifact text/rust ./crates/grimoire/tests/information.rs
 @guidance text/markdown ./proposals/information-flow.md
 ---
-[information/claims] Model confidence-aware information claims (started)
-Files: crates/grimoire/src/information.rs and future addressed-claim fixtures.
-Build on the finite posterior summaries to represent source-terminal information claims with quantity, denominator, estimate, uncertainty interval, Bayesian prior/posterior context, credibility level, method, sample context, decision threshold, and optional route partition. Validate percentage bounds and require a declared attribution basis for additive route shares. Keep classical mutual information, posterior uncertainty about it, and agent-relative Bayesian mutual information distinguishable.
-Current implementation provides generic posterior samples, credible intervals, and threshold probabilities; addressed source-terminal claim serialization and route attribution remain next.
-Accept: Exact claims, Bayesian posterior claims, interval estimates, normalized retention, joint-terminal claims, and route-share claims have distinguishable representations; malformed intervals, missing denominators, prior/posterior mismatches, and unexplained confidence values fail visibly.
+[information/claims] Model confidence-aware information claims (reviewing)
+Files: crates/grimoire/src/information.rs and crates/grimoire/tests/information.rs, with future text/graph claim fixtures.
+Represent source-terminal information claims with quantity, denominator, exact or Bayesian estimate, uncertainty interval, posterior credibility and decision probability, method, evidence context, and optional partitioned route shares. Validate percentage bounds and require a declared attribution basis for additive route shares. Keep classical mutual information, posterior uncertainty about it, and agent-relative Bayesian mutual information distinguishable.
+Current implementation provides addressed claim structs, exact and Bayesian estimates, generic posterior summaries, credible intervals, threshold probabilities, and route-share partition validation; text serialization and graph-populated claims remain next.
+Accept: Exact claims, Bayesian posterior claims, interval estimates, normalized retention, joint-terminal claims, and route-share claims have distinguishable representations; malformed intervals, missing denominators, invalid posterior probabilities, and unexplained route partitions fail visibly.
 -> implementation/language
 -> information/channel-contract
-> 2026-08-27: Generic posterior summaries are implemented before address-bearing claim serialization; the latter remains a separate graph/schema boundary.
+> 2026-08-27: Address-bearing claim structs are implemented independently of text grammar; graph composition will populate them after the finite channel laws are reviewed.
+> 2026-08-27: A route allocation is valid only as a named partition with shares summing to one under its declared attribution method.
 @artifact text/rust ./crates/grimoire/src/information.rs
 @artifact text/rust ./crates/grimoire/tests/information.rs
 @guidance text/markdown ./proposals/information-flow.md
 ---
-[information/graph-composition] Compose channels over addressed graphs (notstarted)
-Files: crates/grimoire/src/information.rs, evaluate integration, and focused graph fixtures.
-Map addressed ports and block interfaces in a selected reprojection to finite channels. Support explicit source and terminal ports, branches, merges, and finite-horizon unrolled recurrent graphs. Report bare cyclic queries as unresolved until a fixed-point or process contract exists.
-Accept: Acyclic addressed graphs compose to the finite calculus; joint terminal queries do not sum marginal information; source and terminal visibility follow layer scope; no channel behavior is inferred from labels or topology alone.
+[information/graph-composition] Compose channels over addressed graphs (reviewing)
+Files: crates/grimoire/src/information.rs and crates/grimoire/tests/information_graph.rs.
+Map evaluated addressed reprojections to finite channels through explicit block-channel assignments. Support explicit source and terminal ports, branch fan-out, conditional-independence merges, layer visibility, and finite addressed acyclic graphs. Report bare cyclic queries as unresolved until a fixed-point or process contract exists.
+Accept: Acyclic addressed graphs compose to the finite calculus; evaluated Grimoire layers supply wiring; joint terminal queries do not sum marginal information; source and terminal visibility follows the selected reprojection; graph-populated claims carry exact finite results; no channel behavior is inferred from labels or topology alone.
 -> information/claims
 -> information/finite-calculus
 -> layers/info-flow
+> 2026-08-27: Graph composition consumes explicit ChannelNode assignments; topology alone never supplies a channel kernel or information value.
+> 2026-08-27: A merge uses an explicit conditional-independence product of its source-conditioned input channels in the first prototype; correlated merge behavior remains a future joint-kernel boundary.
 @guidance text/markdown ./proposals/information-flow.md
 ---
-[information/conformance] Exercise channel conformance (notstarted)
-Files: crates/grimoire/tests/information.rs and channel graph fixtures named at dispatch.
-Exercise the channel laws and the addressed graph interpretation, including exact finite results, confidence-bearing empirical claims, branch and merge semantics, finite-horizon unrolling, and unresolved bare cycles.
-Accept: The suite distinguishes structural reachability from Shannon quantities, proves joint-information behavior, checks confidence/interval shape, and records continuous estimators, fixed points, and causal interventions as visible follow-up boundaries.
+[information/conformance] Exercise channel conformance (reviewing)
+Files: crates/grimoire/tests/information.rs and crates/grimoire/tests/information_graph.rs.
+Exercise the finite channel laws, addressed graph interpretation, exact source-terminal claims, Bayesian posterior summaries, branch and merge semantics, layer visibility, finite-horizon unrolling, and unresolved bare cycles.
+Accept: The suite distinguishes structural reachability from Shannon quantities, proves joint-information behavior, checks confidence/interval and claim shape, and records continuous estimators, fixed points, correlated merges, and causal interventions as visible follow-up boundaries.
 -> information/graph-composition
+> 2026-08-27: Channel conformance is split between mathematical laws and evaluated-reprojection graph fixtures; text grammar integration remains downstream.
+> 2026-08-27: Finite-horizon recurrence is represented by explicit acyclic addressed state nodes; a bare cycle remains unresolved.
+> 2026-08-27: The current graph adapter requires explicit ChannelNode assignments and uses conditional-independence products at multi-input nodes; correlated joint kernels remain a future boundary.
+@artifact text/rust ./crates/grimoire/tests/information.rs
+@artifact text/rust ./crates/grimoire/tests/information_graph.rs
 @guidance text/markdown ./proposals/information-flow.md
