@@ -849,17 +849,25 @@ The proposed cases consume the indexed papers as follows:
 This map is a coverage statement, not a ranking of the papers or a claim that
 every paper in one row has identical architecture.
 
+## Executable Consumer Checkpoint
+
+The current Rust fixture in
+[`consumer_targets.rs`](../crates/grimoire/tests/consumer_targets.rs) covers
+the cross-paper consumer boundary with independent bridge, unified-token,
+decoupled-frontend, continuous-latent, one-dimensional-tokenizer, streaming
+speech, latent-dynamics, low-bit, and parameter-lineage layers. It validates
+their cuts, checks that only justified shared backbone addresses fold, and
+keeps precision and lineage facts out of activation structure.
+
+The fixture is intentionally a coverage checkpoint rather than a claim that
+the current grammar evaluates token generation, diffusion, streaming clocks,
+recurrent rollouts, or parameter merges. Those remain static structure plus
+finalized values or explicit external/deferred boundaries.
+
 ## Next Consumption Step
 
-The next fixture should compare two small multimodal descriptions:
-
-1. a bridge-based model with a visual encoder, projector, and language model;
-2. a shared-transformer model with discrete visual and text token streams and
-   objective-specific output paths.
-
-It should include one continuous latent output and one discrete token output only
-if the reviewed grammar can state their shape and visibility contracts without
-inventing runtime semantics. The fixture should then be cut once with the
-language path present and once with it absent, exposing address folding,
-locality, shape contracts, and generated attention structure before the larger
-paper set is transcribed.
+The next artifact should be one complete reference description that composes
+the shared core, domain layers, pretraining and AC checkpoint, downstream
+consumer checkpoint, placement, cost, provenance, and cut/serializer
+validation. It should retain the paper-family distinctions already exercised
+here instead of collapsing them into one universal multimodal architecture.

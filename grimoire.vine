@@ -502,16 +502,19 @@ Accept: The pretraining and AC cuts validate independently; the two predictors r
 > 2026-08-27: information_targets.rs is now an executable representability checkpoint with independently validated pretraining and AC cuts, not a full empirical training reproduction.
 @artifact text/rust ./crates/grimoire/tests/information_targets.rs
 ---
-[example/consumers] Reference downstream consumers (notstarted)
-Files: downstream reference layers named at dispatch. Current VidQA representability checkpoint: crates/grimoire/tests/information_targets.rs.
-The checkpoint proves that VidQA and static planning consumer boundaries can be represented with local projector, language, and controller blocks over the shared encoder/AC structure. Full downstream consumer coverage remains open for classification, anticipation, multimodal variants, speech, tokenizer, low-bit, and lineage cases.
-Accept: Each consumer owns its local blocks and values; shared addresses fold only where justified; bridge and unified-core accounts stay distinguishable; parameter merges do not become activation connections; every unresolved architectural boundary is named in the fixture outcome.
+[example/consumers] Reference downstream consumers (reviewing)
+Files: crates/grimoire/tests/consumer_targets.rs, proposals/frontier-architecture-case-studies.md, and the shared schema/projection artifacts.
+Build the cross-paper downstream consumer checkpoint over a shared core: bridge-based visual-language adaptation, unified discrete modality paths, decoupled semantic/generative frontends, continuous latent generation, one-dimensional tokenization, streaming speech, latent dynamics and planning, low-bit operator variants, and parameter-state lineage. Keep consumer-local blocks and values local; fold shared encoder/backbone addresses only where the observed case justifies reuse. Validate representative cuts. Keep parameter merges out of activation connections and keep runtime clocks, diffusion/generation, recurrent rollouts, and indexed compact syntax outside the static evaluator.
+Accept: The consumer fixture parses, validates, evaluates, and cuts; bridge and unified-core accounts remain distinguishable; semantic and generative frontends remain separate until the shared backbone; sequence latent shape is explicit; speech execution metadata is finalized; precision is a value; lineage has no activation edge; unresolved runtime, generated-index, continuous-estimator, and parameter-update boundaries are visible.
 -> architecture/indexed-visibility
 -> architecture/parameter-lineage
 -> example/pretraining-ac
 -> execution/boundary
 -> layers/fixtures
-> 2026-08-27: information_targets.rs covers VidQA and static planning boundaries as a partial consumer checkpoint; it does not replace the broader downstream consumer fixture.
+> 2026-08-27: consumer_targets.rs is the cross-paper coverage checkpoint for bridge, unified, decoupled, latent, tokenizer, speech, dynamics, low-bit, and lineage cases; it does not claim full paper-by-paper transcription.
+> 2026-08-27: Bridge-based consumers do not select the shared transformer, while unified and decoupled consumers do; this preserves the observed distinction between an independent language core and an early/shared-fusion core.
+> 2026-08-27: Parameter lineage remains a finalized schema value over local state blocks and never becomes an activation connection.
+> 2026-08-27: Runtime, diffusion, recurrent rollout, token-index generation, and continuous channel execution remain external or deferred.
 @artifact text/rust ./crates/grimoire/tests/information_targets.rs
 ---
 [example/validation] Validate reference cuts and properties (notstarted)
