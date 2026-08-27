@@ -1,17 +1,26 @@
 # Visualization design
 
-Status: design checkpoint; no renderer exists yet.
+Status: implementation checkpoint; static viewer exists.
 
 This proposal defines the first visualization boundary for Grimoire. It is a
 rendering contract, not a new core vocabulary or a runtime execution model.
-The first implementation target is a static HTML viewer, but this node only
-specifies that viewer. Rendering code belongs to a later implementation node.
+The first implementation target is a static HTML viewer. The current artifact
+is a self-contained implementation; a later generator may replace its frozen
+embedded view model without changing the rendering contract.
 
 The governing sources are [grimoire.md](../spec/grimoire.md),
 [projection-language.md](./projection-language.md), the reference fixture in
 [reference_validation.rs](../crates/grimoire/tests/reference_validation.rs),
 and the observed cases in [v-jepa-2-case-studies.md](./v-jepa-2-case-studies.md)
 and [frontier-architecture-case-studies.md](./frontier-architecture-case-studies.md).
+
+## Current artifact
+
+[`viz/index.html`](../viz/index.html) is the first browser-openable viewer. It
+contains the static view model for the V-JEPA 2 reference, the cross-paper
+consumer checkpoint, and the Fauxlden Retriever fixture. It requires no build
+step, server, dependency, or network request. Open it directly from the
+workspace to inspect the views.
 
 ## First view
 
@@ -139,8 +148,10 @@ than changing node dimensions unpredictably or overlapping neighboring content.
 
 ## Acceptance fixtures
 
-The first implementation should consume the existing static fixtures without
-introducing a visualization-specific input format:
+The current implementation consumes a frozen view model derived from the
+existing static fixtures without introducing a visualization-specific input
+format. A later generator can produce the same view model from evaluated Rust
+reprojections. The acceptance cases are:
 
 1. V-JEPA 2: compare `pretraining`, `ac`, `vidqa`, and `planning` against the
    shared core. The encoder address remains common; the pretraining and AC

@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f0e8">
+    <title>Grimoire Atlas</title>
+    <style>
+        :root {
+            --paper: #f3f0e8;
+            --panel: #fcfbf7;
+            --panel-warm: #f8f4ec;
+            --ink: #1d2b26;
+            --muted: #69766e;
+            --faint: #9ba49c;
+            --line: #d4d8ce;
+            --line-strong: #bac4ba;
+            --teal: #0d7d76;
+            --teal-soft: #d7ece5;
+            --coral: #d9634f;
+            --coral-soft: #f6ddd4;
+            --cobalt: #2866bd;
+            --cobalt-soft: #dfe8f7;
+            --sun: #cc951e;
+            --sun-soft: #f4e7bd;
+            --moss: #668741;
+            --moss-soft: #e3ecd4;
+            --shadow: 0 12px 32px rgba(29, 43, 38, 0.08);
+            --radius: 7px;
+            --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+            --display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+            --sans: "Aptos", "Segoe UI", sans-serif;
+        }
+
+        * { box-sizing: border-box; }
+
+        html { min-width: 320px; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background-color: var(--paper);
+            background-image:
+                linear-gradient(125deg, rgba(255, 255, 255, 0.7), rgba(243, 240, 232, 0) 42%),
+                repeating-linear-gradient(0deg, rgba(29, 43, 38, 0.025) 0, rgba(29, 43, 38, 0.025) 1px, transparent 1px, transparent 5px);
+            font-family: var(--sans);
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
+        button, select, input { font: inherit; }
+
+        button, select { cursor: pointer; }
+
+        button:focus-visible, select:focus-visible, input:focus-visible, [role="button"]:focus-visible {
+            outline: 3px solid rgba(40, 102, 189, 0.28);
+            outline-offset: 2px;
+        }
+
+        .topbar {
+            min-height: 74px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 14px 28px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(252, 251, 247, 0.84);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            color: #fffaf0;
+            background: var(--ink);
+            border-radius: 5px;
+            font-family: var(--display);
+            font-size: 22px;
+            font-weight: 700;
+            box-shadow: 5px 5px 0 var(--coral);
+        }
+
+        .eyebrow, .section-label, .kind-tag, .presence-tag, .status-label, .header-note, .stat-label {
+            font-size: 10px;
+            font-weight: 750;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow {
+            display: block;
+            color: var(--teal);
+            margin-bottom: 1px;
+        }
+
+        .brand strong {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: var(--display);
+            font-size: 19px;
+            font-weight: 600;
+        }
+
+        .header-note {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            display: inline-block;
+            border-radius: 50%;
+            background: var(--moss);
+            box-shadow: 0 0 0 4px var(--moss-soft);
+        }
+
+        .app {
+            width: min(1680px, 100%);
+            margin: 0 auto;
+            padding: 22px 28px 34px;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .control {
+            display: grid;
+            gap: 5px;
+            min-width: 165px;
+        }
+
+        .control.wide { min-width: 205px; }
+
+        .control label, .search-control label {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        select, input {
+            min-height: 36px;
+            border: 1px solid var(--line-strong);
+            border-radius: 5px;
+            color: var(--ink);
+            background: #fffefb;
+            padding: 7px 10px;
+        }
+
+        select:hover, input:hover { border-color: var(--teal); }
+
+        .search-control {
+            display: grid;
+            gap: 5px;
+            flex: 1 1 230px;
+            min-width: 210px;
+        }
+
+        .search-wrap { position: relative; }
+        .search-wrap input { width: 100%; padding-right: 34px; }
+        .search-key {
+            position: absolute;
+            right: 9px;
+            top: 8px;
+            color: var(--faint);
+            font-family: var(--mono);
+            font-size: 11px;
+        }
+
+        .toggle {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--line-strong);
+            border-radius: 5px;
+            color: var(--muted);
+            background: var(--panel-warm);
+            padding: 0 11px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .toggle:hover { border-color: var(--teal); color: var(--ink); }
+        .toggle.active { color: var(--teal); border-color: rgba(13, 125, 118, 0.42); background: var(--teal-soft); }
+        .toggle-indicator {
+            width: 9px;
+            height: 9px;
+            border: 1px solid currentColor;
+            border-radius: 2px;
+            background: transparent;
+        }
+        .toggle.active .toggle-indicator { background: currentColor; }
+
+        .clear-button {
+            min-height: 36px;
+            align-self: end;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            color: var(--coral);
+            background: transparent;
+            padding: 0 9px;
+            font-weight: 700;
+        }
+        .clear-button:hover { background: var(--coral-soft); }
+        .clear-button span { margin-right: 3px; font-size: 17px; vertical-align: -1px; }
+
+        .context {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 26px 2px 20px;
+        }
+
+        .context-copy { min-width: 0; }
+        .context-copy .eyebrow { margin-bottom: 7px; }
+        h1, h2, h3, p { margin-top: 0; }
+        h1 {
+            margin-bottom: 6px;
+            font-family: var(--display);
+            font-size: 35px;
+            line-height: 1.08;
+            font-weight: 600;
+            letter-spacing: 0;
+        }
+        .context-copy p {
+            max-width: 740px;
+            margin-bottom: 0;
+            color: var(--muted);
+        }
+        .citation {
+            color: var(--cobalt);
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+        }
+        .citation:hover { color: var(--coral); }
+
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: end;
+            gap: 9px;
+        }
+        .stat {
+            min-width: 80px;
+            padding: 9px 11px;
+            border-left: 3px solid var(--teal);
+            background: rgba(252, 251, 247, 0.65);
+        }
+        .stat:nth-child(2) { border-left-color: var(--cobalt); }
+        .stat:nth-child(3) { border-left-color: var(--coral); }
+        .stat:nth-child(4) { border-left-color: var(--sun); }
+        .stat-value { display: block; font-size: 19px; font-weight: 750; line-height: 1.1; }
+        .stat-label { display: block; color: var(--muted); margin-top: 3px; }
+
+        .body-grid {
+            display: grid;
+            grid-template-columns: 220px minmax(0, 1fr) 300px;
+            gap: 14px;
+            align-items: start;
+        }
+
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--panel);
+            box-shadow: 0 7px 22px rgba(29, 43, 38, 0.045);
+        }
+
+        .rail { padding: 14px 10px 12px; }
+        .section-label { color: var(--muted); padding: 0 7px; }
+        .rail-heading { margin: 4px 7px 12px; font-family: var(--display); font-size: 20px; font-weight: 600; }
+        .view-list { display: grid; gap: 3px; }
+        .view-button {
+            position: relative;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 9px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 8px;
+            border: 0;
+            border-radius: 4px;
+            color: var(--muted);
+            background: transparent;
+            padding: 8px 7px;
+            text-align: left;
+        }
+        .view-button:hover { color: var(--ink); background: var(--panel-warm); }
+        .view-button.active { color: var(--ink); background: var(--teal-soft); }
+        .view-button.active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 7px;
+            bottom: 7px;
+            width: 3px;
+            border-radius: 2px;
+            background: var(--teal);
+        }
+        .view-marker { width: 8px; height: 8px; border-radius: 2px; background: var(--line-strong); }
+        .view-button[data-kind="analysis"] .view-marker { background: var(--sun); }
+        .view-button[data-kind="consumer"] .view-marker { background: var(--cobalt); }
+        .view-button[data-kind="runtime"] .view-marker { background: var(--coral); }
+        .view-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 700; }
+        .view-kind { color: var(--faint); font-family: var(--mono); font-size: 9px; }
+        .rail-rule { height: 1px; margin: 14px 7px; background: var(--line); }
+        .legend-list { display: grid; gap: 8px; padding: 8px 7px 2px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; }
+        .legend-swatch { width: 15px; height: 10px; border: 2px solid var(--teal); border-radius: 3px; background: var(--teal-soft); }
+        .legend-swatch.group { border-style: dashed; border-color: var(--cobalt); background: var(--cobalt-soft); }
+        .legend-swatch.left-only { border-color: var(--coral); background: var(--coral-soft); }
+        .legend-swatch.right-only { border-color: var(--sun); background: var(--sun-soft); }
+        .legend-swatch.deferred { border-color: var(--faint); border-style: dotted; background: #eff0eb; }
+
+        .stage-column { min-width: 0; }
+        .stage-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 0 3px 9px;
+        }
+        .stage-head h2 { margin-bottom: 0; font-family: var(--display); font-size: 21px; font-weight: 600; }
+        .stage-head p { margin-bottom: 0; color: var(--muted); font-size: 12px; }
+        .compare-badge { flex: 0 0 auto; color: var(--teal); font-family: var(--mono); font-size: 10px; }
+
+        .graph-comparison {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .graph-pane { min-width: 0; overflow: hidden; }
+        .graph-pane-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 46px;
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--line);
+            background: var(--panel-warm);
+        }
+        .graph-pane-head strong { display: block; font-size: 13px; }
+        .graph-pane-head span { display: block; color: var(--muted); font-size: 11px; }
+        .pane-side { color: var(--faint); font-family: var(--mono); font-size: 10px; }
+        .graph-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+        .graph-stage {
+            position: relative;
+            min-width: 720px;
+            height: 570px;
+            overflow: hidden;
+            background-color: #f8f7f1;
+            background-image:
+                linear-gradient(rgba(29, 43, 38, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(29, 43, 38, 0.035) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+        .graph-stage svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            pointer-events: none;
+        }
+        .edge { fill: none; stroke-width: 2.4; opacity: 0.72; }
+        .edge.common { stroke: var(--teal); }
+        .edge.left-only { stroke: var(--coral); stroke-dasharray: 7 6; }
+        .edge.right-only { stroke: var(--sun); stroke-dasharray: 7 6; }
+        .edge.dimmed { opacity: 0.13; }
+
+        .graph-node {
+            position: absolute;
+            width: 176px;
+            min-height: 80px;
+            z-index: 2;
+            display: block;
+            border: 2px solid var(--line-strong);
+            border-radius: 6px;
+            color: var(--ink);
+            background: rgba(252, 251, 247, 0.97);
+            padding: 9px 10px 8px;
+            text-align: left;
+            box-shadow: 4px 5px 0 rgba(29, 43, 38, 0.08);
+            transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+        }
+        .graph-node:hover, .graph-node.selected { transform: translate(-2px, -2px); box-shadow: 6px 7px 0 rgba(29, 43, 38, 0.13); }
+        .graph-node.selected { outline: 3px solid rgba(40, 102, 189, 0.24); outline-offset: 2px; }
+        .graph-node.kind-block { border-color: var(--teal); }
+        .graph-node.kind-group { border-color: var(--cobalt); border-style: dashed; background: rgba(239, 245, 252, 0.96); }
+        .graph-node.kind-port { border-color: var(--sun); }
+        .graph-node.presence-common { border-top-color: var(--teal); }
+        .graph-node.presence-left-only { border-color: var(--coral); background: rgba(255, 247, 242, 0.97); }
+        .graph-node.presence-right-only { border-color: var(--sun); background: rgba(255, 251, 236, 0.97); }
+        .graph-node.is-dim { opacity: 0.18; }
+        .node-topline { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 5px; }
+        .kind-tag, .presence-tag { letter-spacing: 0.08em; font-size: 8px; }
+        .kind-tag { color: var(--teal); }
+        .kind-group .kind-tag { color: var(--cobalt); }
+        .presence-tag { color: var(--faint); }
+        .presence-left-only .presence-tag { color: var(--coral); }
+        .presence-right-only .presence-tag { color: var(--sun); }
+        .node-label { margin-bottom: 3px; font-size: 12px; font-weight: 750; line-height: 1.18; }
+        .node-address { display: block; overflow: hidden; color: var(--muted); font-family: var(--mono); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+        .port-list { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 7px; }
+        .port-chip, .member-chip, .analysis-chip {
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            border-radius: 3px;
+            padding: 2px 4px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: var(--mono);
+            font-size: 8px;
+        }
+        .port-chip { color: var(--muted); background: #eef0eb; }
+        .member-list { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 7px; }
+        .member-chip { color: var(--cobalt); background: var(--cobalt-soft); }
+        .group-toggle {
+            margin-top: 7px;
+            border: 0;
+            color: var(--cobalt);
+            background: transparent;
+            padding: 0;
+            font-size: 10px;
+            font-weight: 750;
+        }
+        .group-toggle:hover { color: var(--coral); }
+        .analysis-chip { margin-top: 7px; color: var(--teal); background: var(--teal-soft); }
+        .analysis-chip.warn { color: #8a5b09; background: var(--sun-soft); }
+
+        .below-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.7fr); gap: 10px; margin-top: 10px; }
+        .ledger, .legend-panel { padding: 14px; }
+        .ledger-head, .legend-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+        .ledger h3, .legend-panel h3 { margin-bottom: 0; font-family: var(--display); font-size: 18px; font-weight: 600; }
+        .ledger-count { color: var(--muted); font-family: var(--mono); font-size: 10px; }
+        .ledger-list { display: grid; gap: 7px; }
+        .ledger-item { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 10px; align-items: start; border-top: 1px solid var(--line); padding-top: 7px; }
+        .ledger-status { color: var(--faint); font-family: var(--mono); font-size: 9px; font-weight: 750; text-transform: uppercase; }
+        .ledger-status.deferred { color: var(--coral); }
+        .ledger-status.unresolved { color: var(--sun); }
+        .ledger-item strong { display: block; font-size: 11px; }
+        .ledger-item span { display: block; color: var(--muted); font-size: 11px; }
+        .empty-ledger { color: var(--moss); font-size: 12px; }
+        .legend-panel .legend-list { padding: 0; }
+
+        .inspector { position: sticky; top: 15px; min-height: 560px; padding: 16px; }
+        .inspector-kicker { color: var(--teal); font-size: 10px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; }
+        .inspector h2 { margin: 5px 0 3px; font-family: var(--display); font-size: 24px; line-height: 1.1; font-weight: 600; }
+        .inspector-address { display: block; overflow-wrap: anywhere; color: var(--muted); font-family: var(--mono); font-size: 10px; }
+        .inspector-state { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 14px; }
+        .state-pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 4px 8px; color: var(--muted); background: #edf0ea; font-family: var(--mono); font-size: 9px; font-weight: 750; text-transform: uppercase; }
+        .state-pill.common { color: var(--teal); background: var(--teal-soft); }
+        .state-pill.left-only { color: var(--coral); background: var(--coral-soft); }
+        .state-pill.right-only { color: #8a5b09; background: var(--sun-soft); }
+        .inspector-section { border-top: 1px solid var(--line); padding: 12px 0; }
+        .inspector-section h3 { margin-bottom: 8px; color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; }
+        .fact-list { display: grid; gap: 7px; }
+        .fact { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; align-items: start; }
+        .fact-key { color: var(--muted); font-size: 10px; }
+        .fact-value { min-width: 0; overflow-wrap: anywhere; font-size: 11px; font-weight: 700; }
+        .fact-value code { color: var(--cobalt); font-family: var(--mono); font-size: 9px; font-weight: 500; }
+        .fact-status { color: var(--faint); font-family: var(--mono); font-size: 8px; text-transform: uppercase; }
+        .inspector-note { color: var(--muted); font-size: 11px; }
+        .inspector-note strong { color: var(--ink); }
+        .empty-inspector { display: grid; align-content: center; min-height: 470px; color: var(--muted); text-align: center; }
+        .empty-inspector strong { display: block; margin-bottom: 4px; color: var(--ink); font-family: var(--display); font-size: 21px; font-weight: 600; }
+        .empty-inspector code { color: var(--teal); font-family: var(--mono); font-size: 10px; }
+        .inspector-hidden { display: none; }
+
+        .footer-note { padding: 18px 2px 0; color: var(--muted); font-family: var(--mono); font-size: 10px; }
+        .footer-note strong { color: var(--ink); }
+
+        @media (max-width: 1500px) {
+            .body-grid { grid-template-columns: 190px minmax(0, 1fr); }
+            .graph-comparison { grid-template-columns: minmax(0, 1fr); }
+            .inspector { position: static; grid-column: 1 / -1; min-height: 0; }
+            .empty-inspector { min-height: 0; padding: 25px; }
+        }
+
+        @media (max-width: 1900px) and (min-width: 1501px) {
+            .graph-comparison { grid-template-columns: minmax(0, 1fr); }
+        }
+
+        @media (max-width: 820px) {
+            .topbar { padding: 13px 17px; }
+            .header-note { display: none; }
+            .app { padding: 15px 14px 26px; }
+            .context { display: block; padding-top: 22px; }
+            h1 { font-size: 30px; }
+            .stats { justify-content: start; margin-top: 18px; }
+            .body-grid { display: block; }
+            .rail { margin-bottom: 12px; }
+            .view-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .rail-rule, .legend-list { display: none; }
+            .graph-comparison { grid-template-columns: minmax(0, 1fr); }
+            .below-grid { grid-template-columns: minmax(0, 1fr); }
+            .inspector { margin-top: 10px; }
+        }
+
+        @media (max-width: 540px) {
+            .toolbar { padding: 11px; }
+            .control, .control.wide, .search-control { min-width: 100%; }
+            .toggle { flex: 1 1 0; justify-content: center; }
+            .clear-button { width: 100%; }
+            .context-copy p { font-size: 13px; }
+            .view-list { grid-template-columns: minmax(0, 1fr); }
+            .graph-stage { height: 520px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark" aria-hidden="true">G</div>
+            <div>
+                <span class="eyebrow">Grimoire / research atlas</span>
+                <strong>Static architecture views</strong>
+            </div>
+        </div>
+        <div class="header-note"><span class="status-dot" aria-hidden="true"></span>offline artifact <span id="artifactState">ready</span></div>
+    </header>
+
+    <main class="app">
+        <section class="toolbar" aria-label="View controls">
+            <div class="control wide">
+                <label for="datasetSelect">Corpus</label>
+                <select id="datasetSelect"></select>
+            </div>
+            <div class="control">
+                <label for="leftViewSelect">Primary view</label>
+                <select id="leftViewSelect"></select>
+            </div>
+            <div class="control">
+                <label for="rightViewSelect">Compare with</label>
+                <select id="rightViewSelect"></select>
+            </div>
+            <div class="search-control">
+                <label for="addressSearch">Focus address</label>
+                <div class="search-wrap">
+                    <input id="addressSearch" type="search" placeholder="@reference/encoder" autocomplete="off">
+                    <span class="search-key" aria-hidden="true">/</span>
+                </div>
+            </div>
+            <button id="metadataToggle" class="toggle active" type="button" aria-pressed="true"><span class="toggle-indicator" aria-hidden="true"></span>metadata</button>
+            <button id="analysisToggle" class="toggle active" type="button" aria-pressed="true"><span class="toggle-indicator" aria-hidden="true"></span>analysis</button>
+            <button id="clearFocus" class="clear-button" type="button"><span aria-hidden="true">x</span>clear focus</button>
+        </section>
+
+        <section class="context" aria-live="polite">
+            <div class="context-copy">
+                <span id="datasetEyebrow" class="eyebrow"></span>
+                <h1 id="datasetTitle"></h1>
+                <p><span id="datasetSummary"></span> <a id="datasetCitation" class="citation" href="#" target="_blank" rel="noreferrer"></a></p>
+            </div>
+            <div id="stats" class="stats" aria-label="View counts"></div>
+        </section>
+
+        <div class="body-grid">
+            <aside class="rail panel" aria-label="Available views">
+                <span class="section-label">Viewport</span>
+                <h2 class="rail-heading">Research layers</h2>
+                <div id="viewList" class="view-list"></div>
+                <div class="rail-rule"></div>
+                <span class="section-label">Legend</span>
+                <div class="legend-list">
+                    <div class="legend-item"><span class="legend-swatch"></span>shared address</div>
+                    <div class="legend-item"><span class="legend-swatch group"></span>group boundary</div>
+                    <div class="legend-item"><span class="legend-swatch left-only"></span>primary only</div>
+                    <div class="legend-item"><span class="legend-swatch right-only"></span>comparison only</div>
+                    <div class="legend-item"><span class="legend-swatch deferred"></span>deferred boundary</div>
+                </div>
+            </aside>
+
+            <section class="stage-column" aria-label="Reprojection comparison">
+                <div class="stage-head">
+                    <div>
+                        <h2>Addressed structure</h2>
+                        <p>Evaluated reprojections, compared by exact address.</p>
+                    </div>
+                    <span id="compareBadge" class="compare-badge"></span>
+                </div>
+                <div id="graphComparison" class="graph-comparison"></div>
+                <div class="below-grid">
+                    <section class="ledger panel" aria-labelledby="ledgerTitle">
+                        <div class="ledger-head">
+                            <h3 id="ledgerTitle">Boundary ledger</h3>
+                            <span id="ledgerCount" class="ledger-count"></span>
+                        </div>
+                        <div id="ledgerList" class="ledger-list"></div>
+                    </section>
+                    <section class="legend-panel panel" aria-labelledby="presenceTitle">
+                        <div class="legend-panel-head">
+                            <h3 id="presenceTitle">Presence</h3>
+                            <span id="presenceCount" class="ledger-count"></span>
+                        </div>
+                        <div id="presenceList" class="legend-list"></div>
+                    </section>
+                </div>
+            </section>
+
+            <aside id="inspector" class="inspector panel" aria-label="Selected element inspector"></aside>
+        </div>
+
+        <p class="footer-note"><strong>Static boundary.</strong> Structure comes from evaluated views. Metadata, measurements, placement, cost, channel estimates, and deferred outcomes remain separate records.</p>
+    </main>
+
+    <script>
+        const block = (id, label, ports = [], meta = {}, analysis = {}) => ({
+            id, label, kind: "block", ports, meta, analysis
+        });
+        const group = (id, label, members = [], meta = {}, analysis = {}) => ({
+            id, label, kind: "group", members, meta, analysis
+        });
+        const view = (label, subtitle, visible, edges = [], layout = {}, extra = {}) => ({
+            label, subtitle, visible, edges, layout,
+            kind: extra.kind || "structure",
+            meta: extra.meta || [],
+            deferred: extra.deferred || [],
+            analysis: extra.analysis || []
+        });
+        const edge = (source, target, label = "") => ({ source, target, label });
+
+        const datasets = {
+            reference: {
+                eyebrow: "Observed system / V-JEPA 2",
+                title: "Shared representation, many consumers",
+                summary: "One addressed encoder carries masked prediction, action-conditioned dynamics, VidQA, planning, and review-time analysis.",
+                citation: "arXiv:2506.09985",
+                citationUrl: "https://arxiv.org/abs/2506.09985",
+                defaultLeft: "pretraining",
+                defaultRight: "ac",
+                elements: {},
+                views: {}
+            },
+            consumers: {
+                eyebrow: "Observed families / cross-paper consumers",
+                title: "Where architectures diverge",
+                summary: "Bridge, early-fusion, decoupled-frontend, latent, speech, low-bit, and lineage boundaries stay addressable without becoming new core kinds.",
+                citation: "cross-paper case studies",
+                citationUrl: "#",
+                defaultLeft: "bridge",
+                defaultRight: "unified",
+                elements: {},
+                views: {}
+            },
+            fauxlden: {
+                eyebrow: "Synthetic consumption / Fauxlden Retriever",
+                title: "Dense facts, explicit geometry",
+                summary: "A test-local consumer exercises candidate plurality, spacetime tubes, multi-location reach, paired scoring, and one execution boundary.",
+                citation: "synthetic fixture",
+                citationUrl: "#",
+                defaultLeft: "retrieval",
+                defaultRight: "none",
+                elements: {},
+                views: {}
+            }
+        };
+
+        const R = datasets.reference.elements;
+        Object.assign(R, {
+            "@reference/observation": block("@reference/observation", "Video observation", ["@reference/observation/output"], { modality: "video observation", schema: "shapes/1", state: "exact" }),
+            "@reference/encoder": block("@reference/encoder", "Shared visual encoder", ["@reference/encoder/input", "@reference/encoder/output"], { family: "vision-transformer", scale: "ViT-g / 1B", width: "1408", state: "exact", source: "Section 2" }, { placement: "gpu-0", cost: "2 * T * H * W * D" }),
+            "@reference/action": block("@reference/action", "Robot action", ["@reference/action/output"], { shape: "vector[7]", state: "exact" }),
+            "@reference/state": block("@reference/state", "End-effector state", ["@reference/state/output"], { shape: "vector[7]", state: "exact" }),
+            "@reference/bridge": block("@reference/bridge", "Visual-language bridge", ["@reference/bridge/input", "@reference/bridge/output"], { family: "projector / bridge", state: "exact" }, { placement: "gpu-1", cost: "tokens * hidden" }),
+            "@reference/transformer": block("@reference/transformer", "Shared multimodal transformer", ["@reference/transformer/input", "@reference/transformer/output"], { family: "multimodal-transformer", attention: "mixed", state: "exact" }),
+            "@reference/latent": block("@reference/latent", "Latent representation", ["@reference/latent/input", "@reference/latent/output"], { representation: "continuous latent", state: "exact" }),
+            "@reference/planner": block("@reference/planner", "Planner boundary", ["@reference/planner/input", "@reference/planner/output"], { boundary: "goal-conditioned planning", state: "deferred" }, { status: "deferred", reason: "CEM and receding-horizon execution are external" }),
+            "@reference/understanding": block("@reference/understanding", "Understanding path", ["@reference/understanding/input", "@reference/understanding/output"], { mode: "understanding", state: "exact" }),
+            "@reference/generation": block("@reference/generation", "Generation path", ["@reference/generation/input", "@reference/generation/output"], { mode: "generation", state: "exact" }),
+            "@reference/pretraining/target-encoder": block("@reference/pretraining/target-encoder", "EMA target encoder", ["@reference/pretraining/target-encoder/input", "@reference/pretraining/target-encoder/output"], { role: "stopped-gradient target", state: "deferred" }),
+            "@reference/pretraining/mask-token": block("@reference/pretraining/mask-token", "Learned mask token", ["@reference/pretraining/mask-token/output"], { role: "masked positions", state: "exact" }),
+            "@reference/pretraining/predictor": block("@reference/pretraining/predictor", "Representation predictor", ["@reference/pretraining/predictor/input", "@reference/pretraining/predictor/mask", "@reference/pretraining/predictor/output"], { family: "ViT-s-like", width: "384", state: "exact" }),
+            "@reference/pretraining/objective": block("@reference/pretraining/objective", "Masked objective", ["@reference/pretraining/objective/prediction", "@reference/pretraining/objective/target"], { loss: "representation-space L1", state: "exact" }),
+            "@reference/ac/predictor": block("@reference/ac/predictor", "Action-conditioned predictor", ["@reference/ac/predictor/visual", "@reference/ac/predictor/action", "@reference/ac/predictor/state", "@reference/ac/predictor/output"], { family: "V-JEPA 2-AC", attention: "block-causal", state: "exact" }, { cost: "24 layers * T * D^2" }),
+            "@reference/ac/teacher-forcing": block("@reference/ac/teacher-forcing", "Teacher-forcing objective", ["@reference/ac/teacher-forcing/input", "@reference/ac/teacher-forcing/output"], { horizon: "training", state: "exact" }),
+            "@reference/ac/rollout": block("@reference/ac/rollout", "Two-step rollout objective", ["@reference/ac/rollout/input", "@reference/ac/rollout/output"], { horizon: "2 steps", state: "exact" }),
+            "@reference/anticipation/probe": block("@reference/anticipation/probe", "Action anticipation probe", ["@reference/anticipation/probe/encoder", "@reference/anticipation/probe/prediction", "@reference/anticipation/probe/output"], { task: "EK100 action / verb / noun", state: "exact" }),
+            "@reference/vidqa/projector": block("@reference/vidqa/projector", "Visual-language projector", ["@reference/vidqa/projector/input", "@reference/vidqa/projector/output"], { role: "visual embeddings to LLM space", state: "exact" }),
+            "@reference/vidqa/language": block("@reference/vidqa/language", "Language model", ["@reference/vidqa/language/input", "@reference/vidqa/language/output"], { family: "Qwen2-7B / Llama 3.1 8B", state: "exact" }),
+            "@reference/planning/controller": block("@reference/planning/controller", "External controller", ["@reference/planning/controller/input", "@reference/planning/controller/output"], { regime: "closed-loop", state: "deferred" }, { status: "deferred", reason: "runtime observation, action execution, and replanning are external" }),
+            "@reference/mode/probe": block("@reference/mode/probe", "Understanding probe", ["@reference/mode/probe/input"], { mode: "understanding", state: "exact" }),
+            "@reference/low-bit/operator": block("@reference/low-bit/operator", "Quantized operator", ["@reference/low-bit/operator/input", "@reference/low-bit/operator/output"], { weights: "ternary", activations: "int4", state: "measured" }, { placement: "gpu-0", cost: "precision-dependent" }),
+            "@reference/lineage/base": block("@reference/lineage/base", "Base parameters", [], { state: "exact" }),
+            "@reference/lineage/delta": block("@reference/lineage/delta", "Fine-tuning delta", [], { state: "exact" }),
+            "@reference/lineage/merged": block("@reference/lineage/merged", "Merged parameters", [], { operation: "trim-sign-merge", state: "deferred" }),
+            "@reference/pipeline": group("@reference/pipeline", "Shared pipeline", ["@reference/encoder", "@reference/bridge", "@reference/encoder-to-bridge"], { schema: "training/1", state: "measured" }),
+            "@reference/pretraining/structure": group("@reference/pretraining/structure", "Pretraining structure", ["@reference/pretraining/target-encoder", "@reference/pretraining/mask-token", "@reference/pretraining/predictor", "@reference/pretraining/objective"], { schema: "training/1", state: "exact" }),
+            "@reference/ac/structure": group("@reference/ac/structure", "Action-conditioned structure", ["@reference/ac/predictor", "@reference/ac/teacher-forcing", "@reference/ac/rollout"], { schema: "training/1", state: "exact" }),
+            "@reference/lineage/states": group("@reference/lineage/states", "Parameter states", ["@reference/lineage/base", "@reference/lineage/delta", "@reference/lineage/merged"], { schema: "lineage/1", state: "deferred" })
+        });
+
+        const referenceCore = ["@reference/observation", "@reference/encoder", "@reference/action", "@reference/state", "@reference/bridge", "@reference/transformer", "@reference/latent", "@reference/planner", "@reference/understanding", "@reference/generation"];
+        const referenceCoreEdges = [
+            edge("@reference/observation", "@reference/encoder"),
+            edge("@reference/encoder", "@reference/bridge"),
+            edge("@reference/bridge", "@reference/transformer"),
+            edge("@reference/transformer", "@reference/latent"),
+            edge("@reference/latent", "@reference/planner"),
+            edge("@reference/action", "@reference/planner"),
+            edge("@reference/state", "@reference/planner")
+        ];
+        datasets.reference.views = {
+            core: view("Shared core", "Reusable addressed boundaries", referenceCore, referenceCoreEdges, {
+                "@reference/observation": { x: 3, y: 236 }, "@reference/encoder": { x: 21, y: 236 }, "@reference/action": { x: 21, y: 46 }, "@reference/state": { x: 21, y: 426 }, "@reference/bridge": { x: 42, y: 236 }, "@reference/transformer": { x: 63, y: 236 }, "@reference/latent": { x: 82, y: 136 }, "@reference/planner": { x: 82, y: 336 }, "@reference/understanding": { x: 63, y: 46 }, "@reference/generation": { x: 63, y: 426 }
+            }, { meta: [{ key: "Boundary", value: "shared representation core" }, { key: "Semantics", value: "structure only" }], deferred: [{ title: "Token correspondence", reason: "Shape values do not assert spatial identity." }] }),
+            pretraining: view("Action-free pretraining", "Mask prediction and EMA target boundary", ["@reference/observation", "@reference/encoder", "@reference/pretraining/target-encoder", "@reference/pretraining/mask-token", "@reference/pretraining/predictor", "@reference/pretraining/objective", "@reference/pretraining/structure"], [
+                edge("@reference/observation", "@reference/encoder"), edge("@reference/encoder", "@reference/pretraining/predictor"), edge("@reference/pretraining/mask-token", "@reference/pretraining/predictor"), edge("@reference/pretraining/predictor", "@reference/pretraining/objective"), edge("@reference/pretraining/target-encoder", "@reference/pretraining/objective")
+            ], {
+                "@reference/observation": { x: 3, y: 236 }, "@reference/encoder": { x: 21, y: 236 }, "@reference/pretraining/target-encoder": { x: 42, y: 46 }, "@reference/pretraining/mask-token": { x: 42, y: 426 }, "@reference/pretraining/predictor": { x: 63, y: 236 }, "@reference/pretraining/objective": { x: 82, y: 236 }, "@reference/pretraining/structure": { x: 42, y: 236 }
+            }, { meta: [{ key: "Objective", value: "masked representation prediction" }, { key: "Data", value: "VideoMix22M" }], deferred: [{ title: "EMA update", reason: "Parameter update relation is not an activation edge." }] }),
+            ac: view("V-JEPA 2-AC", "Action-conditioned world model", ["@reference/encoder", "@reference/action", "@reference/state", "@reference/ac/predictor", "@reference/ac/teacher-forcing", "@reference/ac/rollout", "@reference/ac/structure"], [
+                edge("@reference/encoder", "@reference/ac/predictor"), edge("@reference/action", "@reference/ac/predictor"), edge("@reference/state", "@reference/ac/predictor"), edge("@reference/ac/predictor", "@reference/ac/teacher-forcing"), edge("@reference/ac/predictor", "@reference/ac/rollout")
+            ], {
+                "@reference/encoder": { x: 3, y: 236 }, "@reference/action": { x: 3, y: 46 }, "@reference/state": { x: 3, y: 426 }, "@reference/ac/predictor": { x: 42, y: 236 }, "@reference/ac/teacher-forcing": { x: 72, y: 136 }, "@reference/ac/rollout": { x: 72, y: 336 }, "@reference/ac/structure": { x: 42, y: 236 }
+            }, { meta: [{ key: "Inputs", value: "visual + action + state" }, { key: "Attention", value: "block-causal" }, { key: "Data", value: "Droid" }], deferred: [{ title: "Continuous channel", reason: "Finite kernels are reference fixtures, not neural estimates." }, { title: "Runtime rollout", reason: "Teacher forcing and rollout are static objective participants." }] }),
+            anticipation: view("Action anticipation", "Prediction probe over shared representation", ["@reference/encoder", "@reference/pretraining/predictor", "@reference/anticipation/probe"], [edge("@reference/encoder", "@reference/anticipation/probe"), edge("@reference/pretraining/predictor", "@reference/anticipation/probe")], {
+                "@reference/encoder": { x: 12, y: 236 }, "@reference/pretraining/predictor": { x: 42, y: 426 }, "@reference/anticipation/probe": { x: 76, y: 236 }
+            }, { meta: [{ key: "Task", value: "EK100 action / verb / noun" }], deferred: [{ title: "Conditional information", reason: "The current finite API does not estimate conditional mutual information." }] }),
+            vidqa: view("Video question answering", "Visual projector into a language model", ["@reference/encoder", "@reference/vidqa/projector", "@reference/vidqa/language"], [edge("@reference/encoder", "@reference/vidqa/projector"), edge("@reference/vidqa/projector", "@reference/vidqa/language")], {
+                "@reference/encoder": { x: 12, y: 236 }, "@reference/vidqa/projector": { x: 43, y: 236 }, "@reference/vidqa/language": { x: 76, y: 236 }
+            }, { meta: [{ key: "Bridge", value: "visual patches -> LLM space" }, { key: "Variant", value: "frozen or end-to-end" }], deferred: [{ title: "Continuous estimator", reason: "No tensor-channel estimator is embedded in the prototype." }] }),
+            planning: view("Goal-conditioned planning", "Static model predictive control boundary", ["@reference/encoder", "@reference/action", "@reference/state", "@reference/ac/predictor", "@reference/planning/controller"], [edge("@reference/encoder", "@reference/ac/predictor"), edge("@reference/action", "@reference/ac/predictor"), edge("@reference/state", "@reference/ac/predictor"), edge("@reference/ac/predictor", "@reference/planning/controller")], {
+                "@reference/encoder": { x: 3, y: 236 }, "@reference/action": { x: 3, y: 46 }, "@reference/state": { x: 3, y: 426 }, "@reference/ac/predictor": { x: 43, y: 236 }, "@reference/planning/controller": { x: 76, y: 236 }
+            }, { kind: "runtime", meta: [{ key: "Planner", value: "CEM + L1 goal energy" }, { key: "Regime", value: "closed-loop" }], deferred: [{ title: "Runtime controller", reason: "Observation, action execution, and replanning are external." }] }),
+            hyperparameters: view("Hyperparameters", "Training values on a selected group", ["@reference/pipeline"], [], { "@reference/pipeline": { x: 39, y: 236 } }, { kind: "analysis", meta: [{ key: "Schema", value: "training/1" }, { key: "Values", value: "objective, optimizer, phases" }] }),
+            provenance: view("Provenance", "Citation and assumption surface", ["@reference/pipeline"], [], { "@reference/pipeline": { x: 39, y: 236 } }, { kind: "analysis", meta: [{ key: "Schema", value: "provenance/1" }, { key: "Novelty", value: "adapted" }] }),
+            placement: view("Placement", "Authored deployment locations", ["@reference/encoder", "@reference/bridge", "@reference/encoder-to-bridge"], [edge("@reference/encoder", "@reference/bridge")], { "@reference/encoder": { x: 18, y: 236 }, "@reference/bridge": { x: 68, y: 236 }, "@reference/encoder-to-bridge": { x: 43, y: 426 } }, { kind: "analysis", meta: [{ key: "gpu-0", value: "encoder" }, { key: "gpu-1", value: "bridge" }], analysis: [{ status: "measured", title: "Wire bytes", value: "8 bytes for supplied fixture shape" }] }),
+            cost: view("Cost", "Explicit symbolic accounting", ["@reference/pipeline", "@reference/encoder", "@reference/bridge", "@reference/encoder-to-bridge"], [edge("@reference/encoder", "@reference/bridge")], { "@reference/pipeline": { x: 39, y: 426 }, "@reference/encoder": { x: 18, y: 176 }, "@reference/bridge": { x: 68, y: 176 }, "@reference/encoder-to-bridge": { x: 43, y: 276 } }, { kind: "analysis", meta: [{ key: "Expression", value: "2 * tokens * hidden" }, { key: "Units", value: "authored / explicit" }], analysis: [{ status: "exact", title: "Pipeline total", value: "38 symbolic units at tokens=4" }] }),
+            mode: view("Mode", "Selected understanding path", ["@reference/transformer", "@reference/understanding", "@reference/mode/probe"], [edge("@reference/transformer", "@reference/mode/probe"), edge("@reference/understanding", "@reference/mode/probe")], { "@reference/transformer": { x: 14, y: 236 }, "@reference/understanding": { x: 43, y: 426 }, "@reference/mode/probe": { x: 76, y: 236 } }, { meta: [{ key: "Selected", value: "understanding" }, { key: "Alternative", value: "generation remains in core" }] }),
+            execution: view("Execution", "Static regime metadata", ["@reference/latent", "@reference/planner"], [edge("@reference/latent", "@reference/planner")], { "@reference/latent": { x: 22, y: 236 }, "@reference/planner": { x: 68, y: 236 } }, { kind: "runtime", meta: [{ key: "Regime", value: "static" }, { key: "Runtime", value: "external" }], deferred: [{ title: "Closed-loop runtime", reason: "This view records the boundary; it does not execute it." }] }),
+            "info-flow": view("Information flow", "Source and terminal interfaces", ["@reference/observation", "@reference/encoder", "@reference/encoder/output"].filter(id => R[id]), [edge("@reference/observation", "@reference/encoder")], { "@reference/observation": { x: 17, y: 236 }, "@reference/encoder": { x: 66, y: 236 } }, { kind: "analysis", meta: [{ key: "Source", value: "@reference/observation/output" }, { key: "Terminal", value: "@reference/encoder/output" }], analysis: [{ status: "posterior", title: "Reference channel", value: "exact finite kernel required" }] }),
+            "low-bit": view("Low-bit variant", "Precision as finalized metadata", ["@reference/transformer", "@reference/low-bit/operator"], [edge("@reference/transformer", "@reference/low-bit/operator")], { "@reference/transformer": { x: 16, y: 236 }, "@reference/low-bit/operator": { x: 68, y: 236 } }, { kind: "analysis", meta: [{ key: "Weights", value: "ternary" }, { key: "Activations", value: "int4" }], deferred: [{ title: "Operator identity", reason: "Precision stays metadata until an interface difference is authored." }] }),
+            lineage: view("Parameter lineage", "Base, delta, and merge boundary", ["@reference/lineage/base", "@reference/lineage/delta", "@reference/lineage/merged", "@reference/lineage/states"], [], { "@reference/lineage/base": { x: 5, y: 236 }, "@reference/lineage/delta": { x: 35, y: 46 }, "@reference/lineage/merged": { x: 68, y: 236 }, "@reference/lineage/states": { x: 35, y: 426 } }, { kind: "analysis", meta: [{ key: "Operation", value: "trim-sign-merge" }], deferred: [{ title: "Reproducibility relation", reason: "Lineage is a value boundary, not activation flow." }] })
+        };
+
+        const C = datasets.consumers.elements;
+        Object.assign(C, {
+            "@frontier/vision-encoder": block("@frontier/vision-encoder", "Shared visual encoder", ["@frontier/vision-encoder/input", "@frontier/vision-encoder/output"], { family: "vision-transformer", state: "exact" }, { placement: "gpu-0" }),
+            "@frontier/shared-transformer": block("@frontier/shared-transformer", "Shared transformer", ["@frontier/shared-transformer/input", "@frontier/shared-transformer/output"], { family: "multimodal-transformer", attention: "mixed", state: "exact" }),
+            "@frontier/action": block("@frontier/action", "Action input", ["@frontier/action/output"], { shape: "vector[7]", state: "exact" }),
+            "@frontier/state": block("@frontier/state", "State input", ["@frontier/state/output"], { shape: "vector[7]", state: "exact" }),
+            "@frontier/latent": block("@frontier/latent", "Latent representation", ["@frontier/latent/input", "@frontier/latent/output"], { shape: "continuous latent", state: "exact" }),
+            "@frontier/shared": group("@frontier/shared", "Shared representation boundaries", ["@frontier/vision-encoder", "@frontier/shared-transformer", "@frontier/latent"], { state: "exact" }),
+            "@bridge/projector": block("@bridge/projector", "Visual projector", ["@bridge/projector/input", "@bridge/projector/output"], { role: "encoder to language", state: "exact" }),
+            "@bridge/language": block("@bridge/language", "Language model", ["@bridge/language/input", "@bridge/language/output"], { family: "independent language core", state: "exact" }),
+            "@unified/visual-tokenizer": block("@unified/visual-tokenizer", "Visual tokenizer", ["@unified/visual-tokenizer/input", "@unified/visual-tokenizer/output"], { modality: "visual discrete", state: "exact" }),
+            "@unified/text-tokenizer": block("@unified/text-tokenizer", "Text tokenizer", ["@unified/text-tokenizer/input", "@unified/text-tokenizer/output"], { modality: "text discrete", state: "exact" }),
+            "@unified/visual-head": block("@unified/visual-head", "Visual head", ["@unified/visual-head/input", "@unified/visual-head/output"], { objective: "visual generation", state: "exact" }),
+            "@unified/text-head": block("@unified/text-head", "Text head", ["@unified/text-head/input", "@unified/text-head/output"], { objective: "language modeling", state: "exact" }),
+            "@decoupled/semantic-encoder": block("@decoupled/semantic-encoder", "Semantic encoder", ["@decoupled/semantic-encoder/input", "@decoupled/semantic-encoder/output"], { path: "understanding", state: "exact" }),
+            "@decoupled/semantic-adaptor": block("@decoupled/semantic-adaptor", "Semantic adaptor", ["@decoupled/semantic-adaptor/input", "@decoupled/semantic-adaptor/output"], { path: "understanding", state: "exact" }),
+            "@decoupled/generation-tokenizer": block("@decoupled/generation-tokenizer", "Generation tokenizer", ["@decoupled/generation-tokenizer/input", "@decoupled/generation-tokenizer/output"], { path: "generation", state: "exact" }),
+            "@decoupled/generation-adaptor": block("@decoupled/generation-adaptor", "Generation adaptor", ["@decoupled/generation-adaptor/input", "@decoupled/generation-adaptor/output"], { path: "generation", state: "exact" }),
+            "@latent/conditioner": block("@latent/conditioner", "Conditioner", ["@latent/conditioner/input", "@latent/conditioner/output"], { role: "text / time / noise", state: "exact" }),
+            "@latent/denoiser": block("@latent/denoiser", "Continuous denoiser", ["@latent/denoiser/input", "@latent/denoiser/output"], { objective: "flow or diffusion", state: "deferred" }),
+            "@latent/decoder": block("@latent/decoder", "Latent decoder", ["@latent/decoder/input", "@latent/decoder/output"], { role: "observable reconstruction", state: "exact" }),
+            "@tokenizer/encoder": block("@tokenizer/encoder", "Image encoder", ["@tokenizer/encoder/input", "@tokenizer/encoder/output"], { state: "exact" }),
+            "@tokenizer/latent": block("@tokenizer/latent", "One-dimensional latent", ["@tokenizer/latent/input", "@tokenizer/latent/output"], { shape: "sequence[32, 1024]", topology: "non-spatial", state: "exact" }),
+            "@tokenizer/decoder": block("@tokenizer/decoder", "Reconstruction decoder", ["@tokenizer/decoder/input", "@tokenizer/decoder/output"], { state: "exact" }),
+            "@tokenizer/generator": block("@tokenizer/generator", "Latent generator", ["@tokenizer/generator/input", "@tokenizer/generator/output"], { state: "deferred" }),
+            "@speech/encoder": block("@speech/encoder", "Speech encoder", ["@speech/encoder/input", "@speech/encoder/output"], { state: "exact" }),
+            "@speech/decoder": block("@speech/decoder", "Streaming speech decoder", ["@speech/decoder/input", "@speech/decoder/output"], { regime: "streaming", state: "deferred" }),
+            "@dynamics/predictor": block("@dynamics/predictor", "Latent dynamics predictor", ["@dynamics/predictor/visual", "@dynamics/predictor/action", "@dynamics/predictor/state", "@dynamics/predictor/output"], { state: "exact" }),
+            "@dynamics/planner": block("@dynamics/planner", "Dynamics planner", ["@dynamics/planner/input", "@dynamics/planner/output"], { state: "deferred" }),
+            "@low-bit/operator": block("@low-bit/operator", "Quantized operator", ["@low-bit/operator/input", "@low-bit/operator/output"], { weights: "ternary", activations: "int4", state: "measured" }),
+            "@lineage/base": block("@lineage/base", "Base parameters", [], { state: "exact" }),
+            "@lineage/delta": block("@lineage/delta", "Fine-tuning delta", [], { state: "exact" }),
+            "@lineage/merged": block("@lineage/merged", "Merged parameters", [], { state: "deferred" }),
+            "@lineage/states": group("@lineage/states", "Parameter states", ["@lineage/base", "@lineage/delta", "@lineage/merged"], { state: "deferred" })
+        });
+        datasets.consumers.views = {
+            core: view("Shared consumer core", "Backbone and reusable boundaries", ["@frontier/vision-encoder", "@frontier/shared-transformer", "@frontier/action", "@frontier/state", "@frontier/latent", "@frontier/shared"], [edge("@frontier/vision-encoder", "@frontier/shared-transformer"), edge("@frontier/shared-transformer", "@frontier/latent")], { "@frontier/vision-encoder": { x: 10, y: 236 }, "@frontier/shared-transformer": { x: 43, y: 236 }, "@frontier/latent": { x: 75, y: 236 }, "@frontier/action": { x: 24, y: 46 }, "@frontier/state": { x: 24, y: 426 }, "@frontier/shared": { x: 43, y: 426 } }),
+            bridge: view("Bridge-based language", "Independent language core", ["@frontier/vision-encoder", "@bridge/projector", "@bridge/language"], [edge("@frontier/vision-encoder", "@bridge/projector"), edge("@bridge/projector", "@bridge/language")], { "@frontier/vision-encoder": { x: 8, y: 236 }, "@bridge/projector": { x: 42, y: 236 }, "@bridge/language": { x: 75, y: 236 } }, { kind: "consumer", meta: [{ key: "Pattern", value: "encoder -> projector -> LLM" }], deferred: [{ title: "Dynamic tiling", reason: "Token identity may require generated indexed structure." }] }),
+            unified: view("Unified discrete", "Modality streams enter one transformer", ["@frontier/shared-transformer", "@unified/visual-tokenizer", "@unified/text-tokenizer", "@unified/visual-head", "@unified/text-head"], [edge("@unified/visual-tokenizer", "@frontier/shared-transformer"), edge("@unified/text-tokenizer", "@frontier/shared-transformer"), edge("@frontier/shared-transformer", "@unified/visual-head"), edge("@frontier/shared-transformer", "@unified/text-head")], { "@unified/visual-tokenizer": { x: 4, y: 46 }, "@unified/text-tokenizer": { x: 4, y: 426 }, "@frontier/shared-transformer": { x: 42, y: 236 }, "@unified/visual-head": { x: 76, y: 46 }, "@unified/text-head": { x: 76, y: 426 } }, { kind: "consumer", meta: [{ key: "Pattern", value: "shared discrete token space" }], deferred: [{ title: "Indexed attention", reason: "Compact token-index syntax remains outside v1." }] }),
+            decoupled: view("Decoupled frontends", "Separate semantic and generative paths", ["@frontier/vision-encoder", "@frontier/shared-transformer", "@decoupled/semantic-encoder", "@decoupled/semantic-adaptor", "@decoupled/generation-tokenizer", "@decoupled/generation-adaptor"], [edge("@frontier/vision-encoder", "@decoupled/semantic-encoder"), edge("@decoupled/semantic-encoder", "@decoupled/semantic-adaptor"), edge("@decoupled/semantic-adaptor", "@frontier/shared-transformer"), edge("@frontier/vision-encoder", "@decoupled/generation-tokenizer"), edge("@decoupled/generation-tokenizer", "@decoupled/generation-adaptor"), edge("@decoupled/generation-adaptor", "@frontier/shared-transformer")], { "@frontier/vision-encoder": { x: 2, y: 236 }, "@decoupled/semantic-encoder": { x: 27, y: 46 }, "@decoupled/semantic-adaptor": { x: 50, y: 46 }, "@decoupled/generation-tokenizer": { x: 27, y: 426 }, "@decoupled/generation-adaptor": { x: 50, y: 426 }, "@frontier/shared-transformer": { x: 76, y: 236 } }, { kind: "consumer", deferred: [{ title: "Frontend relation", reason: "Paths remain distinct until the shared transformer address." }] }),
+            latent: view("Continuous latent", "Conditioning and denoising path", ["@frontier/latent", "@latent/conditioner", "@latent/denoiser", "@latent/decoder"], [edge("@latent/conditioner", "@latent/denoiser"), edge("@latent/denoiser", "@frontier/latent"), edge("@frontier/latent", "@latent/decoder")], { "@latent/conditioner": { x: 4, y: 236 }, "@latent/denoiser": { x: 32, y: 236 }, "@frontier/latent": { x: 61, y: 236 }, "@latent/decoder": { x: 79, y: 236 } }, { kind: "consumer", meta: [{ key: "Objective", value: "flow / diffusion" }], deferred: [{ title: "Sampling", reason: "ODE, diffusion, and runtime sampling are external." }] }),
+            tokenizer: view("One-dimensional tokenizer", "Sequence without inferred spatial geometry", ["@frontier/vision-encoder", "@tokenizer/encoder", "@tokenizer/latent", "@tokenizer/decoder", "@tokenizer/generator"], [edge("@frontier/vision-encoder", "@tokenizer/encoder"), edge("@tokenizer/encoder", "@tokenizer/latent"), edge("@tokenizer/latent", "@tokenizer/decoder"), edge("@tokenizer/latent", "@tokenizer/generator")], { "@frontier/vision-encoder": { x: 2, y: 236 }, "@tokenizer/encoder": { x: 23, y: 236 }, "@tokenizer/latent": { x: 44, y: 236 }, "@tokenizer/decoder": { x: 70, y: 136 }, "@tokenizer/generator": { x: 70, y: 336 } }, { kind: "consumer", meta: [{ key: "Shape", value: "sequence[32, 1024]" }, { key: "Topology", value: "non-spatial" }] }),
+            speech: view("Streaming speech", "Speech paths around a reasoning core", ["@frontier/shared-transformer", "@speech/encoder", "@speech/decoder"], [edge("@speech/encoder", "@frontier/shared-transformer"), edge("@frontier/shared-transformer", "@speech/decoder")], { "@speech/encoder": { x: 8, y: 236 }, "@frontier/shared-transformer": { x: 43, y: 236 }, "@speech/decoder": { x: 76, y: 236 } }, { kind: "runtime", meta: [{ key: "Regime", value: "streaming" }, { key: "Rate", value: "50 Hz fixture" }], deferred: [{ title: "Audio clock", reason: "Chunking and wall-clock scheduling are external." }] }),
+            dynamics: view("Latent dynamics", "Action-conditioned predictive consumer", ["@frontier/vision-encoder", "@frontier/action", "@frontier/state", "@dynamics/predictor", "@dynamics/planner"], [edge("@frontier/vision-encoder", "@dynamics/predictor"), edge("@frontier/action", "@dynamics/predictor"), edge("@frontier/state", "@dynamics/predictor"), edge("@dynamics/predictor", "@dynamics/planner")], { "@frontier/vision-encoder": { x: 2, y: 236 }, "@frontier/action": { x: 2, y: 46 }, "@frontier/state": { x: 2, y: 426 }, "@dynamics/predictor": { x: 42, y: 236 }, "@dynamics/planner": { x: 76, y: 236 } }, { kind: "consumer", deferred: [{ title: "Recurrent rollout", reason: "Runtime state updates remain outside the static evaluator." }] }),
+            "low-bit": view("Low-bit operator", "Precision variant over logical structure", ["@frontier/shared-transformer", "@low-bit/operator"], [edge("@frontier/shared-transformer", "@low-bit/operator")], { "@frontier/shared-transformer": { x: 15, y: 236 }, "@low-bit/operator": { x: 68, y: 236 } }, { kind: "analysis", meta: [{ key: "Weights", value: "ternary" }, { key: "Activations", value: "int4" }], deferred: [{ title: "Operator identity", reason: "A distinct interface would require a distinct block definition." }] }),
+            lineage: view("Parameter lineage", "Base, delta, and merge without activation flow", ["@lineage/base", "@lineage/delta", "@lineage/merged", "@lineage/states"], [], { "@lineage/base": { x: 5, y: 236 }, "@lineage/delta": { x: 35, y: 46 }, "@lineage/merged": { x: 68, y: 236 }, "@lineage/states": { x: 35, y: 426 } }, { kind: "analysis", deferred: [{ title: "Merge reproducibility", reason: "Lineage relation is recorded as a value or external artifact." }] })
+        };
+
+        const F = datasets.fauxlden.elements;
+        Object.assign(F, {
+            "@fauxlden/input": block("@fauxlden/input", "Observation input", ["@fauxlden/input/output"], { state: "exact" }),
+            "@fauxlden/encoder": block("@fauxlden/encoder", "Hot-path encoder", ["@fauxlden/encoder/input", "@fauxlden/encoder/output"], { precision: "bf16 / fp32 state", state: "measured" }, { placement: "site-a", cost: "encoder pass" }),
+            "@fauxlden/ranker": block("@fauxlden/ranker", "Paired spacetime ranker", ["candidate-0-frame-0", "candidate-0-frame-1", "candidate-1-frame-0", "candidate-1-frame-1", "score-0", "score-1"], { reads: "all candidate spacetime", state: "exact" }),
+            "@fauxlden/selector": block("@fauxlden/selector", "Exactly-one candidate selector", ["score-0", "score-1", "selected"], { cardinality: "one selected output", state: "exact" }),
+            "@fauxlden/executor": block("@fauxlden/executor", "Execution boundary", ["@fauxlden/executor/input", "@fauxlden/executor/output"], { regime: "closed-loop", state: "deferred" }, { status: "deferred", reason: "runtime action execution is external" }),
+            "@fauxlden/candidate/0/lead": block("@fauxlden/candidate/0/lead", "Candidate zero lead", ["@fauxlden/candidate/0/lead/output"], { state: "exact" }),
+            "@fauxlden/candidate/0/locations": group("@fauxlden/candidate/0/locations", "Candidate zero locations", ["@fauxlden/candidate/0/location/0", "@fauxlden/candidate/0/location/1"], { axis: "location", state: "exact" }),
+            "@fauxlden/candidate/0/tube": group("@fauxlden/candidate/0/tube", "Candidate zero spacetime tube", ["@fauxlden/candidate/0/tube/frame/0", "@fauxlden/candidate/0/tube/frame/1", "@fauxlden/candidate/0/tube/advance"], { axis: "time", state: "exact" }),
+            "@fauxlden/candidate/0": group("@fauxlden/candidate/0", "Candidate zero", ["@fauxlden/candidate/0/lead", "@fauxlden/candidate/0/locations", "@fauxlden/candidate/0/tube"], { state: "exact" }),
+            "@fauxlden/candidate/1/lead": block("@fauxlden/candidate/1/lead", "Candidate one lead", ["@fauxlden/candidate/1/lead/output"], { state: "exact" }),
+            "@fauxlden/candidate/1/locations": group("@fauxlden/candidate/1/locations", "Candidate one locations", ["@fauxlden/candidate/1/location/0", "@fauxlden/candidate/1/location/1"], { axis: "location", state: "exact" }),
+            "@fauxlden/candidate/1/tube": group("@fauxlden/candidate/1/tube", "Candidate one spacetime tube", ["@fauxlden/candidate/1/tube/frame/0", "@fauxlden/candidate/1/tube/frame/1", "@fauxlden/candidate/1/tube/advance"], { axis: "time", state: "exact" }),
+            "@fauxlden/candidate/1": group("@fauxlden/candidate/1", "Candidate one", ["@fauxlden/candidate/1/lead", "@fauxlden/candidate/1/locations", "@fauxlden/candidate/1/tube"], { state: "exact" }),
+            "@fauxlden/candidates": group("@fauxlden/candidates", "Candidate plurality", ["@fauxlden/candidate/0", "@fauxlden/candidate/1"], { axes: "candidate + location", state: "exact" }),
+            "@fauxlden/location/0": block("@fauxlden/location/0", "Location site-a", [], { location: "site-a", state: "exact" }),
+            "@fauxlden/location/1": block("@fauxlden/location/1", "Location site-b", [], { location: "site-b", state: "exact" }),
+            "@fauxlden/hot-path": group("@fauxlden/hot-path", "Fauxlden hot path", ["@fauxlden/encoder", "@fauxlden/ranker", "@fauxlden/selector", "@fauxlden/executor", "@fauxlden/candidates"], { opaqueFacts: "preserved", state: "opaque" }),
+            "@fauxlden/candidate/0/location/0": block("@fauxlden/candidate/0/location/0", "Candidate zero at site-a", [], { location: "site-a", state: "exact" }),
+            "@fauxlden/candidate/0/location/1": block("@fauxlden/candidate/0/location/1", "Candidate zero at site-b", [], { location: "site-b", state: "exact" }),
+            "@fauxlden/candidate/1/location/0": block("@fauxlden/candidate/1/location/0", "Candidate one at site-c", [], { location: "site-c", state: "exact" }),
+            "@fauxlden/candidate/1/location/1": block("@fauxlden/candidate/1/location/1", "Candidate one at site-d", [], { location: "site-d", state: "exact" }),
+            "@fauxlden/candidate/0/tube/frame/0": block("@fauxlden/candidate/0/tube/frame/0", "Candidate zero frame zero", [], { frame: "0", state: "exact" }),
+            "@fauxlden/candidate/0/tube/frame/1": block("@fauxlden/candidate/0/tube/frame/1", "Candidate zero frame one", [], { frame: "1", state: "exact" }),
+            "@fauxlden/candidate/0/tube/advance": block("@fauxlden/candidate/0/tube/advance", "Advance one frame", [], { relation: "frame 0 -> frame 1", state: "exact" }),
+            "@fauxlden/candidate/1/tube/frame/0": block("@fauxlden/candidate/1/tube/frame/0", "Candidate one frame zero", [], { frame: "0", state: "exact" }),
+            "@fauxlden/candidate/1/tube/frame/1": block("@fauxlden/candidate/1/tube/frame/1", "Candidate one frame one", [], { frame: "1", state: "exact" }),
+            "@fauxlden/candidate/1/tube/advance": block("@fauxlden/candidate/1/tube/advance", "Advance one frame", [], { relation: "frame 0 -> frame 1", state: "exact" })
+        });
+        datasets.fauxlden.views = {
+            retrieval: view("Retriever hot path", "Candidate plurality and paired selection", ["@fauxlden/input", "@fauxlden/encoder", "@fauxlden/candidates", "@fauxlden/candidate/0", "@fauxlden/candidate/0/locations", "@fauxlden/candidate/0/tube", "@fauxlden/candidate/1", "@fauxlden/candidate/1/locations", "@fauxlden/candidate/1/tube", "@fauxlden/ranker", "@fauxlden/selector", "@fauxlden/executor", "@fauxlden/hot-path"], [edge("@fauxlden/input", "@fauxlden/encoder"), edge("@fauxlden/encoder", "@fauxlden/ranker"), edge("@fauxlden/candidate/0", "@fauxlden/ranker"), edge("@fauxlden/candidate/1", "@fauxlden/ranker"), edge("@fauxlden/ranker", "@fauxlden/selector"), edge("@fauxlden/selector", "@fauxlden/executor")], { "@fauxlden/input": { x: 2, y: 236 }, "@fauxlden/encoder": { x: 19, y: 236 }, "@fauxlden/candidates": { x: 40, y: 426 }, "@fauxlden/candidate/0": { x: 40, y: 46 }, "@fauxlden/candidate/0/locations": { x: 40, y: 176 }, "@fauxlden/candidate/0/tube": { x: 40, y: 306 }, "@fauxlden/candidate/1": { x: 60, y: 46 }, "@fauxlden/candidate/1/locations": { x: 60, y: 176 }, "@fauxlden/candidate/1/tube": { x: 60, y: 306 }, "@fauxlden/ranker": { x: 41, y: 236 }, "@fauxlden/selector": { x: 63, y: 426 }, "@fauxlden/executor": { x: 79, y: 426 }, "@fauxlden/hot-path": { x: 79, y: 46 } }, { kind: "runtime", meta: [{ key: "Candidates", value: "2" }, { key: "Frames", value: "2 per tube" }, { key: "Selection", value: "exactly one" }], deferred: [{ title: "Tie policy", reason: "Intentionally undefined in the synthetic fixture." }, { title: "Execution", reason: "The controller boundary is static only." }], analysis: [{ status: "opaque", title: "Unknown facts", value: "optimizer, gradient, seed, evidence, bandwidth" }] })
+        };
+
+        const state = {
+            datasetId: "reference",
+            leftView: "pretraining",
+            rightView: "ac",
+            selected: "@reference/encoder",
+            query: "",
+            showMetadata: true,
+            showAnalysis: true,
+            collapsed: new Set()
+        };
+
+        const $ = (id) => document.getElementById(id);
+        const escapeHtml = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[character]));
+        const shortAddress = (address) => address.replace(/^@/, "").split("/").slice(-2).join("/");
+        const dataset = () => datasets[state.datasetId];
+        const leftView = () => dataset().views[state.leftView];
+        const rightView = () => state.rightView === "none" ? null : dataset().views[state.rightView];
+        const nodeFor = (id) => dataset().elements[id];
+        const visibleSet = (activeView) => new Set(activeView.visible.filter((id) => nodeFor(id)));
+        const isCollapsed = (id) => state.collapsed.has(id);
+
+        function hiddenByGroup(id, activeView) {
+            return activeView.visible.some((candidate) => {
+                const candidateNode = nodeFor(candidate);
+                return candidateNode && candidateNode.kind === "group" && isCollapsed(candidate) && candidateNode.members.includes(id);
+            });
+        }
+
+        function displayIds(activeView) {
+            return activeView.visible.filter((id) => nodeFor(id) && !hiddenByGroup(id, activeView));
+        }
+
+        function presence(id, otherView, side) {
+            if (!otherView) return "solo";
+            const inOther = otherView.visible.includes(id);
+            if (inOther) return "common";
+            return side === "left" ? "left-only" : "right-only";
+        }
+
+        function currentSearchMatches(node) {
+            if (!state.query) return true;
+            const haystack = [node.id, node.label, ...(node.ports || []), ...(node.members || [])].join(" ").toLowerCase();
+            return haystack.includes(state.query.toLowerCase());
+        }
+
+        function positionFor(activeView, id, index) {
+            if (activeView.layout[id]) return activeView.layout[id];
+            return { x: 8 + (index % 4) * 22, y: 70 + Math.floor(index / 4) * 210 };
+        }
+
+        function edgeClass(item, otherView, side) {
+            if (!otherView) return "common";
+            const shared = otherView.edges.some((candidate) => candidate.source === item.source && candidate.target === item.target);
+            return shared ? "common" : side === "left" ? "left-only" : "right-only";
+        }
+
+        function renderNode(id, activeView, otherView, side, index) {
+            const node = nodeFor(id);
+            const relation = presence(id, otherView, side);
+            const kindClass = `kind-${node.kind}`;
+            const selectedClass = state.selected === id ? "selected" : "";
+            const dimClass = currentSearchMatches(node) ? "" : "is-dim";
+            const position = positionFor(activeView, id, index);
+            const ports = (node.ports || []).slice(0, 5).map((port) => `<span class="port-chip" title="${escapeHtml(port)}">${escapeHtml(shortAddress(port))}</span>`).join("");
+            const members = (node.members || []).slice(0, 4).map((member) => `<span class="member-chip" title="${escapeHtml(member)}">${escapeHtml(shortAddress(member))}</span>`).join("");
+            const analysis = state.showAnalysis && node.analysis && (node.analysis.placement || node.analysis.cost) ? `<span class="analysis-chip">${escapeHtml(node.analysis.placement || node.analysis.cost)}</span>` : "";
+            const groupToggle = node.kind === "group" ? `<button class="group-toggle" type="button" data-collapse-id="${escapeHtml(id)}" aria-expanded="${!isCollapsed(id)}">${isCollapsed(id) ? "+ expand" : "- collapse"}</button>` : "";
+            return `<div class="graph-node ${kindClass} presence-${relation} ${selectedClass} ${dimClass}" role="button" tabindex="0" aria-label="${escapeHtml(node.label)} ${escapeHtml(id)}" data-node-id="${escapeHtml(id)}" style="left:${position.x}%;top:${position.y / 6.2}%">
+                <div class="node-topline"><span class="kind-tag">${escapeHtml(node.kind)}</span><span class="presence-tag">${relation === "solo" ? "view" : relation}</span></div>
+                <div class="node-label">${escapeHtml(node.label)}</div>
+                <code class="node-address">${escapeHtml(id)}</code>
+                ${ports ? `<div class="port-list">${ports}</div>` : ""}
+                ${members ? `<div class="member-list">${members}</div>` : ""}
+                ${groupToggle}
+                ${analysis}
+            </div>`;
+        }
+
+        function renderGraphPane(activeView, otherView, side) {
+            const ids = displayIds(activeView);
+            const visible = visibleSet(activeView);
+            const lines = activeView.edges.filter((item) => visible.has(item.source) && visible.has(item.target)).map((item) => {
+                const sourceIndex = ids.indexOf(item.source);
+                const targetIndex = ids.indexOf(item.target);
+                const source = positionFor(activeView, item.source, sourceIndex);
+                const target = positionFor(activeView, item.target, targetIndex);
+                const relation = edgeClass(item, otherView, side);
+                const opacity = state.query && (!currentSearchMatches(nodeFor(item.source)) || !currentSearchMatches(nodeFor(item.target))) ? "dimmed" : "";
+                return `<line class="edge ${relation} ${opacity}" x1="${source.x + 17.5}" y1="${source.y + 5.4}" x2="${target.x + 1}" y2="${target.y + 5.4}" marker-end="url(#arrow-${side})"><title>${escapeHtml(item.source)} -> ${escapeHtml(item.target)}${item.label ? ` / ${escapeHtml(item.label)}` : ""}</title></line>`;
+            }).join("");
+            const nodes = ids.map((id, index) => renderNode(id, activeView, otherView, side, index)).join("");
+            return `<article class="graph-pane panel"><div class="graph-pane-head"><div><strong>${escapeHtml(activeView.label)}</strong><span>${escapeHtml(activeView.subtitle)}</span></div><span class="pane-side">${side === "left" ? "PRIMARY" : "COMPARE"}</span></div><div class="graph-scroll"><div class="graph-stage"><svg viewBox="0 0 100 620" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="arrow-${side}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="${side === "left" ? "#0d7d76" : "#2866bd"}"></path></marker></defs>${lines}</svg>${nodes}</div></div></article>`;
+        }
+
+        function countStats(activeView) {
+            const nodes = activeView.visible.map(nodeFor).filter(Boolean);
+            return {
+                blocks: nodes.filter((node) => node.kind === "block").length,
+                ports: nodes.reduce((total, node) => total + (node.ports || []).length, 0),
+                connections: activeView.edges.length,
+                groups: nodes.filter((node) => node.kind === "group").length
+            };
+        }
+
+        function renderStats() {
+            const stats = countStats(leftView());
+            $("stats").innerHTML = [[stats.blocks, "blocks"], [stats.ports, "ports"], [stats.connections, "edges"], [stats.groups, "groups"]].map(([value, label]) => `<div class="stat"><span class="stat-value">${value}</span><span class="stat-label">${label}</span></div>`).join("");
+        }
+
+        function renderViewList() {
+            $("viewList").innerHTML = Object.entries(dataset().views).map(([id, activeView]) => `<button class="view-button ${id === state.leftView ? "active" : ""}" type="button" data-view-id="${escapeHtml(id)}" data-kind="${escapeHtml(activeView.kind)}"><span class="view-marker" aria-hidden="true"></span><span class="view-name">${escapeHtml(activeView.label)}</span><span class="view-kind">${escapeHtml(activeView.kind)}</span></button>`).join("");
+        }
+
+        function renderPresence() {
+            const leftIds = new Set(leftView().visible);
+            const rightIds = rightView() ? new Set(rightView().visible) : new Set();
+            let common = 0;
+            let primaryOnly = 0;
+            let comparisonOnly = 0;
+            leftIds.forEach((id) => rightIds.has(id) ? common += 1 : primaryOnly += 1);
+            rightIds.forEach((id) => { if (!leftIds.has(id)) comparisonOnly += 1; });
+            const items = rightView() ? [[common, "common addresses", "legend-swatch"], [primaryOnly, "primary only", "legend-swatch left-only"], [comparisonOnly, "comparison only", "legend-swatch right-only"]] : [[leftIds.size, "addresses in view", "legend-swatch"]];
+            $("presenceCount").textContent = `${leftIds.size + rightIds.size} observed`;
+            $("presenceList").innerHTML = items.map(([value, label, swatch]) => `<div class="legend-item"><span class="${swatch}"></span><strong>${value}</strong> ${label}</div>`).join("");
+        }
+
+        function renderLedger() {
+            const entries = [...(leftView().deferred || [])];
+            if (state.showAnalysis) entries.push(...(leftView().analysis || []));
+            $("ledgerCount").textContent = `${entries.length} record${entries.length === 1 ? "" : "s"}`;
+            $("ledgerList").innerHTML = entries.length ? entries.map((entry) => `<div class="ledger-item"><div class="ledger-status ${entry.status || "deferred"}">${escapeHtml(entry.status || "deferred")}</div><div><strong>${escapeHtml(entry.title)}</strong><span>${escapeHtml(entry.reason || entry.value || "")}</span></div></div>`).join("") : `<div class="empty-ledger">No unresolved boundary is attached to this view.</div>`;
+        }
+
+        function renderInspector() {
+            const node = nodeFor(state.selected);
+            if (!node) {
+                $("inspector").innerHTML = `<div class="empty-inspector"><strong>Nothing selected</strong><span>Focus an addressed structure item.</span><code>keyboard and pointer focus are equivalent</code></div>`;
+                return;
+            }
+            const inLeft = leftView().visible.includes(node.id);
+            const inRight = rightView() && rightView().visible.includes(node.id);
+            const relation = rightView() ? (inLeft && inRight ? "common" : inLeft ? "left-only" : "right-only") : "common";
+            const facts = state.showMetadata ? Object.entries(node.meta || {}).map(([key, value]) => `<div class="fact"><span class="fact-key">${escapeHtml(key)}</span><span class="fact-value">${escapeHtml(value)} <span class="fact-status">declared</span></span></div>`).join("") : "";
+            const analysisFacts = state.showAnalysis ? Object.entries(node.analysis || {}).map(([key, value]) => `<div class="fact"><span class="fact-key">${escapeHtml(key)}</span><span class="fact-value"><code>${escapeHtml(value)}</code> <span class="fact-status">analysis</span></span></div>`).join("") : "";
+            const ports = (node.ports || []).map((port) => `<div class="fact"><span class="fact-key">port</span><span class="fact-value"><code>${escapeHtml(port)}</code></span></div>`).join("");
+            const members = (node.members || []).map((member) => `<div class="fact"><span class="fact-key">member</span><span class="fact-value"><code>${escapeHtml(member)}</code></span></div>`).join("");
+            const status = node.meta && node.meta.state ? String(node.meta.state) : "exact";
+            $("inspector").innerHTML = `<div class="inspector-kicker">Selected ${escapeHtml(node.kind)}</div><h2>${escapeHtml(node.label)}</h2><code class="inspector-address">${escapeHtml(node.id)}</code><div class="inspector-state"><span class="state-pill ${relation}">${relation}</span><span class="state-pill">${escapeHtml(status)}</span></div>
+                ${facts ? `<section class="inspector-section"><h3>Finalized metadata</h3><div class="fact-list">${facts}</div></section>` : ""}
+                ${analysisFacts ? `<section class="inspector-section"><h3>Opt-in analysis</h3><div class="fact-list">${analysisFacts}</div></section>` : ""}
+                ${ports ? `<section class="inspector-section"><h3>Ports</h3><div class="fact-list">${ports}</div></section>` : ""}
+                ${members ? `<section class="inspector-section"><h3>Members</h3><div class="fact-list">${members}</div></section>` : ""}
+                <section class="inspector-section"><h3>View context</h3><p class="inspector-note"><strong>${escapeHtml(leftView().label)}</strong> is the primary reprojection. ${rightView() ? `The comparison is <strong>${escapeHtml(rightView().label)}</strong>.` : "No comparison reprojection is selected."}</p></section>`;
+        }
+
+        function renderContext() {
+            $("datasetEyebrow").textContent = dataset().eyebrow;
+            $("datasetTitle").textContent = dataset().title;
+            $("datasetSummary").textContent = dataset().summary;
+            $("datasetCitation").textContent = dataset().citation;
+            $("datasetCitation").href = dataset().citationUrl;
+            $("compareBadge").textContent = rightView() ? `${leftView().label}  /  ${rightView().label}` : "single reprojection";
+            $("artifactState").textContent = `${Object.keys(dataset().views).length} views loaded`;
+        }
+
+        function renderSelects() {
+            const viewOptions = Object.entries(dataset().views).map(([id, activeView]) => `<option value="${escapeHtml(id)}">${escapeHtml(activeView.label)}</option>`).join("");
+            $("leftViewSelect").innerHTML = viewOptions;
+            $("rightViewSelect").innerHTML = `<option value="none">No comparison</option>${viewOptions}`;
+            $("leftViewSelect").value = state.leftView;
+            $("rightViewSelect").value = state.rightView;
+        }
+
+        function renderAll() {
+            renderContext();
+            renderStats();
+            renderSelects();
+            renderViewList();
+            renderPresence();
+            renderLedger();
+            $("graphComparison").innerHTML = renderGraphPane(leftView(), rightView(), "left") + (rightView() ? renderGraphPane(rightView(), leftView(), "right") : "");
+            renderInspector();
+            document.querySelectorAll("[data-node-id]").forEach((nodeElement) => {
+                nodeElement.addEventListener("click", () => { state.selected = nodeElement.dataset.nodeId; renderAll(); });
+                nodeElement.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); state.selected = nodeElement.dataset.nodeId; renderAll(); }
+                });
+            });
+            document.querySelectorAll("[data-collapse-id]").forEach((toggle) => {
+                toggle.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    const id = toggle.dataset.collapseId;
+                    if (state.collapsed.has(id)) state.collapsed.delete(id); else state.collapsed.add(id);
+                    renderAll();
+                });
+            });
+            document.querySelectorAll("[data-view-id]").forEach((button) => button.addEventListener("click", () => {
+                state.leftView = button.dataset.viewId;
+                state.selected = dataset().views[state.leftView].visible.find((id) => nodeFor(id)) || null;
+                state.collapsed.clear();
+                renderAll();
+            }));
+        }
+
+        function setDataset(id) {
+            state.datasetId = id;
+            state.leftView = dataset().defaultLeft;
+            state.rightView = dataset().defaultRight;
+            state.selected = dataset().views[state.leftView].visible.find((candidate) => nodeFor(candidate)) || null;
+            state.collapsed.clear();
+            renderAll();
+        }
+
+        function setToggle(button, key) {
+            state[key] = !state[key];
+            button.classList.toggle("active", state[key]);
+            button.setAttribute("aria-pressed", String(state[key]));
+            renderAll();
+        }
+
+        $("datasetSelect").innerHTML = Object.entries(datasets).map(([id, item]) => `<option value="${id}">${escapeHtml(item.title)}</option>`).join("");
+        $("datasetSelect").value = state.datasetId;
+        $("datasetSelect").addEventListener("change", (event) => setDataset(event.target.value));
+        $("leftViewSelect").addEventListener("change", (event) => { state.leftView = event.target.value; state.selected = leftView().visible.find((id) => nodeFor(id)) || null; state.collapsed.clear(); renderAll(); });
+        $("rightViewSelect").addEventListener("change", (event) => { state.rightView = event.target.value; renderAll(); });
+        $("addressSearch").addEventListener("input", (event) => { state.query = event.target.value.trim(); renderAll(); });
+        $("addressSearch").addEventListener("keydown", (event) => { if (event.key === "Escape") { state.query = ""; event.target.value = ""; renderAll(); } });
+        $("clearFocus").addEventListener("click", () => { state.query = ""; $("addressSearch").value = ""; state.selected = leftView().visible.find((id) => nodeFor(id)) || null; renderAll(); });
+        $("metadataToggle").addEventListener("click", () => setToggle($("metadataToggle"), "showMetadata"));
+        $("analysisToggle").addEventListener("click", () => setToggle($("analysisToggle"), "showAnalysis"));
+        document.addEventListener("keydown", (event) => { if (event.key === "/" && document.activeElement !== $("addressSearch")) { event.preventDefault(); $("addressSearch").focus(); } });
+        renderAll();
+    </script>
+</body>
+</html>
