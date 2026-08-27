@@ -328,10 +328,12 @@ Accept: Each schema declares allowed element kinds; every valid value in the cas
 @artifact text/rust ./crates/grimoire/src/schemas.rs
 @artifact text/rust ./crates/grimoire/tests/schemas.rs
 ---
-[schemas/conformance] Schema conformance fixtures (notstarted)
-Files: schema conformance fixtures named at dispatch.
-Do: Exercise valid and invalid values for every concrete schema instance, including symbolic axis references, ordered shapes, optional fields, finite measurements, provenance novelty states, execution regimes, precision combinations, and lineage candidates.
-Accept: Fixtures prove closed-algebra validation, address-reference validation, absent versus present values, domain failures, and preservation of unrecognized extension namespaces.
+[schemas/conformance] Schema conformance fixtures (reviewing)
+Files: crates/grimoire/tests/schemas.rs and crates/grimoire/tests/address_references.rs.
+Do: Exercise valid and invalid values for every concrete schema instance, including symbolic axis references, ordered shapes, optional fields, finite measurements, provenance novelty states, execution regimes, precision combinations, lineage candidates, and address references nested inside finalized values.
+Accept: Fixtures prove closed-algebra validation, address-reference validation, absent versus present values, attachment-kind/domain failures, duplicate and below-scope references, and preservation of unrecognized extension namespaces.
+@artifact text/rust ./crates/grimoire/tests/schemas.rs
+@artifact text/rust ./crates/grimoire/tests/address_references.rs
 -> schemas/instances
 ---
 [tools/validator/parse] Parse reviewed descriptions (started)
@@ -352,6 +354,9 @@ Accept: Valid current fixtures parse into one internal form; malformed input fai
 Files: crates/grimoire/src/validate.rs and crates/grimoire/tests/validate.rs.
 Implement the first structural validator slice: global address uniqueness and one definition site across core and generated elements; directed connection endpoints must resolve to ports; block/name and model-shape checks; layer input resolution and DAG cycles; visible references and maximal-site locality; known extension schema/attachment validation; opaque unknown namespace acceptance. C3 is structurally represented by the typed core-spec field; cut extraction remains downstream.
 Accept: Every failure names its check, location, and relevant identifier; valid ties and unreferenced elements are accepted; focused Cargo tests pass.
+@artifact text/rust ./crates/grimoire/src/validate.rs
+@artifact text/rust ./crates/grimoire/tests/validate.rs
+@artifact text/rust ./crates/grimoire/tests/address_references.rs
 -> implementation/bootstrap
 -> implementation/language
 -> schemas/instances
