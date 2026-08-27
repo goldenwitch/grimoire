@@ -119,12 +119,14 @@ Accept: Understanding and generation mode fixtures share the backbone address, s
 > 2026-08-26: Mode alternatives are ordinary core blocks selected by per-regime layers; mode-local probe/head elements are generated at each layer definition site and are invisible to the other mode.
 @artifact text/rust ./crates/grimoire/tests/mode_layer.rs
 ---
-[consumers/golden-retriever] Fauxlden Retriever consumption exercise (started)
-A synthetic whole-system description used to consume Grimoire before a real consumer exists. It stress-tests whether the language can describe arbitrary hot-path facts without making r3/r4 terminology, priorities, or mechanisms normative.
-> Fauxlden Retriever is a test fixture, not a product consumer and not a source of layer priority.
-> Use r3/r4 only to exercise the description language against a dense whole-system case; do not promote its vocabulary or architecture into Grimoire without an independent language need.
-> The fixture includes whole-system facts such as tensors, passes, optimizer flags, gradient interventions, seeds, evidence artifacts, placement paths, bandwidth costs, and intentionally undefined behavior.
-> R4 geometry is fixture evidence only: candidate plurality and multi-location reach are separate axes; each candidate lead contains a spacetime tube; every tube advances one frame; paired scoring reads all candidate spacetime; exactly one candidate is selected for execution.
+[consumers/golden-retriever] Fauxlden Retriever consumption exercise (reviewing)
+Files: crates/grimoire/tests/fauxlden_retriever.rs.
+Consume Grimoire with one dense synthetic whole-system description. Use ordinary blocks, ports, connections, and nested groups to represent candidate plurality, two-frame spacetime tubes, separate multi-location membership, paired scoring over every candidate frame, and a single selected output crossing the execution boundary. Exercise known precision, training, provenance, measurement, placement, and execution values, while optimizer flags, gradient interventions, seeds, evidence artifacts, bandwidth notes, and intentionally undefined policy remain in an opaque extension namespace. Keep Fauxlden and its r3/r4 vocabulary test-local; it is not a product architecture or a source of Grimoire requirements.
+Accept: The fixture parses, validates, evaluates, and round-trips; candidate plurality is distinct from location membership; each candidate has exactly one two-frame tube with one advance connection; paired scoring has one input per candidate frame; selection exposes exactly one selected port and one execution connection; dense unknown facts survive as opaque data; placement and execution metadata remain finalized values; no new core element kind or runtime behavior is introduced.
+> 2026-08-27: Fauxlden Retriever is a synthetic consumption fixture only; its names, r3/r4 geometry, priorities, and mechanisms are not promoted into the core vocabulary.
+> 2026-08-27: Candidate plurality and multi-location reach are separate nested groups; temporal tube advancement is an ordinary connection from frame zero to frame one.
+> 2026-08-27: Paired scoring reads all candidate spacetime through four explicit ranker input ports; selection has one selected output and one execution-boundary connection.
+> 2026-08-27: Optimizer flags, gradient intervention, seed, evidence, bandwidth note, and undefined tie policy use an unknown extension namespace and remain opaque; known placement, measurement, precision, training, provenance, and execution facts use existing schemas.
 ---
 [projlang/spec] Projection language implementation (reviewing)
 Implement the reviewed projection language from its grammar and settled semantic design. The current Rust prototype binds the static select/invert/decorate/check surface, evaluates structural folding and finalization, supports addressed description and recursive group targets, and preserves standalone layer packaging; indexed generation, symbolic arithmetic, parameter updates, and runtime loops remain explicitly deferred.
