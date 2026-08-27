@@ -101,44 +101,49 @@ Projection-language semantic decisions recorded; concrete selector and value syn
 > 2026-07-21: Structural folding joins references by address under the one-definition rule. Decoration identity and constraints belong to extension namespaces and schemas; generated-selector and symbolic-value syntax are deferred until a concrete example requires them.
 @artifact text/markdown ./proposals/projection-language.md
 ---
-[schemas/shapes] Design with the user: shapes schema (notstarted)
-Tensor shapes referencing axes by address.
+[schemas/shapes] Design with the user: shapes schema (reviewing)
+Artifact: proposals/shape-schema.md.
+Define shape values as coarse layout plus ordered dimensions, where each dimension is a positive literal or a first-class axis reference. Keep topology and token correspondence explicit; do not infer spatial meaning from names or media type.
+@artifact text/markdown ./proposals/shape-schema.md
 -> extension-namespaces/minting
 -> schemas/axes
 -> schemas/meta
+> 2026-08-26: Shape values use layout enum(scalar,vector,sequence,grid,volume) plus ordered literal-or-axis-reference dimensions.
+> 2026-08-26: TiTok's latent is represented as a sequence and V-JEPA 2 frame features as a grid; layout does not infer spatial correspondence.
+> 2026-08-26: Shape compatibility is a narrow later check over explicit ports, not a new core graph primitive or implicit shape inference.
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/axes] Design with the user: axes schema (reviewing)
 Artifact: proposals/axes-schema.md.
 Define symbolic axis values as name plus optional description. Use first-class address references and normal locality; fixed extents remain shape values. The initial fixture anchors declarations on dimension-owning ports.
-@artifact text/markdown ./proposals/axes-schema.md
 -> extension-namespaces/minting
 -> schemas/meta
 > 2026-08-26: Axis values are product{name:text, description:optional(text)}; names are labels and do not imply time, height, width, batch, token, or feature semantics.
 > 2026-08-26: Fixed extents belong to shapes, not axis declarations, so one symbolic axis can support multiple model variants and cuts.
 > 2026-08-26: The first anchoring fixture places an axis declaration on a dimension-owning port; broader group anchoring remains an explicit gap.
+@artifact text/markdown ./proposals/axes-schema.md
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/measurement] Design with the user: measurement-origin schema (reviewing)
 Artifact: proposals/measurement-schema.md.
 Define sourced literal measurements as value, unit, and mandatory source record with origin, optional locator, and optional protocol. Keep symbolic costs and configured training values outside measurement.
-@artifact text/markdown ./proposals/measurement-schema.md
 -> extension-namespaces/minting
 -> schemas/meta
 > 2026-08-26: Every measurement carries a literal integer or finite-number value, text unit, and mandatory source record.
 > 2026-08-26: Source records require origin and may carry locator and protocol; the base schema does not normalize or convert units.
 > 2026-08-26: Measurements are finalized values and cannot feed structural selection; symbolic costs belong to projection arithmetic.
+@artifact text/markdown ./proposals/measurement-schema.md
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/provenance] Design with the user: provenance schema (reviewing)
 Artifact: proposals/provenance-schema.md.
 Define provenance as citation sequence, assumption sequence, and required novelty state. Initially attach it to groups and expose unclassified groups through the provenance layer's finalization check.
-@artifact text/markdown ./proposals/provenance-schema.md
 -> extension-namespaces/minting
 -> schemas/meta
 > 2026-08-26: Provenance values are product{citations:seq(text), assumptions:seq(text), novelty:enum(novel,existing,adapted,unclassified)}.
 > 2026-08-26: The initial attachment target is groups, matching the core provenance layer; element-level attachment remains a sized gap.
 > 2026-08-26: Provenance is finalized data and cannot feed structural selection; novelty checks observe only finalized provenance values.
+@artifact text/markdown ./proposals/provenance-schema.md
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/meta] Design with the user: schema definition format (reviewing)
