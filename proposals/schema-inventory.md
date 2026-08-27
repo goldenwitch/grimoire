@@ -55,6 +55,24 @@ There are no separate `janus`, `chameleon`, `jepa`, `bitnet`, `qwen`, or
 `dreamer` schemas. Those names are values of `architecture.family`,
 `training.objective`, or provenance records.
 
+## Candidate channel-claim family
+
+The initial executable registry intentionally remains the nine families above.
+Shannon channel claims are the next candidate family, but they do not fit the
+current single-element attachment model without an explicit source-terminal
+relation boundary.
+
+A candidate information claim, as described in the
+[information-flow proposal](./information-flow.md), would name a source port, one terminal port or a
+joint terminal set, a quantity such as mutual information, a denominator when
+reporting normalized retention, and the distribution, channel or estimator,
+method, uncertainty, confidence, and evidence context used to obtain it.
+
+This is not yet an `information/1` registry entry. Adding it before the
+relation and uncertainty contracts are reviewed would make a source-terminal
+fact look like an ordinary scalar decoration and would obscure branching and
+joint-information semantics.
+
 ## Schema Bodies
 
 ### `axes/1`

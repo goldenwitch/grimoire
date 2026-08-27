@@ -126,7 +126,11 @@ The initial **layers**, stated as the features Grimoire must support to express 
 Forward and backward views of one system, with honest quantities.
 
 - **Invert** over **selected** subgraphs, with exclusions composing with **invert** to express stop-gradients.
-- Declared and derived reach as values attached by **decorate** on each objective; their agreement as a **check**.
+- The structural graph establishes which addressed routes are available; it does not by itself establish a Shannon quantity.
+- A channel interpretation MAY assign random variables to addressed ports and conditional channel behavior to blocks, then query information from an explicit source port to explicit terminal ports.
+- A Shannon claim MUST identify its source distribution, channel or estimator, quantity, and evidence context. An approximate percentage MUST distinguish normalized terminal retention from a route-allocation attribution.
+- Confidence qualifies an estimated claim and records how it was obtained; it is not probability mass in the channel and does not turn an uncomputed quantity into an exact bit count.
+- Declared and derived structural reach may remain a separate check from Shannon information; the two must not be conflated.
 
 ### Hyperparameters
 

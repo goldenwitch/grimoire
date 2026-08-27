@@ -74,6 +74,21 @@ describes. The exact allowed element kinds should follow the reviewed layer and
 schema definitions. A measured result does not define a new block and cannot
 change structural selection.
 
+## Relationship to Shannon channel claims
+
+A measurement is one sourced literal value attached to an element. A Shannon
+information claim is a relation between an addressed source variable and one or
+more addressed terminal variables under a source distribution and channel or
+estimation method. It therefore cannot be represented faithfully by a bare
+measurement value alone.
+
+`measurement/1` may record auxiliary evidence such as sample count, latency,
+or a reported information value, but it does not define channel composition,
+mutual information, route attribution, or confidence semantics. Those belong
+to the [information-flow proposal](./information-flow.md). A channel claim may cite measurement records,
+but its source, terminal set, denominator, uncertainty interval, confidence
+level, and method must remain visible.
+
 ## Relationship to Cost
 
 A measured bandwidth or FLOP value is valid under this schema when it records an

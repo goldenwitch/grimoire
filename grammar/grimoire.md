@@ -541,6 +541,16 @@ The runtime value grammar contains literals and references but no symbolic
 arithmetic. Cost expressions over declared axes remain a projection-language
 and schema decision, not an unreviewed grammar addition.
 
+### Shannon channel semantics
+
+The concrete grammar does not yet serialize channel kernels, source
+distributions, information queries, or uncertainty claims. Those are defined by
+the information-flow proposal as a semantic interpretation over selected
+addressed structure. The first executable regime is finite, discrete, and
+acyclic, with finite-horizon unrolling for recurrent examples; continuous
+estimators, fixed points, and route-attribution methods remain explicit
+follow-up decisions.
+
 ### Finite scalar kind
 
 The schema-format proposal names `finite scalar kind`, but its exact value set

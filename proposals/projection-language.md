@@ -52,6 +52,19 @@ Structural **reprojections** join references by shared **address** and chain by 
 
 The identity and constraints of finalization values are governed by their **extension namespaces** and **schemas**. The **projection language** adds no second decoration merge rule.
 
+## Channel interpretation boundary
+
+A channel interpretation may operate over a selected structural
+**reprojection**. It assigns random variables to addressed ports and channel
+behavior to blocks; it does not change **select**, **invert**, or **decorate**
+semantics.
+
+The projection language does not infer source distributions, conditional
+kernels, Shannon quantities, route-attribution shares, or confidence intervals.
+Those belong to the information-flow contract. A static projection may select
+the structure and addresses used by a channel query, but it does not execute a
+sampling run, estimate a neural distribution, or bind to runtime state.
+
 ## Deferred
 
 The following are not unresolved **projection language** semantics:
@@ -59,3 +72,4 @@ The following are not unresolved **projection language** semantics:
 - Concrete syntax for generated **select** forms belongs to grammar construction when a described example requires it.
 - The internal value shape and constraints of **decorate** values belong to the **schema** definition format and their consuming **schemas**.
 - Concrete symbolic-value syntax and aggregation notation wait for a described value example that requires them.
+- Channel kernels, source distributions, uncertainty claims, and cyclic channel semantics belong to the information-flow contract rather than to projection evaluation.

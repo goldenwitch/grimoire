@@ -51,16 +51,19 @@ Visualization is specified separately and nothing exists yet. Views render repro
 -> projlang/spec
 ---
 [layers/info-flow] Information flow layer (reviewing)
-Files: crates/grimoire/tests/info_flow_layer.rs.
-Build forward and backward static views over one core graph. Select the forward path, invert a selected differentiable group in the backward view, and omit a stopped connection as an explicit exclusion. Keep declared-versus-derived reach agreement as a deferred check outcome until the projection language has a settled reach aggregation form.
-Accept: Forward and backward fixtures parse, validate, and evaluate; selected differentiable connections reverse direction; omitted stop-gradient connections are absent; the reach-check gap is visible and no runtime behavior is introduced.
+Files: crates/grimoire/tests/info_flow_layer.rs and the information channel artifacts.
+Retain the existing forward/backward structural views as the topology foundation, then extend the information-flow work toward a channel interpretation: an addressed source port, explicit terminal ports, finite stochastic block channels, and confidence-aware Shannon claims. Keep declared-versus-derived structural reach separate from mutual information and route attribution; do not use invert to mean Shannon reversal.
+Accept: Existing forward/backward behavior remains valid; the channel contract and finite calculus define how information quantities are computed or qualified; any uncomputed continuous, cyclic, causal, or attribution boundary is explicit rather than guessed.
 -> core/freeze
 -> projlang/spec
 -> schemas/measurement
 -> schemas/shapes
+> 2026-08-27: Shannon information is a source-terminal channel quantity, with mutual information as the default transfer measure and normalized retention only when source entropy is nonzero.
+> 2026-08-27: Approximate route percentages require a declared partition, denominator, attribution method, and confidence or uncertainty record; they are not sums of branch mutual informations.
 > 2026-08-26: Stop-gradient exclusion is represented by omitting the stopped addressed connection from the backward select; no separate exclusion primitive is added.
 > 2026-08-26: Declared-versus-derived reach agreement remains deferred because the current static check surface only counts finalized decoration values and does not define graph-reach aggregation.
 @artifact text/rust ./crates/grimoire/tests/info_flow_layer.rs
+@guidance text/markdown ./proposals/information-flow.md
 ---
 [layers/hyperparameters] Hyperparameters layer (reviewing)
 Files: crates/grimoire/tests/hyperparameters_layer.rs.
@@ -331,10 +334,11 @@ Mint extension namespaces using author-controlled absolute https URIs with uniqu
 ---
 [schemas/inventory] Minimal schema inventory (reviewing)
 Artifact: proposals/schema-inventory.md.
-The closed-algebra schema family that covers the empirical architecture cases without one schema per paper. Record allowed attachment kinds, candidate value bodies, coverage, minimality, and sized gaps. Preserve the boundary between finalized schema values and structural graph/projection semantics.
-Accept: Every case-family row maps to a schema or an explicit gap; no paper-specific primitive is introduced; all candidate bodies use only the settled schema constructors.
+Maintain the minimal executable schema inventory for the empirical architecture cases without one schema per paper. The initial registry remains nine finalized-value families; confidence-aware Shannon channel claims are a candidate next family because they relate addressed source and terminal variables and require a relation/uncertainty boundary beyond single-element attachment.
+Accept: Every case-family row maps to a schema or an explicit gap; no paper-specific primitive is introduced; all candidate bodies use only the settled schema constructors; the information-flow handoff remains explicit.
 -> extension-namespaces/minting
 -> schemas/meta
+> 2026-08-27: Do not add information/1 to the executable registry until source-terminal relation, branch/joint-information, route-attribution, and confidence contracts are reviewed.
 @artifact text/markdown ./proposals/schema-inventory.md
 ---
 [architecture/vocabulary] Architecture vocabulary ledger (reviewing)
@@ -438,11 +442,11 @@ Accept: The suite covers every validator requirement currently implemented and b
 ---
 [layers/fixtures] Layer and schema coverage fixtures (notstarted)
 Files: domain layer fixtures named per subtask, currently crates/grimoire/tests/provenance_layer.rs, mode_layer.rs, info_flow_layer.rs, hyperparameters_layer.rs, and execution_boundary.rs.
-After the indexed-visibility and execution-boundary decisions are settled, encode the initial information-flow, hyperparameter, placement, cost, provenance, and mode layers against the concrete schema family and reviewed projection language. Include empty checks, coverage checks, symbolic axes, local elements, and cut boundaries. Each deferred boundary must remain a visible fixture outcome rather than acquire guessed runtime semantics.
-Current slices: provenance selects a core group, decorates it with provenance/1, validates the group-only attachment, and checks finalized data without structural feedback; mode layers share one backbone, select distinct ordinary core alternatives, and own separate local blocks; information-flow layers select forward structure, invert a differentiable group backward, and exclude a stopped connection, with reach agreement deferred; hyperparameters attaches training/1 to a training-stage group and checks typed finalized dials, with symbolic schedule functions deferred; execution covers static metadata for streaming, recurrent, and closed-loop layers, structural state feedback, and C12 runtime-producer absence.
+The information-flow slice now has a channel-semantics branch: proposals/information-flow.md defines source-terminal Shannon quantities, finite stochastic kernels, confidence-aware estimates, branch/merge semantics, and visible limits for continuous variables, cycles, causal claims, and route attribution. Existing structural information-flow remains the topology foundation.
 Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; settled architectural decisions are exercised; any intentionally deferred boundary is recorded as an explicit deferred outcome rather than hidden in prose; decorations never feed structural selection; fixtures remain static and runtime-free.
 -> architecture/indexed-visibility
 -> execution/boundary
+-> information/conformance
 -> layers/cost
 -> layers/hyperparameters
 -> layers/info-flow
@@ -451,11 +455,13 @@ Accept: Every initial layer has one valid fixture and one relevant visible failu
 -> layers/provenance
 -> projlang/spec
 -> schemas/conformance
+> 2026-08-27: Channel semantics supersede placement as the next design thread because the target is information quantity, not only route location or measurement storage.
 @artifact text/rust ./crates/grimoire/tests/provenance_layer.rs
 @artifact text/rust ./crates/grimoire/tests/info_flow_layer.rs
 @artifact text/rust ./crates/grimoire/tests/hyperparameters_layer.rs
 @artifact text/rust ./crates/grimoire/tests/mode_layer.rs
 @artifact text/rust ./crates/grimoire/tests/execution_boundary.rs
+@guidance text/markdown ./proposals/information-flow.md
 ---
 [example/core-graph] Reference shared architecture graph (reviewing)
 Files: crates/grimoire/tests/reference_core.rs.
@@ -558,3 +564,45 @@ Accept: `cargo test -p grimoire` passes with model, finite-value, address, names
 > 2026-08-26: The initial executable crate is a dependency-light Rust library under crates/grimoire.
 > 2026-08-26: Internal addresses, namespaces, and semantic versions are typed newtypes with exact string identity and local validation.
 > 2026-08-26: The closed prototype value algebra represents finite-scalar as boolean, products as exact labeled maps, alternatives as one tagged arm, and presence as explicit absent/present values.
+---
+[information/channel-contract] Define Shannon channel semantics (started)
+Files: proposals/information-flow.md and the aligned specification/proposal records.
+Define the channel interpretation over addressed ports and blocks: source and terminal variables, finite stochastic kernels, source distributions, joint branch semantics, confidence-aware information claims, route-attribution boundaries, and cycle/continuous-variable limits. Keep structural reach, Shannon dependence, causal influence, and gradient flow distinct.
+Accept: One authoritative contract exists for exact finite channel results and uncertain empirical percentage claims; every denominator, terminal set, attribution method, confidence meaning, and unresolved boundary is explicit; no new core element kind or runtime execution semantics is introduced.
+-> core/freeze
+-> projlang/spec
+-> schemas/instances
+-> schemas/meta
+@artifact text/markdown ./proposals/information-flow.md
+---
+[information/finite-calculus] Implement finite channel calculus (notstarted)
+Files: crates/grimoire/src/information.rs and focused Rust fixtures.
+Implement validated finite discrete distributions, deterministic and stochastic channels, channel composition, entropy, mutual information, joint terminal information, normalized retention, and data-processing checks. Keep the mathematical kernel independent from text grammar until its laws are stable.
+Accept: Identity, constant, noisy, composition, associativity, data-processing, and joint-branch laws pass; invalid probability tables fail visibly; exact results are distinguished from empirical estimates.
+-> implementation/language
+-> information/channel-contract
+@guidance text/markdown ./proposals/information-flow.md
+---
+[information/claims] Model confidence-aware information claims (notstarted)
+Files: crates/grimoire/src/information.rs or a focused claims module, plus Rust fixtures.
+Represent source-terminal information claims with quantity, denominator, estimate, uncertainty interval, confidence or credibility level, method, sample context, and optional route partition. Validate percentage bounds and require a declared attribution basis for additive route shares.
+Accept: Exact claims, interval estimates, normalized retention, joint-terminal claims, and route-share claims have distinguishable representations; malformed intervals, missing denominators, and unexplained confidence values fail visibly.
+-> implementation/language
+-> information/channel-contract
+@guidance text/markdown ./proposals/information-flow.md
+---
+[information/graph-composition] Compose channels over addressed graphs (notstarted)
+Files: crates/grimoire/src/information.rs, evaluate integration, and focused graph fixtures.
+Map addressed ports and block interfaces in a selected reprojection to finite channels. Support explicit source and terminal ports, branches, merges, and finite-horizon unrolled recurrent graphs. Report bare cyclic queries as unresolved until a fixed-point or process contract exists.
+Accept: Acyclic addressed graphs compose to the finite calculus; joint terminal queries do not sum marginal information; source and terminal visibility follow layer scope; no channel behavior is inferred from labels or topology alone.
+-> information/claims
+-> information/finite-calculus
+-> layers/info-flow
+@guidance text/markdown ./proposals/information-flow.md
+---
+[information/conformance] Exercise channel conformance (notstarted)
+Files: crates/grimoire/tests/information.rs and channel graph fixtures named at dispatch.
+Exercise the channel laws and the addressed graph interpretation, including exact finite results, confidence-bearing empirical claims, branch and merge semantics, finite-horizon unrolling, and unresolved bare cycles.
+Accept: The suite distinguishes structural reachability from Shannon quantities, proves joint-information behavior, checks confidence/interval shape, and records continuous estimators, fixed points, and causal interventions as visible follow-up boundaries.
+-> information/graph-composition
+@guidance text/markdown ./proposals/information-flow.md

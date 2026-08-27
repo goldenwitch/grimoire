@@ -20,6 +20,7 @@ claim complete coverage.
 | Tensor, token stream, latent state, action, end-effector state, image goal, logits | Port value described by `shapes/1` and other schemas | These are values crossing structural boundaries, not independently addressable structure unless a case needs them to be selected or referenced. |
 | Input, output, target, mask token, query token | `port` or a block-local element | The choice depends on whether the item is a stable interface or only an internal generated element. |
 | Data flow, attention visibility, modality path, encoder-to-projector path | Directed `connection` | The relation determines what a downstream block can receive. It cannot be only a decoration. |
+| Shannon information between port variables | Channel interpretation over addressed ports and blocks | Topology establishes possible routes; source distributions and conditional channel behavior are needed for information quantities. |
 | Transformer stage, tokenizer family, probe, language alignment, planning view | `layer` | These are human viewports or consumer-specific structures over shared inputs. |
 | Model family, parameter count, width, depth, heads, activation, position encoding | `architecture/1` value | They describe a block without changing its identity by themselves. |
 | Objective, optimizer, schedule, frozen target, trainable target, data mixture | `training/1` value | They describe a training stage and must not make a static projection run training. |
@@ -111,6 +112,20 @@ inputs a block can see.
 An objective name, loss name, or attention-regime decoration can describe the
 path, but it cannot retroactively change a folded graph. The projection language
 must complete structural selection before decoration.
+
+### Shannon information is a channel interpretation
+
+The graph can say that a source port reaches a terminal port. It cannot infer
+how many bits survive. A channel interpretation assigns random variables and
+conditional behavior to the existing addressed structure, then computes or
+records quantities such as source entropy, mutual information, and normalized
+terminal retention. The full boundary is recorded in the
+[information-flow proposal](./information-flow.md).
+
+An approximate route percentage is not a primitive property of an arbitrary
+branching graph. It is an attribution claim with a declared information
+denominator, route partition, method, and confidence or uncertainty record.
+Mutual information on separate branches must not be added by default.
 
 ### Shapes describe topology only at the level actually known
 

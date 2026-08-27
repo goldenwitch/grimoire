@@ -383,6 +383,11 @@ The case studies intentionally do not force an example of `invert`. They also do
 not introduce a new core primitive for tensors, training, robot actions, or
 runtime control.
 
+A later Shannon channel interpretation may quantify information retained from
+an addressed observation port to an explicit terminal port. The case studies
+provide structural interfaces and paths for that interpretation, but they do
+not infer information quantities from architecture topology or training prose.
+
 ## Sized Gaps
 
 ### Parameter update and freeze relations
