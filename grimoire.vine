@@ -154,15 +154,21 @@ The format schemas themselves are written in: versioned and machine-checkable.
 > 2026-07-21: The format provides the necessary bootstrap productions to describe and validate its own closed algebra. Bootstrap uses the same constructors and does not invoke a second schema language.
 @artifact text/markdown ./proposals/schema-format.md
 ---
-[grammar/review] Review the grammar (notstarted)
-Your read of the grammar against the specification: every vocabulary term graduated into a production, canonical serialization defined, nothing invented beyond the requirements.
+[grammar/review] Review the grammar (reviewing)
+Artifact: grammar/grimoire.md.
+Review the concrete grammar against the frozen core specification, schema contracts, namespace rule, and settled projection semantics. Accept the repaired structural, layer, value, and phase-order clauses; retain explicit blockers for finite-scalar bootstrap semantics, namespace URI lexical rules, and the exact opaque-byte boundary.
+@artifact text/markdown ./grammar/grimoire.md
 -> grammar/build
+> 2026-08-26: The description production explicitly declares core spec version; grammar header version remains syntax version.
+> 2026-08-26: Tagged alternatives serialize as tag(value) and select exactly one schema arm.
+> 2026-08-26: Checks aggregate finalized values matching one namespace and parameter across visible folded elements only.
+> 2026-08-26: Generated and decoration references resolve from the visible input chain or current definition site without textual-order visibility.
+> 2026-08-26: Grammar review remains incomplete until finite-scalar semantics, namespace URI lexical rules, and unknown-parameter byte boundary are resolved.
 @guidance text/markdown ./spec/grimoire.md
 ---
 [grammar/build] Grammar of the format (reviewing)
 Artifact: grammar/grimoire.md.
 Draft the concrete Grimoire grammar for bundled descriptions, standalone layers, schema documents, extensions, runtime values, and the ordered select/invert/decorate/check projection surface. Keep core vocabulary, layer ownership, locality, canonical serialization, and unknown-namespace preservation explicit; leave unresolved URI lexical and parameter-update questions visible for grammar review.
-@artifact text/markdown ./grammar/grimoire.md
 -> architecture/vocabulary
 -> core/vocab-review
 -> extension-namespaces/minting
@@ -175,6 +181,7 @@ Draft the concrete Grimoire grammar for bundled descriptions, standalone layers,
 > 2026-08-26: Generated select definitions use ordinary element productions and the same global address and visibility checks as authored definitions.
 > 2026-08-26: Unknown extension parameter spans are opaque serializer exceptions; internal comments and whitespace are retained byte-for-byte while known values are canonicalized.
 > 2026-08-26: Projection syntax orders select and invert before decorate and checks; checks name only finalized decoration namespace and parameter values.
+@artifact text/markdown ./grammar/grimoire.md
 @guidance text/markdown ./spec/grimoire.md
 ---
 [core/freeze] Stamp the core spec (complete) @dispatch(mechanical)

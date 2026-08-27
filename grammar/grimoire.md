@@ -269,10 +269,13 @@ core definition or any other layer definition.
 A generated definition may reference an existing element in a group member
 list, a connection endpoint, or an address-valued extension field. Every such
 reference is resolved from the current layer's visible input chain or from an
-element defined earlier in the same layer; generated structure cannot see
-finalized decoration values. Generated addresses participate in the same single
-global address-uniqueness check as authored addresses; a duplicate is a C1
-failure rather than a second definition.
+element defined at the current layer's definition site; textual definition
+order does not change visibility, and generated structure cannot see finalized
+decoration values. Generated addresses participate in the same single global
+address-uniqueness check as authored addresses; a duplicate is a C1 failure
+rather than a second definition. This follows the pure and static projection
+requirement: structural evaluation depends on declared inputs and structural
+definitions only.
 
 `invert` names groups. It reverses the direction sign of every connection in the
 selected group. Exclusions are represented by the selected group membership and
@@ -282,7 +285,10 @@ primitive in this draft.
 `decorate` attaches extension parameters after all `select` and `invert`
 evaluation. `decoration` uses an extension parameter's ordinary namespace,
 parameter, schema, version, and value form. A decoration target must be a
-folded element address visible to the layer.
+folded element address visible to the layer. It resolves from the layer's
+declared input chain or from an element defined at the layer's own definition
+site; an out-of-scope target is a validation failure under the ordinary
+reference rules.
 
 A check names an expected cardinality and selects only finalized decoration
 values. The check result is not an element and does not discard or alter the
@@ -290,8 +296,10 @@ finalized structure or values. An empty result is valid when the expected
 cardinality is `empty`; a nonempty result is valid when it is `nonempty`.
 
 The concrete syntax for a check's selector is provisional. It names one
-namespace and parameter, and its semantic restriction is fixed: it cannot
-inspect structural data except through values attached by `decorate`.
+namespace and parameter. The selector aggregates all finalized values with that
+namespace and parameter on folded elements visible to the layer. Its semantic
+restriction is fixed: it cannot inspect structural data except through values
+attached by `decorate`.
 
 ## Values and Schema Expressions
 
@@ -302,6 +310,7 @@ value            = string
                  | integer
                  | number
                  | enum-value
+                 | tagged-value
                  | product-value
                  | sequence-value
                  | address-value
@@ -309,6 +318,7 @@ value            = string
                  | "present" , "(" , value , ")" ;
 
 enum-value       = identifier ;
+tagged-value     = identifier , "(" , value , ")" ;
 
 product-value    = "{" , [ field-value , { "," , field-value } ] , "}" ;
 field-value      = identifier , ":" , value ;
@@ -325,7 +335,9 @@ unless the selected schema expects a closed enumeration.
 Products are semantically labeled, not positional. Sequences are ordered and
 homogeneous according to their schema. `absent` and `present(T)` are explicit;
 absence is not represented by a missing product field when the schema declares
-the field.
+the field. A tagged alternative is represented as `tag(value)` and selects
+exactly one arm named by `tag`; the selected value must validate against that
+arm's schema.
 
 The serializer emits product fields in schema declaration order and sequence
 items in value order. It emits a closed enumeration using its schema spelling.
