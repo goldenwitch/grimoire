@@ -189,3 +189,47 @@ fn invalid_opaque_bytes_are_rejected_by_text_serializer() {
     });
     assert!(serialize_description(&parsed).is_err());
 }
+
+#[test]
+fn integral_finite_numbers_keep_their_numeric_variant() {
+    let source = r#"
+        grimoire 1.0.0
+        description @d "integral number" {
+            core-spec 1.0.0;
+            core {
+                block @b "Block" { }
+            }
+        }
+    "#;
+    let mut description = parse_description(source).unwrap_or_else(|error| panic!("{error}"));
+    description.extensions.push(grimoire::ExtensionParameter {
+        namespace: grimoire::Namespace::parse(
+            "https://github.com/goldenwitch/grimoire/extension/measurement",
+        )
+        .unwrap(),
+        name: "measurement".to_owned(),
+        schema: "measurement".to_owned(),
+        version: grimoire::Version::new(1, 0, 0),
+        value: ExtensionValue::Known(Value::Product(std::collections::BTreeMap::from([
+            (
+                "value".to_owned(),
+                Value::Tagged {
+                    tag: "number".to_owned(),
+                    value: Box::new(Value::Number(grimoire::FiniteNumber::new(10.0).unwrap())),
+                },
+            ),
+            ("unit".to_owned(), Value::Text("seconds".to_owned())),
+            (
+                "source".to_owned(),
+                Value::Product(std::collections::BTreeMap::from([(
+                    "origin".to_owned(),
+                    Value::Text("fixture".to_owned()),
+                )])),
+            ),
+        ]))),
+    });
+    let serialized = serialize_description(&description).unwrap_or_else(|error| panic!("{error}"));
+    assert!(serialized.contains("number(10.0)"));
+    let reparsed = parse_description(&serialized).unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(reparsed, description);
+}

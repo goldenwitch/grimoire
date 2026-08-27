@@ -493,7 +493,7 @@ fn write_value(output: &mut String, value: &Value) -> Result<(), SerializeError>
     match value {
         Value::Bool(value) => output.push_str(if *value { "true" } else { "false" }),
         Value::PositiveInteger(value) => output.push_str(&value.to_string()),
-        Value::Number(value) => output.push_str(&value.get().to_string()),
+        Value::Number(value) => write_number(output, value.get()),
         Value::Text(value) => write_string(output, value),
         Value::Enum(value) => output.push_str(value),
         Value::Product(fields) => {
@@ -613,6 +613,14 @@ fn write_address_list(output: &mut String, addresses: &[Address]) {
             output.push_str(", ");
         }
         write_address(output, address);
+    }
+}
+
+fn write_number(output: &mut String, value: f64) {
+    let rendered = value.to_string();
+    output.push_str(&rendered);
+    if value.fract() == 0.0 && !rendered.contains(['.', 'e', 'E']) {
+        output.push_str(".0");
     }
 }
 

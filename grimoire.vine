@@ -517,10 +517,10 @@ Accept: The consumer fixture parses, validates, evaluates, and cuts; bridge and 
 > 2026-08-27: Runtime, diffusion, recurrent rollout, token-index generation, and continuous channel execution remain external or deferred.
 @artifact text/rust ./crates/grimoire/tests/information_targets.rs
 ---
-[example/validation] Validate reference cuts and properties (notstarted)
-Files: reference-description validation fixtures named at dispatch.
-Run the complete reference description through the validator, projection conformance, schema conformance, canonical serializer, and cut extraction after the required architecture decisions are settled or explicitly deferred. Record the empirical source for architecture values and benchmark measurements.
-Accept: Minimal cuts erase and revalidate; non-cuts report absent declared inputs; serializer properties hold; every blocked or deferred boundary has a named visible outcome; no unresolved relation is silently given semantics.
+[example/validation] Validate reference cuts and properties (reviewing)
+Files: crates/grimoire/tests/reference_validation.rs, crates/grimoire/src/serialize.rs, crates/grimoire/tests/serialize.rs, proposals/schema-inventory.md, and the reference case-study artifacts.
+Run the complete V-JEPA 2 and frontier reference description through the validator, projection evaluation, schema conformance, canonical serializer, host-side placement/cost reports, and cut extraction. The fixture composes shared core, pretraining, AC, anticipation, VidQA, planning, hyperparameter, provenance, placement, cost, mode, execution, information, low-bit, and lineage surfaces. It records an empirical architecture measurement with source context and verifies that static structure, finalized values, explicit analysis inputs, and deferred runtime/parameter boundaries remain distinct.
+Accept: The reference description parses, validates, evaluates every static layer, and round-trips canonically; representative downward-closed cuts serialize and revalidate; non-cuts report absent declared inputs as C12; integral finite-number values retain their numeric variant; placement and cost reports require explicit inputs; every blocked or deferred boundary has a named visible outcome; no unresolved relation is silently given semantics.
 -> architecture/indexed-visibility
 -> architecture/parameter-lineage
 -> example/consumers
