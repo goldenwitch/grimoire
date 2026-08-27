@@ -80,14 +80,6 @@ impl<'description> Context<'description> {
     fn check_layers(&mut self) {
         let mut names = BTreeSet::new();
         for layer in &self.description.layers {
-            if layer.name.is_empty() || !is_identifier(&layer.name) {
-                self.error(
-                    "C5",
-                    format!("layer/{}", layer.name),
-                    Some(layer.name.clone()),
-                    "layer name is not a valid identifier",
-                );
-            }
             if !names.insert(layer.name.clone()) {
                 self.error(
                     "C1",
@@ -96,16 +88,12 @@ impl<'description> Context<'description> {
                     "duplicate layer name",
                 );
             }
-            if !layer
-                .inputs
-                .iter()
-                .any(|input| matches!(input, LayerInput::Core))
-            {
+            if !self.layer_reaches_core(&layer.name, &mut BTreeSet::new()) {
                 self.error(
                     "C9",
                     format!("layer/{}/inputs", layer.name),
                     Some(layer.name.clone()),
-                    "layer must declare the core graph as an input",
+                    "layer input chain does not reach the core graph",
                 );
             }
             for input in &layer.inputs {
@@ -461,14 +449,15 @@ impl<'description> Context<'description> {
     }
 
     fn collect_block_references(&mut self, block: &Block, site: Site, location: &str) {
-        self.collect_element_extensions(&block.extensions, site, &format!("{location}/extensions"));
+        self.collect_element_extensions(
+            &block.extensions,
+            site.clone(),
+            &format!("{location}/extensions"),
+        );
         for (port_address, port) in &block.ports {
             self.collect_element_extensions(
                 &port.extensions,
-                Site::Layer(match location.split('/').nth(1) {
-                    Some(name) => name.to_owned(),
-                    None => String::new(),
-                }),
+                site.clone(),
                 &format!("{location}/port/{port_address}/extensions"),
             );
         }
@@ -616,13 +605,14 @@ impl<'description> Context<'description> {
             if definition_site == Site::Core {
                 continue;
             }
-            let candidate_sites: Vec<Site> = self
-                .definitions
-                .values()
-                .map(|definition| definition.site.clone())
-                .collect::<BTreeSet<_>>()
-                .into_iter()
-                .collect();
+            let mut candidate_sites = BTreeSet::from([Site::Core]);
+            candidate_sites.extend(
+                self.description
+                    .layers
+                    .iter()
+                    .map(|layer| Site::Layer(layer.name.clone())),
+            );
+            let candidate_sites: Vec<Site> = candidate_sites.into_iter().collect();
             let legal_sites: Vec<&Site> = candidate_sites
                 .iter()
                 .filter(|candidate| {

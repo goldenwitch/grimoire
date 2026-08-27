@@ -93,6 +93,116 @@ fn reports_missing_layer_visibility_with_c6() {
 }
 
 #[test]
+fn reports_a_layer_definition_below_a_maximal_referencer_with_c7() {
+    let source = r#"
+        grimoire 1.0.0
+        description @d "locality" {
+            core-spec 1.0.0;
+            core { block @root "Root" { port @root/p; } }
+            layer "base" {
+                inputs { core };
+                consumes { projection-language 1.0.0; schemas { } }
+                projection {
+                    select {
+                        block @local "Local" { port @local/p; }
+                    }
+                }
+            }
+            layer "consumer" {
+                inputs { "base" };
+                consumes { projection-language 1.0.0; schemas { } }
+                projection { select { use @local; } }
+            }
+        }
+    "#;
+    let failures = checks(source);
+    assert!(
+        failures
+            .iter()
+            .any(|failure| { failure.contains("C7") && failure.contains("@local") })
+    );
+}
+
+#[test]
+fn accepts_a_layer_whose_declared_chain_reaches_core() {
+    let source = r#"
+        grimoire 1.0.0
+        description @d "chained inputs" {
+            core-spec 1.0.0;
+            core {
+                block @root "Root" { port @root/p; }
+                group @root-group { @root; }
+            }
+            layer "base" {
+                inputs { core };
+                consumes { projection-language 1.0.0; schemas { } }
+                projection { select { use @root; } }
+            }
+            layer "child" {
+                inputs { "base" };
+                consumes { projection-language 1.0.0; schemas { } }
+                projection { select { use @root; } }
+            }
+        }
+    "#;
+    validate_description(&parsed(source), &schemas())
+        .unwrap_or_else(|errors| panic!("validation errors: {errors:?}"));
+}
+
+#[test]
+fn accepts_layer_names_as_grammar_strings() {
+    let source = r#"
+        grimoire 1.0.0
+        description @d "layer names" {
+            core-spec 1.0.0;
+            core {
+                block @root "Root" { port @root/p; }
+                group @root-group { @root; }
+            }
+            layer "video language" {
+                inputs { core };
+                consumes { projection-language 1.0.0; schemas { } }
+                projection { select { use @root; } }
+            }
+        }
+    "#;
+    validate_description(&parsed(source), &schemas())
+        .unwrap_or_else(|errors| panic!("validation errors: {errors:?}"));
+}
+
+#[test]
+fn generated_block_extension_references_use_the_actual_layer_name() {
+    let source = r#"
+        grimoire 1.0.0
+        description @d "layer location" {
+            core-spec 1.0.0;
+            core {
+                block @root "Root" { port @root/p; }
+                group @root-group { @root, @root/p; }
+            }
+            layer "video/language" {
+                inputs { core };
+                consumes { projection-language 1.0.0; schemas { } }
+                projection {
+                    select {
+                        block @consumer "Consumer" {
+                            port @consumer/features extensions {
+                                extension "https://github.com/goldenwitch/grimoire/extension/shapes" shape schema shapes @1.0.0 = {
+                                    layout: sequence,
+                                    dimensions: [symbolic(ref(@root/p))]
+                                };
+                            };
+                        }
+                    }
+                }
+            }
+        }
+    "#;
+    validate_description(&parsed(source), &schemas())
+        .unwrap_or_else(|errors| panic!("validation errors: {errors:?}"));
+}
+
+#[test]
 fn reports_missing_and_cyclic_layer_inputs_with_c9() {
     let missing = r#"
         grimoire 1.0.0 description @d {

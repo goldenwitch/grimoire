@@ -30,10 +30,19 @@ One synthetic whole-system description exercised end to end across every layer a
 @guidance text/markdown ./proposals/v-jepa-2-case-studies.md
 @guidance text/markdown ./proposals/frontier-architecture-case-studies.md
 ---
-[tools/validator] Reference validator and canonical serializer (notstarted) @dispatch(mechanical)
-Implements the constraints: addresses, scoping, locality, cuts, checks, canonical serialization. Conforms to the specification; never the definition.
+[tools/validator] Reference validator and canonical serializer (reviewing) @dispatch(mechanical)
+Files: crates/grimoire/src/parser.rs, projection.rs, serialize.rs, validate.rs, cut.rs, and the focused/end-to-end Rust fixtures.
+Implement the reference parser, structural validator, cut extractor, and canonical serializer for the reviewed Grimoire format. The current prototype covers bundled descriptions, standalone layers, schema documents, closed values, extensions, projection structure, address/scoping/locality checks, schema validation, cuts, opaque preservation, and serializer fixpoints. It conforms to the specification and never defines it.
+Accept: The complete current Rust suite passes; valid document forms parse and serialize canonically; structural and schema failures identify check, location, and relevant identifier; successful cuts revalidate; non-cuts report C12; unknown extension data survives unchanged; projection evaluation remains a separate implementation boundary.
 -> grammar/review
 -> tools/validator/conformance
+> 2026-08-26: The reference tool is library-first and offline; it parses and validates documents without dereferencing namespaces or executing projections.
+> 2026-08-26: Core-defined shared elements remain legal in the prototype, while layer-defined elements are checked against maximal locality sites; indirect layer-to-core input chains are valid.
+@artifact text/rust ./crates/grimoire/src/parser.rs
+@artifact text/rust ./crates/grimoire/src/serialize.rs
+@artifact text/rust ./crates/grimoire/src/validate.rs
+@artifact text/rust ./crates/grimoire/src/cut.rs
+@artifact text/rust ./crates/grimoire/tests/conformance.rs
 @guidance text/markdown ./spec/grimoire.md
 @guidance text/markdown ./guidance/tools-validator.md
 ---
@@ -86,11 +95,13 @@ A synthetic whole-system description used to consume Grimoire before a real cons
 > The fixture includes whole-system facts such as tensors, passes, optimizer flags, gradient interventions, seeds, evidence artifacts, placement paths, bandwidth costs, and intentionally undefined behavior.
 > R4 geometry is fixture evidence only: candidate plurality and multi-location reach are separate axes; each candidate lead contains a spacetime tube; every tube advances one frame; paired scoring reads all candidate spacetime; exactly one candidate is selected for execution.
 ---
-[projlang/spec] Projection language implementation (notstarted)
-Implement the reviewed projection language from its grammar and settled semantic design.
+[projlang/spec] Projection language implementation (reviewing)
+Implement the reviewed projection language from its grammar and settled semantic design. The current Rust prototype binds the static select/invert/decorate/check surface, evaluates structural folding and finalization, and preserves standalone layer packaging; indexed generation, symbolic arithmetic, parameter updates, and runtime loops remain explicitly deferred.
 -> grammar/build
 -> projlang/design
 -> projlang/projlang/review
+> 2026-08-26: The first implementation is library-first and static: projections evaluate descriptions and do not bind to training, inference, sampling, or controller runs.
+> 2026-08-26: Projection conformance and review fixtures cover the implemented grammar surface; unresolved indexed and symbolic forms remain owned by later grammar/schema work.
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -170,11 +181,13 @@ Accept: Fixtures cover stage order, generated and referenced definitions, genera
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
-[projlang/projlang/review] Review projection implementation (notstarted)
-Files: Projection-language implementation and conformance fixtures.
-Do: Review implementation and fixtures against the reviewed grammar, core specification, and projection-language design artifact. Escalate any behavior not settled by those artifacts.
+[projlang/projlang/review] Review projection implementation (reviewing)
+Files: crates/grimoire/src/evaluate.rs, crates/grimoire/src/projection.rs, crates/grimoire/src/parser.rs, crates/grimoire/src/serialize.rs, and focused projection fixtures.
+Do: Review the implementation and fixtures against the reviewed grammar, core specification, and projection-language design artifact. Check one-definition folding, declared-input visibility, structural-before-finalization ordering, decoration-only checks, and the absence of runtime execution semantics. Escalate any behavior not settled by those artifacts.
 Accept: Every implemented behavior maps to a settled semantic rule; deferred selector and symbolic-value syntax remains owned by grammar and schemas; no runtime behavior is introduced.
 -> projlang/projlang/conformance
+> 2026-08-26: Projection review covered parser bindings, structural folding/inversion, finalization, checks, standalone layer packaging, and canonical serialization against the current fixtures.
+> 2026-08-26: The reviewed implementation leaves indexed selector expansion, symbolic arithmetic, parameter updates, and runtime loops outside the projection evaluator.
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -314,19 +327,15 @@ Accept: The ledger names the existing account for every recurring paper term and
 @artifact text/markdown ./proposals/architecture-vocabulary.md
 ---
 [schemas/instances] Concrete schema instances (reviewing)
-Files: crates/grimoire/src/schemas.rs and crates/grimoire/tests/schemas.rs.
-Translate the reviewed minimal inventory into executable versioned schema instances for axes, shapes, architecture, training, execution, precision, measurement, provenance, and the bounded lineage candidate. Use the provisional author-controlled namespace root and boolean finite-scalar ruling; keep all value bodies inside the closed Grimoire algebra.
-The registry and representative value fixtures are complete-for-review. Textual schema-document parsing and bootstrap integration remain parser follow-up work.
-Accept: Each schema declares allowed element kinds; every valid value in the case-study coverage matrix has a schema account; attachment-kind and value failures are visible; unresolved topology, parameter-update, symbolic-cost, and lineage behavior remains explicit.
+Files: crates/grimoire/src/schemas.rs, crates/grimoire/tests/schemas.rs, and crates/grimoire/tests/schema_documents.rs.
+Translate the reviewed minimal inventory into executable versioned schema instances for axes, shapes, architecture, training, execution, precision, measurement, provenance, and the bounded lineage candidate. Use the provisional author-controlled namespace root and boolean finite-scalar ruling; keep all value bodies inside the closed Grimoire algebra. The registry, representative value fixtures, and standalone schema-document parser/serializer are complete-for-review.
+Accept: Each schema declares allowed element kinds; every valid value in the case-study coverage matrix has a schema account; attachment-kind and value failures are visible; registry/document identity round-trips; unresolved topology, parameter-update, symbolic-cost, and lineage behavior remains explicit.
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
 -> schemas/inventory
 -> schemas/meta/scalar-domain
-> 2026-08-26: Concrete prototype schemas use the provisional namespace root `https://github.com/goldenwitch/grimoire/extension` with one child namespace per schema family.
-> 2026-08-26: The executable registry is Rust data first; textual schema-document parsing remains downstream of the grammar parser and can falsify the registry shape through fixtures.
-> 2026-08-26: Prototype schema instances keep parameter lineage as a value-level candidate and do not add a new core element kind.
-> 2026-08-26: Representative registry fixtures cover V-JEPA 2 shapes/execution, TiTok sequence topology, BitNet precision, sourced measurements, provenance, and lineage values.
+> 2026-08-26: Standalone schema documents now parse and serialize through the same closed algebra as the executable registry; document identity is checked against the shapes registry fixture.
 @artifact text/rust ./crates/grimoire/src/schemas.rs
 @artifact text/rust ./crates/grimoire/tests/schemas.rs
 ---
@@ -339,45 +348,38 @@ Accept: Fixtures prove closed-algebra validation, address-reference validation, 
 @artifact text/rust ./crates/grimoire/tests/address_references.rs
 @artifact text/rust ./crates/grimoire/tests/schema_documents.rs
 ---
-[tools/validator/parse] Parse reviewed descriptions (started)
-Files: crates/grimoire/src/parser.rs, projection.rs, and focused parser/layer/schema/extension fixtures.
-Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, layers, schema uses, extensions, and ordered projection sections in Rust. Current slices handle headers, core elements, comments, JSON-style strings, global core address uniqueness, known closed values, opaque unknown extension parameters, bundled layer inputs, generated definitions, select/invert/decorate/check syntax, duplicate inputs, phase-order rejection, and standalone schema documents. Standalone layer documents and full semantic schema attachment remain next.
+[tools/validator/parse] Parse reviewed descriptions (reviewing)
+Files: crates/grimoire/src/parser.rs, crates/grimoire/src/projection.rs, and focused parser/layer/schema/extension fixtures.
+Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, bundled and standalone layers, schema documents, extensions, and ordered projection sections in Rust. Current slices handle headers, core elements, comments, JSON-style strings, global core address uniqueness, known closed values, opaque unknown extension parameters, layer inputs, generated definitions, select/invert/decorate/check syntax, duplicate inputs, phase-order rejection, standalone layer wrappers, and standalone schema wrappers.
 Accept: Valid current fixtures parse into one internal form; malformed input fails with location; unknown namespace bytes survive; no recovery or accepted dialect is introduced; focused Cargo tests pass.
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
 -> implementation/bootstrap
 -> implementation/language
-> 2026-08-26: Parser work starts from the minimal description/core grammar and grows only when a fixture requires the next production.
-> 2026-08-26: The initial parser reports byte offsets and rejects duplicate core addresses before returning a description.
-> 2026-08-26: The prototype recognizes the provisional Grimoire namespace root as typed extension data and stores all other extension parameter spans opaquely from `extension` through the terminating semicolon.
-> 2026-08-26: Bundled layers parse as named viewports with declared inputs, schema uses, and fixed select/invert/decorate/check stage order.
-> 2026-08-26: Schema documents parse through the same closed recursive constructors used by the executable registry; duplicate fields, tags, and attachment kinds fail visibly.
 > 2026-08-26: Standalone layer documents carry only the owning description address and reuse the bundled layer production; surrounding-description reference resolution remains a validator concern.
+> 2026-08-26: Schema documents parse through the same closed recursive constructors used by the executable registry; duplicate fields, tags, and attachment kinds fail visibly.
 @artifact text/rust ./crates/grimoire/tests/layer_documents.rs
 @artifact text/rust ./crates/grimoire/tests/schema_documents.rs
 ---
 [tools/validator/structure] Validate structural invariants (reviewing)
 Files: crates/grimoire/src/validate.rs and crates/grimoire/tests/validate.rs.
-Implement the first structural validator slice: global address uniqueness and one definition site across core and generated elements; directed connection endpoints must resolve to ports; block/name and model-shape checks; layer input resolution and DAG cycles; visible references and maximal-site locality; known extension schema/attachment validation; opaque unknown namespace acceptance. C3 is structurally represented by the typed core-spec field; cut extraction remains downstream.
-Accept: Every failure names its check, location, and relevant identifier; valid ties and unreferenced elements are accepted; focused Cargo tests pass.
+Implement the structural validator slice: global address uniqueness and one definition site across core and generated elements; directed connection endpoints must resolve to ports; block/name and model-shape checks; layer input resolution and DAG cycles; visible references and maximal-site locality; known extension schema/attachment validation; opaque unknown namespace acceptance. C3 is structurally represented by the typed core-spec field; core-defined shared elements remain legal by the recorded prototype boundary; cut extraction remains downstream.
+Accept: Every failure names its check, location, and relevant identifier; valid ties, indirect chains reaching core, grammar-string layer names, and unreferenced elements are accepted; generated extension references use the actual layer site; focused Cargo tests pass.
 -> implementation/bootstrap
 -> implementation/language
 -> schemas/instances
 -> tools/validator/parse
-> 2026-08-26: Structural validation accumulates typed ValidationError records instead of failing at the first issue.
-> 2026-08-26: Layer visibility is computed over the declared input DAG; a layer must explicitly declare core or an input chain reaching core.
-> 2026-08-26: Locality computes maximal legal definition sites from all reference sites and accepts ties without warnings.
-> 2026-08-26: Recognized prototype extension namespaces validate against the executable schema registry; unknown namespaces must carry opaque payloads and are otherwise preserved.
+> 2026-08-26: C7 candidate sites include the core and every declared layer, but the prototype deliberately permits core-defined shared elements; C7 rejects a layer definition below a maximal legal referencer.
+> 2026-08-26: C9 requires each layer's declared input chain to reach core, not that core appear as a direct input.
+> 2026-08-26: Validator reference collection carries the actual Site value rather than reconstructing layer names from slash-delimited diagnostic locations.
 @artifact text/rust ./crates/grimoire/src/validate.rs
 @artifact text/rust ./crates/grimoire/tests/validate.rs
 @artifact text/rust ./crates/grimoire/tests/address_references.rs
-@artifact text/rust ./crates/grimoire/src/validate.rs
-@artifact text/rust ./crates/grimoire/tests/validate.rs
 ---
-[tools/validator/serialize] Serialize canonical descriptions (started)
-Files: crates/grimoire/src/serialize.rs, crates/grimoire/tests/serialize.rs, crates/grimoire/tests/layer_documents.rs, and crates/grimoire/tests/schema_documents.rs.
-Emit deterministic canonical text for the current description, standalone layer, schema, core, projection, and closed-value model. Canonicalize recognized values and ordering; emit unknown extension raw spans unchanged. Current fixtures cover core, known and unknown extensions, bundled and standalone layers, schemas, projections, fixpoint, and malformed opaque bytes.
+[tools/validator/serialize] Serialize canonical descriptions (reviewing)
+Files: crates/grimoire/src/serialize.rs and focused serializer/document fixtures.
+Emit deterministic canonical text for descriptions, standalone layers, schemas, cores, projections, extensions, and closed values. Canonicalize recognized values and ordering; emit unknown extension raw spans unchanged. Fixtures cover core, known and unknown extensions, bundled and standalone layers, schemas, projections, fixpoint, and malformed opaque bytes.
 Accept: Core, extension, layered, standalone-layer, and schema valid fixtures round-trip; unknown payload bytes survive; malformed opaque bytes fail visibly; focused Cargo tests pass.
 -> grammar/namespace-uri
 -> grammar/review
@@ -385,9 +387,6 @@ Accept: Core, extension, layered, standalone-layer, and schema valid fixtures ro
 -> implementation/bootstrap
 -> implementation/language
 -> tools/validator/parse
-> 2026-08-26: The first serializer returns canonical UTF-8 text for the typed model and treats parser-captured unknown extension spans as opaque source fragments.
-> 2026-08-26: Core maps are emitted in address order; recognized products are emitted in deterministic field order until schema declaration order is wired into the registry.
-> 2026-08-26: The serializer rejects opaque payload bytes that cannot be emitted as UTF-8 rather than silently replacing them.
 > 2026-08-26: Standalone layer and schema serializers use the document wrappers and emit layer structure plus schema expression vectors in deterministic order; schema fields and alternatives retain declaration order.
 @artifact text/rust ./crates/grimoire/src/serialize.rs
 @artifact text/rust ./crates/grimoire/tests/serialize.rs
@@ -406,14 +405,17 @@ Accept: Downward-closed cuts serialize/parse/validate; non-cuts return a distinc
 @artifact text/rust ./crates/grimoire/src/cut.rs
 @artifact text/rust ./crates/grimoire/tests/cut.rs
 ---
-[tools/validator/conformance] Validator conformance suite (notstarted)
-Files: end-to-end validator conformance fixtures named at dispatch.
-Do: Combine parser, structural checks, canonical serialization, extension preservation, schema validation, cuts, and error-message assertions over the reviewed reference fixtures.
-Accept: The suite covers every validator requirement and both serializer properties; failures identify check, location, and identifier; no projection evaluation is introduced.
+[tools/validator/conformance] Validator conformance suite (reviewing)
+Files: crates/grimoire/tests/conformance.rs, reference_core.rs, parser.rs, schema_documents.rs, schemas.rs, validate.rs, serialize.rs, and cut.rs.
+Do: Combine parser, structural checks, canonical serialization, extension preservation, schema validation, cuts, and error-message assertions over the reviewed reference fixtures. Keep projection evaluation separate from validator conformance; it has its own task and fixtures.
+Accept: The suite covers every validator requirement currently implemented and both serializer properties; failures identify check, location, and identifier; successful cuts revalidate; non-cuts return explicit C12; no projection evaluation is introduced.
 -> implementation/language
 -> schemas/conformance
 -> tools/validator/cuts
 -> tools/validator/serialize
+> 2026-08-26: Validator conformance composes parser, structural validation, schema validation, canonical serialization, and cut extraction without invoking the projection evaluator.
+> 2026-08-26: A valid layered fixture must satisfy parse, validation, serializer fixpoint, and cut revalidation as one end-to-end property; a missing declared layer input remains an explicit C12 outcome.
+@artifact text/rust ./crates/grimoire/tests/conformance.rs
 ---
 [layers/fixtures] Layer and schema coverage fixtures (notstarted)
 Files: layer fixtures named at dispatch.
