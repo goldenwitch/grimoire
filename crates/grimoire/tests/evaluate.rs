@@ -165,6 +165,53 @@ fn generated_definitions_are_structural_elements() {
 }
 
 #[test]
+fn generated_connections_and_groups_are_structural_elements() {
+    let generated_connection = Connection {
+        address: address("@generated-flow"),
+        label: None,
+        source: address("@source/out"),
+        destination: address("@target/in"),
+        extensions: Vec::new(),
+    };
+    let generated_group = Group {
+        address: address("@generated-group"),
+        label: None,
+        members: vec![address("@generated-flow")],
+        extensions: Vec::new(),
+    };
+    let description = base_description(vec![layer(
+        "generated-structure",
+        vec![LayerInput::Core],
+        Projection {
+            select: vec![
+                SelectItem::Use(vec![
+                    address("@source"),
+                    address("@target"),
+                    address("@source/out"),
+                    address("@target/in"),
+                ]),
+                SelectItem::GenerateConnection(generated_connection),
+                SelectItem::GenerateGroup(generated_group),
+            ],
+            invert: vec![address("@generated-group")],
+            ..Projection::default()
+        },
+    )]);
+    let result = evaluate_layer(&description, "generated-structure")
+        .unwrap_or_else(|error| panic!("{error}"));
+    let Element::Connection(connection) = &result.structural.elements[&address("@generated-flow")]
+    else {
+        panic!("expected a generated connection");
+    };
+    assert_eq!(connection.source, address("@target/in"));
+    assert_eq!(connection.destination, address("@source/out"));
+    assert!(matches!(
+        result.structural.elements[&address("@generated-group")],
+        Element::Group(_)
+    ));
+}
+
+#[test]
 fn competing_definitions_fail_at_fold() {
     let generated = Block {
         address: address("@source"),
@@ -294,6 +341,23 @@ fn errors_name_the_projection_stage_and_identifier() {
     let error = evaluate_layer(&description, "missing").expect_err("missing selection should fail");
     assert_eq!(error.stage, "select");
     assert_eq!(error.identifier.as_deref(), Some("@absent"));
+}
+
+#[test]
+fn missing_decoration_target_fails_at_finalize() {
+    let description = base_description(vec![layer(
+        "missing-decoration",
+        vec![LayerInput::Core],
+        Projection {
+            select: vec![SelectItem::Use(vec![address("@source")])],
+            decorate: vec![architecture_decoration("@target", "target")],
+            ..Projection::default()
+        },
+    )]);
+    let error = evaluate_layer(&description, "missing-decoration")
+        .expect_err("missing decoration target should fail");
+    assert_eq!(error.stage, "decorate");
+    assert_eq!(error.identifier.as_deref(), Some("@target"));
 }
 
 #[test]

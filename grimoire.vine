@@ -98,15 +98,15 @@ Implement the reviewed projection language from its grammar and settled semantic
 Files: crates/grimoire/src/projection.rs and parser/serializer bindings.
 Bind the reviewed projection model to one internal form: select references/generated definitions, invert group targets, decorate extension parameters, and decoration-only checks. Reject no settled semantic form; keep indexed generation and symbolic values deferred to their explicit prototype choices.
 Accept: The internal form maps every current reviewed stage exactly once and the Rust parser/serializer round-trip preserves it.
-@artifact text/rust ./crates/grimoire/src/projection.rs
-@artifact text/rust ./crates/grimoire/src/parser.rs
-@artifact text/rust ./crates/grimoire/tests/layers.rs
 -> grammar/review
 -> implementation/bootstrap
 -> implementation/language
 > 2026-08-26: Projection stages are represented as one ordered Projection value with select, invert, decorate, and checks collections; stage order is enforced by the parser and serializer.
 > 2026-08-26: Generated definitions use the same Block, Connection, and Group model types as authored definitions.
 > 2026-08-26: Indexed visibility remains ordinary addressed connections; no compact projection syntax is added in the prototype.
+@artifact text/rust ./crates/grimoire/src/projection.rs
+@artifact text/rust ./crates/grimoire/src/parser.rs
+@artifact text/rust ./crates/grimoire/tests/layers.rs
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -114,12 +114,12 @@ Accept: The internal form maps every current reviewed stage exactly once and the
 Files: crates/grimoire/src/evaluate.rs and crates/grimoire/tests/evaluate.rs.
 Evaluate declared input reprojections, select references/generated definitions, structural folding by address, and invert over selected groups. Preserve definition origin so shared references join while competing definitions fail. Keep decorations unavailable until structural evaluation completes.
 Accept: Fixtures prove generated and referenced definitions, chained folding, competing-definition failure, inversion of selected connections, and structural equality despite different decorations.
-@artifact text/rust ./crates/grimoire/src/evaluate.rs
-@artifact text/rust ./crates/grimoire/tests/evaluate.rs
 -> implementation/language
 -> projlang/projlang/surface
 > 2026-08-26: Structural evaluation uses a flat addressed element map with definition origins; same-origin references join, distinct definitions at one address fail visibly.
 > 2026-08-26: Invert reverses selected connection endpoints for connections named by selected groups; it never reads finalized decoration values.
+@artifact text/rust ./crates/grimoire/src/evaluate.rs
+@artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -127,11 +127,11 @@ Accept: Fixtures prove generated and referenced definitions, chained folding, co
 Files: crates/grimoire/src/evaluate.rs and crates/grimoire/tests/evaluate.rs.
 Fold structural references by flat address and preserve definition origin. A shared reference joins one element; a distinct generated definition at an existing address fails visibly. Chained layer inputs compose before the current layer's select and inversion.
 Accept: Fixtures prove shared address joins, chained composition, competing-definition failure, and error identifiers.
-@artifact text/rust ./crates/grimoire/src/evaluate.rs
-@artifact text/rust ./crates/grimoire/tests/evaluate.rs
 -> implementation/language
 -> projlang/projlang/structural
 > 2026-08-26: Structural folding uses a flat addressed element map with definition origins; equal same-origin values join, distinct definitions at one address fail at fold.
+@artifact text/rust ./crates/grimoire/src/evaluate.rs
+@artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -139,11 +139,11 @@ Accept: Fixtures prove shared address joins, chained composition, competing-defi
 Files: crates/grimoire/src/evaluate.rs and crates/grimoire/tests/evaluate.rs.
 Apply decorate once to the folded structural result. Decoration targets must already be present; finalized values are retained separately and never fed into structural selection.
 Accept: Decorated and undecorated structural results compare equal; finalized values survive; a missing decoration target fails at the decorate stage.
-@artifact text/rust ./crates/grimoire/src/evaluate.rs
-@artifact text/rust ./crates/grimoire/tests/evaluate.rs
 -> implementation/language
 -> projlang/projlang/fold
 > 2026-08-26: Finalization is a separate evaluator step after structural folding and inversion; decorations are retained as values separate from structural elements.
+@artifact text/rust ./crates/grimoire/src/evaluate.rs
+@artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -151,20 +151,22 @@ Accept: Decorated and undecorated structural results compare equal; finalized va
 Files: crates/grimoire/src/evaluate.rs and crates/grimoire/tests/evaluate.rs.
 Evaluate expected empty/nonempty cardinality only over finalized decoration values matching a namespace and parameter. Return check results without mutating structural elements or finalized decorations.
 Accept: Empty and nonempty outcomes, observed cardinality, and post-check value preservation are fixtures.
-@artifact text/rust ./crates/grimoire/src/evaluate.rs
-@artifact text/rust ./crates/grimoire/tests/evaluate.rs
 -> implementation/language
 -> projlang/projlang/finalize
 > 2026-08-26: Checks aggregate finalized decoration values over visible folded elements by namespace and parameter; a check result never alters finalized structure or values.
+@artifact text/rust ./crates/grimoire/src/evaluate.rs
+@artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
-[projlang/projlang/conformance] Exercise semantic conformance (notstarted) @dispatch(mechanical)
-Files: Projection-language conformance fixtures introduced by this task.
+[projlang/projlang/conformance] Exercise semantic conformance (reviewing) @dispatch(mechanical)
+Files: crates/grimoire/tests/evaluate.rs and the parser/layer fixtures that exercise the reviewed projection surface.
 Do: Build fixtures in the reviewed grammar that exercise every implemented stage and the required error paths. Keep runtime execution out of the fixtures.
-Accept: Fixtures cover stage order, generated and referenced definitions, invert, address folding, competing-definition failure, finalization non-feedback, and decoration-only checks.
+Accept: Fixtures cover stage order, generated and referenced definitions, generated connections and groups, invert, address folding, competing-definition failure, finalization non-feedback, missing decoration targets, and decoration-only checks.
 -> implementation/language
 -> projlang/projlang/checks
+> 2026-08-26: Projection conformance uses static evaluator fixtures only; no runtime, training, or execution-loop behavior is introduced.
+> 2026-08-26: Generated blocks, connections, and groups are exercised as ordinary structural elements, and missing decoration targets fail at the decorate stage.
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -332,10 +334,10 @@ Accept: Each schema declares allowed element kinds; every valid value in the cas
 Files: crates/grimoire/tests/schemas.rs and crates/grimoire/tests/address_references.rs.
 Do: Exercise valid and invalid values for every concrete schema instance, including symbolic axis references, ordered shapes, optional fields, finite measurements, provenance novelty states, execution regimes, precision combinations, lineage candidates, and address references nested inside finalized values.
 Accept: Fixtures prove closed-algebra validation, address-reference validation, absent versus present values, attachment-kind/domain failures, duplicate and below-scope references, and preservation of unrecognized extension namespaces.
+-> schemas/instances
 @artifact text/rust ./crates/grimoire/tests/schemas.rs
 @artifact text/rust ./crates/grimoire/tests/address_references.rs
 @artifact text/rust ./crates/grimoire/tests/schema_documents.rs
--> schemas/instances
 ---
 [tools/validator/parse] Parse reviewed descriptions (started)
 Files: crates/grimoire/src/parser.rs, projection.rs, and focused parser/layer/schema/extension fixtures.
@@ -359,9 +361,6 @@ Accept: Valid current fixtures parse into one internal form; malformed input fai
 Files: crates/grimoire/src/validate.rs and crates/grimoire/tests/validate.rs.
 Implement the first structural validator slice: global address uniqueness and one definition site across core and generated elements; directed connection endpoints must resolve to ports; block/name and model-shape checks; layer input resolution and DAG cycles; visible references and maximal-site locality; known extension schema/attachment validation; opaque unknown namespace acceptance. C3 is structurally represented by the typed core-spec field; cut extraction remains downstream.
 Accept: Every failure names its check, location, and relevant identifier; valid ties and unreferenced elements are accepted; focused Cargo tests pass.
-@artifact text/rust ./crates/grimoire/src/validate.rs
-@artifact text/rust ./crates/grimoire/tests/validate.rs
-@artifact text/rust ./crates/grimoire/tests/address_references.rs
 -> implementation/bootstrap
 -> implementation/language
 -> schemas/instances
@@ -370,6 +369,9 @@ Accept: Every failure names its check, location, and relevant identifier; valid 
 > 2026-08-26: Layer visibility is computed over the declared input DAG; a layer must explicitly declare core or an input chain reaching core.
 > 2026-08-26: Locality computes maximal legal definition sites from all reference sites and accepts ties without warnings.
 > 2026-08-26: Recognized prototype extension namespaces validate against the executable schema registry; unknown namespaces must carry opaque payloads and are otherwise preserved.
+@artifact text/rust ./crates/grimoire/src/validate.rs
+@artifact text/rust ./crates/grimoire/tests/validate.rs
+@artifact text/rust ./crates/grimoire/tests/address_references.rs
 @artifact text/rust ./crates/grimoire/src/validate.rs
 @artifact text/rust ./crates/grimoire/tests/validate.rs
 ---
