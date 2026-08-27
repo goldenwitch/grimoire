@@ -85,10 +85,68 @@ A synthetic whole-system description used to consume Grimoire before a real cons
 > The fixture includes whole-system facts such as tensors, passes, optimizer flags, gradient interventions, seeds, evidence artifacts, placement paths, bandwidth costs, and intentionally undefined behavior.
 > R4 geometry is fixture evidence only: candidate plurality and multi-location reach are separate axes; each candidate lead contains a spacetime tube; every tube advances one frame; paired scoring reads all candidate spacetime; exactly one candidate is selected for execution.
 ---
-ref [projlang/spec] Projection language implementation (./projlang.vine)
-The implementation graph for reviewed projection-language semantics.
+[projlang/spec] Projection language implementation (notstarted)
+Implement the reviewed projection language from its grammar and settled semantic design.
 -> grammar/build
 -> projlang/design
+-> projlang/projlang/review
+@guidance text/markdown ./proposals/projection-language.md
+@guidance text/markdown ./spec/grimoire.md
+---
+[projlang/projlang/surface] Bind reviewed grammar (notstarted) @dispatch(mechanical)
+Files: Projection-language implementation files named at dispatch.
+Do: Map every reviewed projection-language production to an internal form and its settled stage: select, invert, decorate, or check. Reject any form that needs unruled semantics.
+Accept: Every reviewed production maps to exactly one settled stage; failures identify the source location; no task-local syntax or semantic rule is introduced.
+@guidance text/markdown ./proposals/projection-language.md
+@guidance text/markdown ./spec/grimoire.md
+---
+[projlang/projlang/structural] Evaluate structural stages (notstarted) @dispatch(mechanical)
+Files: Structural projection evaluator files introduced by this task.
+Do: Evaluate select-generated definitions and references, then apply invert to the selected group. Keep finalization values unavailable during structural evaluation.
+Accept: Fixtures cover generated and referenced definitions as ordinary definitions, plus inversion of selected connections; no finalization value changes structural output.
+-> projlang/projlang/surface
+@guidance text/markdown ./proposals/projection-language.md
+@guidance text/markdown ./spec/grimoire.md
+---
+[projlang/projlang/fold] Fold structural results (notstarted) @dispatch(mechanical)
+Files: Structural fold implementation files introduced by this task.
+Do: Join structural references by address and chain structural results by composition. Surface a competing definition at one address as an error.
+Accept: Fixtures prove shared references join, chained results compose, and competing definitions fail visibly.
+-> projlang/projlang/structural
+@guidance text/markdown ./proposals/projection-language.md
+@guidance text/markdown ./spec/grimoire.md
+---
+[projlang/projlang/finalize] Apply global finalization (notstarted) @dispatch(mechanical)
+Files: Projection finalization implementation files introduced by this task.
+Do: Apply decorate once to the folded structural result, attaching schema-governed values without feeding them back into structural evaluation.
+Accept: Finalization runs after structural folding; finalized values remain attached to folded elements; structural evaluation has no finalization-value input.
+-> projlang/projlang/fold
+@guidance text/markdown ./proposals/projection-language.md
+@guidance text/markdown ./spec/grimoire.md
+---
+[projlang/projlang/checks] Evaluate decoration checks (notstarted) @dispatch(mechanical)
+Files: Projection check implementation files introduced by this task.
+Do: Evaluate expected empty or nonempty cardinality only over finalized decoration values. Return the check result without altering finalized structure or values.
+Accept: Fixtures cover expected-empty and expected-nonempty outcomes; checks cannot observe structural data except through finalized decorations; finalized data is unchanged afterward.
+-> projlang/projlang/finalize
+@guidance text/markdown ./proposals/projection-language.md
+@guidance text/markdown ./spec/grimoire.md
+---
+[projlang/projlang/conformance] Exercise semantic conformance (notstarted) @dispatch(mechanical)
+Files: Projection-language conformance fixtures introduced by this task.
+Do: Build fixtures in the reviewed grammar that exercise every implemented stage and the required error paths. Keep runtime execution out of the fixtures.
+Accept: Fixtures cover stage order, generated and referenced definitions, invert, address folding, competing-definition failure, finalization non-feedback, and decoration-only checks.
+-> projlang/projlang/checks
+@guidance text/markdown ./proposals/projection-language.md
+@guidance text/markdown ./spec/grimoire.md
+---
+[projlang/projlang/review] Review projection implementation (notstarted)
+Files: Projection-language implementation and conformance fixtures.
+Do: Review implementation and fixtures against the reviewed grammar, core specification, and projection-language design artifact. Escalate any behavior not settled by those artifacts.
+Accept: Every implemented behavior maps to a settled semantic rule; deferred selector and symbolic-value syntax remains owned by grammar and schemas; no runtime behavior is introduced.
+-> projlang/projlang/conformance
+@guidance text/markdown ./proposals/projection-language.md
+@guidance text/markdown ./spec/grimoire.md
 ---
 [projlang/design] Design with the user: projection language semantics (reviewing)
 Projection-language semantic decisions recorded; concrete selector and value syntax deferred to grammar and schema work.
@@ -211,6 +269,7 @@ Mint extension namespaces using author-controlled absolute https URIs with uniqu
 Artifact: proposals/schema-inventory.md.
 The closed-algebra schema family that covers the empirical architecture cases without one schema per paper. Record allowed attachment kinds, candidate value bodies, coverage, minimality, and sized gaps. Preserve the boundary between finalized schema values and structural graph/projection semantics.
 Accept: Every case-family row maps to a schema or an explicit gap; no paper-specific primitive is introduced; all candidate bodies use only the settled schema constructors.
+@artifact text/markdown ./proposals/schema-inventory.md
 -> extension-namespaces/minting
 -> schemas/meta
 ---
@@ -218,6 +277,7 @@ Accept: Every case-family row maps to a schema or an explicit gap; no paper-spec
 Artifact: proposals/architecture-vocabulary.md.
 Map empirical architecture terms to existing blocks, ports, connections, groups, layers, projections, and schema values. Record decisions for shared addresses, local consumers, unified and decoupled backbones, runtime boundaries, parameter flow, and precision variants.
 Accept: The ledger names the existing account for every recurring paper term and records unresolved parameter-state and update relations without adding them to frozen core vocabulary.
+@artifact text/markdown ./proposals/architecture-vocabulary.md
 -> schemas/inventory
 ---
 [schemas/instances] Concrete schema instances (blocked)
