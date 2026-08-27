@@ -254,7 +254,9 @@ fn write_layer(output: &mut String, layer: &Layer, indent: usize) -> Result<(), 
     output.push_str(" {\n");
     write_indent(output, indent + 1);
     output.push_str("inputs { ");
-    for (index, input) in layer.inputs.iter().enumerate() {
+    let mut inputs = layer.inputs.clone();
+    inputs.sort_by(layer_input_order);
+    for (index, input) in inputs.iter().enumerate() {
         if index > 0 {
             output.push_str(", ");
         }
@@ -302,6 +304,43 @@ fn schema_use_order(left: &SchemaUse, right: &SchemaUse) -> std::cmp::Ordering {
         .cmp(&right.namespace)
         .then_with(|| left.name.cmp(&right.name))
         .then_with(|| left.version.cmp(&right.version))
+}
+
+fn layer_input_order(left: &LayerInput, right: &LayerInput) -> std::cmp::Ordering {
+    match left {
+        LayerInput::Core => match right {
+            LayerInput::Core => std::cmp::Ordering::Equal,
+            LayerInput::Layer(_) => std::cmp::Ordering::Less,
+        },
+        LayerInput::Layer(left) => match right {
+            LayerInput::Core => std::cmp::Ordering::Greater,
+            LayerInput::Layer(right) => left.cmp(right),
+        },
+    }
+}
+
+fn extension_order(left: &ExtensionParameter, right: &ExtensionParameter) -> std::cmp::Ordering {
+    left.namespace
+        .cmp(&right.namespace)
+        .then_with(|| left.name.cmp(&right.name))
+        .then_with(|| left.schema.cmp(&right.schema))
+        .then_with(|| left.version.cmp(&right.version))
+}
+
+fn canonicalize_extensions(extensions: &mut [ExtensionParameter]) {
+    let mut known: Vec<ExtensionParameter> = extensions
+        .iter()
+        .filter(|extension| matches!(&extension.value, ExtensionValue::Known(_)))
+        .cloned()
+        .collect();
+    known.sort_by(extension_order);
+    let mut known_index = 0;
+    for extension in extensions {
+        if matches!(&extension.value, ExtensionValue::Known(_)) {
+            *extension = known[known_index].clone();
+            known_index += 1;
+        }
+    }
 }
 
 fn write_projection(
@@ -403,7 +442,9 @@ fn write_extensions(
     }
     write_indent(output, indent);
     output.push_str("extensions {\n");
-    for extension in extensions {
+    let mut extensions = extensions.to_vec();
+    canonicalize_extensions(&mut extensions);
+    for extension in &extensions {
         write_indent(output, indent + 1);
         write_extension_parameter(output, extension)?;
         output.push('\n');
@@ -428,7 +469,14 @@ fn write_extension_parameter(
             output.push_str(" @");
             output.push_str(&extension.version.to_string());
             output.push_str(" = ");
-            write_value(output, value)?;
+            let schema = crate::prototype_schemas().ok().and_then(|schemas| {
+                schemas.into_iter().find(|schema| {
+                    schema.namespace == extension.namespace
+                        && schema.name == extension.schema
+                        && schema.version == extension.version
+                })
+            });
+            write_value_with_schema(output, value, schema.as_ref().map(|schema| &schema.value))?;
             output.push(';');
         }
         ExtensionValue::Opaque(bytes) => {
@@ -489,6 +537,74 @@ fn write_value(output: &mut String, value: &Value) -> Result<(), SerializeError>
         }
     }
     Ok(())
+}
+
+fn write_value_with_schema(
+    output: &mut String,
+    value: &Value,
+    schema: Option<&SchemaExpr>,
+) -> Result<(), SerializeError> {
+    match (value, schema) {
+        (Value::Product(fields), Some(SchemaExpr::Product(schema_fields))) => {
+            output.push('{');
+            let mut written = 0;
+            for field in schema_fields {
+                let Some(value) = fields.get(&field.name) else {
+                    continue;
+                };
+                if written > 0 {
+                    output.push_str(", ");
+                }
+                output.push_str(&field.name);
+                output.push_str(": ");
+                write_value_with_schema(output, value, Some(&field.schema))?;
+                written += 1;
+            }
+            for (name, value) in fields {
+                if schema_fields.iter().any(|field| field.name == *name) {
+                    continue;
+                }
+                if written > 0 {
+                    output.push_str(", ");
+                }
+                output.push_str(name);
+                output.push_str(": ");
+                write_value(output, value)?;
+                written += 1;
+            }
+            output.push('}');
+            Ok(())
+        }
+        (Value::Sequence(values), Some(SchemaExpr::Sequence(item_schema))) => {
+            output.push('[');
+            for (index, value) in values.iter().enumerate() {
+                if index > 0 {
+                    output.push_str(", ");
+                }
+                write_value_with_schema(output, value, Some(item_schema))?;
+            }
+            output.push(']');
+            Ok(())
+        }
+        (Value::Present(value), Some(SchemaExpr::Presence(inner))) => {
+            output.push_str("present(");
+            write_value_with_schema(output, value, Some(inner))?;
+            output.push(')');
+            Ok(())
+        }
+        (Value::Tagged { tag, value }, Some(SchemaExpr::Alternative(arms))) => {
+            output.push_str(tag);
+            output.push('(');
+            let arm_schema = arms
+                .iter()
+                .find(|arm| arm.tag == *tag)
+                .map(|arm| arm.schema.as_ref());
+            write_value_with_schema(output, value, arm_schema)?;
+            output.push(')');
+            Ok(())
+        }
+        _ => write_value(output, value),
+    }
 }
 
 fn write_address_list(output: &mut String, addresses: &[Address]) {

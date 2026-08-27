@@ -31,13 +31,13 @@ One synthetic whole-system description exercised end to end across every layer a
 @guidance text/markdown ./proposals/frontier-architecture-case-studies.md
 ---
 [tools/validator] Reference validator and canonical serializer (reviewing) @dispatch(mechanical)
-Files: crates/grimoire/src/parser.rs, projection.rs, serialize.rs, validate.rs, cut.rs, and the focused/end-to-end Rust fixtures.
-Implement the reference parser, structural validator, cut extractor, and canonical serializer for the reviewed Grimoire format. The current prototype covers bundled descriptions, standalone layers, schema documents, closed values, extensions, projection structure, address/scoping/locality checks, schema validation, cuts, opaque preservation, and serializer fixpoints. It conforms to the specification and never defines it.
-Accept: The complete current Rust suite passes; valid document forms parse and serialize canonically; structural and schema failures identify check, location, and relevant identifier; successful cuts revalidate; non-cuts report C12; unknown extension data survives unchanged; projection evaluation remains a separate implementation boundary.
+Files: crates/grimoire/src/parser.rs, projection.rs, serialize.rs, validate.rs, cut.rs, evaluate.rs, and the focused/end-to-end Rust fixtures.
+Implement the reference parser, structural validator, cut extractor, canonical serializer, and the separately scoped static projection evaluator for the reviewed Grimoire prototype. The current prototype covers bundled descriptions, standalone layers, schema documents, addressed description selection, closed values, extensions, projection structure, recursive group targets, chained finalized decorations, address/scoping/locality checks, schema validation, cuts, opaque preservation, and serializer fixpoints. It is checked against the specification and recorded prototype decisions; unresolved schema-use authority and custom-schema extension ordering remain explicit follow-up boundaries.
+Accept: The complete current Rust suite passes; valid document forms parse and serialize canonically; structural and schema failures identify check, location, and relevant identifier; successful cuts revalidate; non-cuts report C12; unknown extension data survives unchanged; projection evaluation remains static and does not bind to runtime execution.
 -> grammar/review
 -> tools/validator/conformance
-> 2026-08-26: The reference tool is library-first and offline; it parses and validates documents without dereferencing namespaces or executing projections.
-> 2026-08-26: Core-defined shared elements remain legal in the prototype, while layer-defined elements are checked against maximal locality sites; indirect layer-to-core input chains are valid.
+> 2026-08-27: The coherence pass corrected canonical collection normalization, group-target expansion, chained finalized-decoration propagation, site-blind structural equality, and addressed description selection.
+> 2026-08-27: Layer schema-use authority and generic custom schema ordering for extension values remain design/API gaps; the prototype does not claim those contracts are settled.
 @artifact text/rust ./crates/grimoire/src/parser.rs
 @artifact text/rust ./crates/grimoire/src/serialize.rs
 @artifact text/rust ./crates/grimoire/src/validate.rs
@@ -113,12 +113,12 @@ A synthetic whole-system description used to consume Grimoire before a real cons
 > R4 geometry is fixture evidence only: candidate plurality and multi-location reach are separate axes; each candidate lead contains a spacetime tube; every tube advances one frame; paired scoring reads all candidate spacetime; exactly one candidate is selected for execution.
 ---
 [projlang/spec] Projection language implementation (reviewing)
-Implement the reviewed projection language from its grammar and settled semantic design. The current Rust prototype binds the static select/invert/decorate/check surface, evaluates structural folding and finalization, and preserves standalone layer packaging; indexed generation, symbolic arithmetic, parameter updates, and runtime loops remain explicitly deferred.
+Implement the reviewed projection language from its grammar and settled semantic design. The current Rust prototype binds the static select/invert/decorate/check surface, evaluates structural folding and finalization, supports addressed description and recursive group targets, and preserves standalone layer packaging; indexed generation, symbolic arithmetic, parameter updates, and runtime loops remain explicitly deferred.
 -> grammar/build
 -> projlang/design
 -> projlang/projlang/review
-> 2026-08-26: The first implementation is library-first and static: projections evaluate descriptions and do not bind to training, inference, sampling, or controller runs.
-> 2026-08-26: Projection conformance and review fixtures cover the implemented grammar surface; unresolved indexed and symbolic forms remain owned by later grammar/schema work.
+> 2026-08-27: Projection composition carries surviving finalized decorations through declared layer inputs while keeping structural evaluation independent of finalized values.
+> 2026-08-27: The addressed description element is materialized as a lightweight identity element when selected; its full container is not embedded in each structural result.
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -138,14 +138,14 @@ Accept: The internal form maps every current reviewed stage exactly once and the
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
-[projlang/projlang/structural] Evaluate structural stages (started) @dispatch(mechanical)
+[projlang/projlang/structural] Evaluate structural stages (reviewing) @dispatch(mechanical)
 Files: crates/grimoire/src/evaluate.rs and crates/grimoire/tests/evaluate.rs.
-Evaluate declared input reprojections, select references/generated definitions, structural folding by address, and invert over selected groups. Preserve definition origin so shared references join while competing definitions fail. Keep decorations unavailable until structural evaluation completes.
-Accept: Fixtures prove generated and referenced definitions, chained folding, competing-definition failure, inversion of selected connections, and structural equality despite different decorations.
+Evaluate declared input reprojections, select references/generated definitions, recursive group targets, structural folding by address, and invert over selected groups. Preserve definition origin internally so shared references join while competing definitions fail; do not expose origin in semantic reprojection equality. Keep decorations unavailable until structural evaluation completes.
+Accept: Fixtures prove generated and referenced definitions, selecting a group stands for nested members, chained folding, competing-definition failure, inversion of selected connections, addressed description selection, and structural equality despite different definition sites.
 -> implementation/language
 -> projlang/projlang/surface
-> 2026-08-26: Structural evaluation uses a flat addressed element map with definition origins; same-origin references join, distinct definitions at one address fail visibly.
-> 2026-08-26: Invert reverses selected connection endpoints for connections named by selected groups; it never reads finalized decoration values.
+> 2026-08-27: Selecting a group recursively materializes its input-visible members with cycle protection before inversion; generated-group member closure remains an explicit follow-up boundary.
+> 2026-08-27: StructuralReprojection equality compares only addressed elements; private definition origins remain an evaluator implementation detail for fold conflict detection.
 @artifact text/rust ./crates/grimoire/src/evaluate.rs
 @artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
@@ -153,11 +153,11 @@ Accept: Fixtures prove generated and referenced definitions, chained folding, co
 ---
 [projlang/projlang/fold] Fold structural results (reviewing) @dispatch(mechanical)
 Files: crates/grimoire/src/evaluate.rs and crates/grimoire/tests/evaluate.rs.
-Fold structural references by flat address and preserve definition origin. A shared reference joins one element; a distinct generated definition at an existing address fails visibly. Chained layer inputs compose before the current layer's select and inversion.
-Accept: Fixtures prove shared address joins, chained composition, competing-definition failure, and error identifiers.
+Fold structural references by flat address and preserve definition origin only for conflict detection. A shared reference joins one element; a distinct generated definition at an existing address fails visibly. Chained layer inputs compose before the current layer's select and inversion, and legal definition-site placement does not alter structural reprojection equality.
+Accept: Fixtures prove shared address joins, chained composition, competing-definition failure, group-target closure, and error identifiers.
 -> implementation/language
 -> projlang/projlang/structural
-> 2026-08-26: Structural folding uses a flat addressed element map with definition origins; equal same-origin values join, distinct definitions at one address fail at fold.
+> 2026-08-27: Definition origin is retained internally for one-definition conflict detection but excluded from StructuralReprojection semantic equality.
 @artifact text/rust ./crates/grimoire/src/evaluate.rs
 @artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
@@ -165,11 +165,11 @@ Accept: Fixtures prove shared address joins, chained composition, competing-defi
 ---
 [projlang/projlang/finalize] Apply global finalization (reviewing) @dispatch(mechanical)
 Files: crates/grimoire/src/evaluate.rs and crates/grimoire/tests/evaluate.rs.
-Apply decorate once to the folded structural result. Decoration targets must already be present; finalized values are retained separately and never fed into structural selection.
-Accept: Decorated and undecorated structural results compare equal; finalized values survive; a missing decoration target fails at the decorate stage.
+Apply the current layer's decorate phase after structural folding and inversion. Carry finalized decorations from declared layer inputs, retain only inherited values whose targets survive the current structural selection, then append current decorations; finalized values never feed structural selection.
+Accept: Decorated and undecorated structural results compare equal; inherited and current finalized values survive the chain; a missing decoration target fails at the decorate stage.
 -> implementation/language
 -> projlang/projlang/fold
-> 2026-08-26: Finalization is a separate evaluator step after structural folding and inversion; decorations are retained as values separate from structural elements.
+> 2026-08-27: Chained reprojections propagate inherited finalized decorations for surviving addressed targets; upstream check results are not treated as structural data or re-run by downstream layers.
 @artifact text/rust ./crates/grimoire/src/evaluate.rs
 @artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
@@ -177,11 +177,11 @@ Accept: Decorated and undecorated structural results compare equal; finalized va
 ---
 [projlang/projlang/checks] Evaluate decoration checks (reviewing) @dispatch(mechanical)
 Files: crates/grimoire/src/evaluate.rs and crates/grimoire/tests/evaluate.rs.
-Evaluate expected empty/nonempty cardinality only over finalized decoration values matching a namespace and parameter. Return check results without mutating structural elements or finalized decorations.
-Accept: Empty and nonempty outcomes, observed cardinality, and post-check value preservation are fixtures.
+Evaluate expected empty/nonempty cardinality over finalized decoration values matching a namespace and parameter, including inherited values from declared layer inputs. Return check results without mutating structural elements or finalized decorations.
+Accept: Empty/nonempty outcomes, observed cardinality, inherited decoration visibility, and post-check value preservation are fixtures.
 -> implementation/language
 -> projlang/projlang/finalize
-> 2026-08-26: Checks aggregate finalized decoration values over visible folded elements by namespace and parameter; a check result never alters finalized structure or values.
+> 2026-08-27: Downstream checks observe inherited finalized decorations that survive the current layer's structural selection; upstream check results are not propagated as structure.
 @artifact text/rust ./crates/grimoire/src/evaluate.rs
 @artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
@@ -189,12 +189,12 @@ Accept: Empty and nonempty outcomes, observed cardinality, and post-check value 
 ---
 [projlang/projlang/conformance] Exercise semantic conformance (reviewing) @dispatch(mechanical)
 Files: crates/grimoire/tests/evaluate.rs and the parser/layer fixtures that exercise the reviewed projection surface.
-Do: Build fixtures in the reviewed grammar that exercise every implemented stage and the required error paths. Keep runtime execution out of the fixtures.
-Accept: Fixtures cover stage order, generated and referenced definitions, generated connections and groups, invert, address folding, competing-definition failure, finalization non-feedback, missing decoration targets, and decoration-only checks.
+Build fixtures in the reviewed grammar that exercise every implemented stage and required error path. Keep runtime execution out of the fixtures.
+Accept: Fixtures cover stage order, generated and referenced definitions, generated connections and groups, recursive group targets, addressed description selection, invert, address folding, competing-definition failure, chained finalized-decoration propagation, finalization non-feedback, missing decoration targets, and decoration-only checks.
 -> implementation/language
 -> projlang/projlang/checks
-> 2026-08-26: Projection conformance uses static evaluator fixtures only; no runtime, training, or execution-loop behavior is introduced.
-> 2026-08-26: Generated blocks, connections, and groups are exercised as ordinary structural elements, and missing decoration targets fail at the decorate stage.
+> 2026-08-27: Projection conformance includes recursive group target expansion, addressed description selection, chained inherited decorations, and structural equality independent of private definition origin.
+@artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -203,7 +203,7 @@ Files: crates/grimoire/src/evaluate.rs, crates/grimoire/src/projection.rs, crate
 Do: Review the implementation and fixtures against the reviewed grammar, core specification, and projection-language design artifact. Check one-definition folding, declared-input visibility, structural-before-finalization ordering, decoration-only checks, and the absence of runtime execution semantics. Escalate any behavior not settled by those artifacts.
 Accept: Every implemented behavior maps to a settled semantic rule; deferred selector and symbolic-value syntax remains owned by grammar and schemas; no runtime behavior is introduced.
 -> projlang/projlang/conformance
-> 2026-08-26: Projection review covered parser bindings, structural folding/inversion, finalization, checks, standalone layer packaging, and canonical serialization against the current fixtures.
+> 2026-08-27: Projection review covered parser bindings, structural folding/inversion, recursive group targets, addressed description selection, chained finalization, definition-site-blind equality, standalone layer packaging, and canonical serialization against the current fixtures.
 > 2026-08-26: The reviewed implementation leaves indexed selector expansion, symbolic arithmetic, parameter updates, and runtime loops outside the projection evaluator.
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
@@ -367,15 +367,14 @@ Accept: Fixtures prove closed-algebra validation, address-reference validation, 
 ---
 [tools/validator/parse] Parse reviewed descriptions (reviewing)
 Files: crates/grimoire/src/parser.rs, crates/grimoire/src/projection.rs, and focused parser/layer/schema/extension fixtures.
-Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, bundled and standalone layers, schema documents, extensions, and ordered projection sections in Rust. Current slices handle headers, core elements, comments, JSON-style strings, global core address uniqueness, known closed values, opaque unknown extension parameters, layer inputs, generated definitions, select/invert/decorate/check syntax, duplicate inputs, phase-order rejection, standalone layer wrappers, and standalone schema wrappers.
+Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, bundled and standalone layers, schema documents, extensions, and ordered projection sections in Rust. Current slices handle headers, core elements, comments, JSON-style strings, global core address uniqueness, known closed values, opaque unknown extension parameters, layer inputs, generated definitions, select/invert/decorate/check syntax, duplicate inputs, phase-order rejection, standalone layer wrappers, standalone schema wrappers, and canonical normalization of semantic layer/input/schema-use/recognized-extension collections.
 Accept: Valid current fixtures parse into one internal form; malformed input fails with location; unknown namespace bytes survive; no recovery or accepted dialect is introduced; focused Cargo tests pass.
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
 -> implementation/bootstrap
 -> implementation/language
-> 2026-08-26: Standalone layer documents carry only the owning description address and reuse the bundled layer production; surrounding-description reference resolution remains a validator concern.
-> 2026-08-26: Schema documents parse through the same closed recursive constructors used by the executable registry; duplicate fields, tags, and attachment kinds fail visibly.
+> 2026-08-27: Parsing normalizes layer names, core-first layer inputs, schema uses, and recognized extension parameters so parse(serialize(parse(x))) preserves semantic model equality; opaque unknown spans retain their original slots and bytes.
 @artifact text/rust ./crates/grimoire/tests/layer_documents.rs
 @artifact text/rust ./crates/grimoire/tests/schema_documents.rs
 ---
@@ -396,15 +395,17 @@ Accept: Every failure names its check, location, and relevant identifier; valid 
 ---
 [tools/validator/serialize] Serialize canonical descriptions (reviewing)
 Files: crates/grimoire/src/serialize.rs and focused serializer/document fixtures.
-Emit deterministic canonical text for descriptions, standalone layers, schemas, cores, projections, extensions, and closed values. Canonicalize recognized values and ordering; emit unknown extension raw spans unchanged. Fixtures cover core, known and unknown extensions, bundled and standalone layers, schemas, projections, fixpoint, and malformed opaque bytes.
-Accept: Core, extension, layered, standalone-layer, and schema valid fixtures round-trip; unknown payload bytes survive; malformed opaque bytes fail visibly; focused Cargo tests pass.
+Emit deterministic canonical text for descriptions, standalone layers, schemas, cores, projections, extensions, and closed values. Canonicalize recognized values and ordering; emit unknown extension raw spans unchanged. Built-in known products use executable schema declaration order; arbitrary standalone schemas serialize their own closed expressions. Fixtures cover core, known and unknown extensions, bundled and standalone layers, schemas, projections, noncanonical collection order, fixpoint, and malformed opaque bytes.
+Accept: Core, extension, layered, standalone-layer, and schema valid fixtures round-trip; known built-in values follow schema field order; unknown payload bytes survive; malformed opaque bytes fail visibly; focused Cargo tests pass.
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
 -> implementation/bootstrap
 -> implementation/language
 -> tools/validator/parse
-> 2026-08-26: Standalone layer and schema serializers use the document wrappers and emit layer structure plus schema expression vectors in deterministic order; schema fields and alternatives retain declaration order.
+> 2026-08-27: Parser and serializer normalize layers, core-first inputs, schema uses, and recognized extension slots to satisfy canonical semantic round-trips over noncanonical valid input.
+> 2026-08-27: Recognized extension parameters sort canonically within their opaque-span slots; built-in known product values follow the prototype registry's recursive schema declaration order.
+> 2026-08-27: Extension serialization for custom schemas supplied outside the prototype registry remains an explicit API gap until a schema registry input is designed.
 @artifact text/rust ./crates/grimoire/src/serialize.rs
 @artifact text/rust ./crates/grimoire/tests/serialize.rs
 @artifact text/rust ./crates/grimoire/tests/layer_documents.rs
@@ -417,7 +418,7 @@ Accept: Downward-closed cuts serialize/parse/validate; non-cuts return a distinc
 -> implementation/language
 -> tools/validator/structure
 > 2026-08-26: The prototype cut API receives an explicit selected layer-name set and does not auto-close it; a missing input is reported as C12 unresolvable rather than silently adding a layer.
-> 2026-08-26: Successful cut extraction clones the core graph and description extensions and retains selected layers in authored order before revalidation.
+> 2026-08-26: Successful cut extraction clones the core graph and description extensions and retains selected layers in source-model order before revalidation; canonical serialization emits them by layer name.
 > 2026-08-26: Core-defined shared elements remain legal when consumed by layers; layer-defined elements remain subject to the provisional maximal-site locality check.
 @artifact text/rust ./crates/grimoire/src/cut.rs
 @artifact text/rust ./crates/grimoire/tests/cut.rs

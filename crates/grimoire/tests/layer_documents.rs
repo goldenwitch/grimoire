@@ -10,7 +10,7 @@ const STANDALONE_LAYER: &str = r#"
         consumes {
             projection-language 1.0.0;
             schemas {
-                "https://github.com/goldenwitch/grimoire/extension" / shapes @1.0.0;
+                "https://github.com/goldenwitch/grimoire/extension/shapes" / shapes @1.0.0;
             }
         }
         projection {

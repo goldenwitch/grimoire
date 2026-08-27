@@ -130,6 +130,44 @@ fn folds_shared_references_and_applies_group_inversion() {
 }
 
 #[test]
+fn can_select_the_addressed_description_element() {
+    let description = base_description(vec![layer(
+        "description",
+        vec![LayerInput::Core],
+        Projection {
+            select: vec![SelectItem::Use(vec![address("@d")])],
+            ..Projection::default()
+        },
+    )]);
+    let result =
+        evaluate_layer(&description, "description").unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(
+        result.structural.elements.get(&address("@d")),
+        Some(&Element::Description(address("@d")))
+    );
+}
+
+#[test]
+fn selecting_a_group_stands_for_its_members_during_inversion() {
+    let description = base_description(vec![layer(
+        "group-target",
+        vec![LayerInput::Core],
+        Projection {
+            select: vec![SelectItem::Use(vec![address("@flow-group")])],
+            invert: vec![address("@flow-group")],
+            ..Projection::default()
+        },
+    )]);
+    let result =
+        evaluate_layer(&description, "group-target").unwrap_or_else(|error| panic!("{error}"));
+    let Element::Connection(connection) = &result.structural.elements[&address("@flow")] else {
+        panic!("expected the group member connection");
+    };
+    assert_eq!(connection.source, address("@target/in"));
+    assert_eq!(connection.destination, address("@source/out"));
+}
+
+#[test]
 fn generated_definitions_are_structural_elements() {
     let generated = Block {
         address: address("@generated"),
@@ -162,6 +200,52 @@ fn generated_definitions_are_structural_elements() {
         result.structural.elements[&address("@generated/in")],
         Element::Port(_)
     ));
+}
+
+#[test]
+fn structural_equality_does_not_expose_definition_site() {
+    let core_result = evaluate_layer(
+        &base_description(vec![layer(
+            "core",
+            vec![LayerInput::Core],
+            Projection {
+                select: vec![SelectItem::Use(vec![
+                    address("@source"),
+                    address("@source/out"),
+                ])],
+                ..Projection::default()
+            },
+        )]),
+        "core",
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+
+    let mut layer_description = base_description(Vec::new());
+    layer_description.core = CoreGraph::default();
+    layer_description.layers.push(layer(
+        "local",
+        vec![LayerInput::Core],
+        Projection {
+            select: vec![SelectItem::GenerateBlock(Block {
+                address: address("@source"),
+                name: "Source".to_owned(),
+                ports: std::collections::BTreeMap::from([(
+                    address("@source/out"),
+                    Port {
+                        address: address("@source/out"),
+                        label: None,
+                        extensions: Vec::new(),
+                    },
+                )]),
+                extensions: Vec::new(),
+            })],
+            ..Projection::default()
+        },
+    ));
+    let layer_result =
+        evaluate_layer(&layer_description, "local").unwrap_or_else(|error| panic!("{error}"));
+
+    assert_eq!(core_result.structural, layer_result.structural);
 }
 
 #[test]
@@ -326,6 +410,41 @@ fn chained_layers_compose_by_address() {
     let result = evaluate_layer(&description, "second").unwrap_or_else(|error| panic!("{error}"));
     assert!(result.structural.elements.contains_key(&address("@source")));
     assert!(result.structural.elements.contains_key(&address("@target")));
+}
+
+#[test]
+fn chained_layers_preserve_upstream_finalized_decorations() {
+    let description = base_description(vec![
+        layer(
+            "annotated",
+            vec![LayerInput::Core],
+            Projection {
+                select: vec![SelectItem::Use(vec![address("@source")])],
+                decorate: vec![architecture_decoration("@source", "encoder")],
+                ..Projection::default()
+            },
+        ),
+        layer(
+            "consumer",
+            vec![LayerInput::Core, LayerInput::Layer("annotated".to_owned())],
+            Projection {
+                select: vec![SelectItem::Use(vec![address("@source")])],
+                checks: vec![Check {
+                    name: "inherited-family".to_owned(),
+                    expected: ExpectedCardinality::Nonempty,
+                    namespace: namespace(
+                        "https://github.com/goldenwitch/grimoire/extension/architecture",
+                    ),
+                    parameter: "family".to_owned(),
+                }],
+                ..Projection::default()
+            },
+        ),
+    ]);
+    let result = evaluate_layer(&description, "consumer").unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(result.decorations.len(), 1);
+    assert_eq!(result.checks[0].observed, 1);
+    assert!(result.checks[0].passed);
 }
 
 #[test]

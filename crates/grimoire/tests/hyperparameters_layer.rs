@@ -58,7 +58,7 @@ fn hyperparameter_layer_validates_typed_training_values() {
         .unwrap_or_else(|errors| panic!("validation errors: {errors:?}"));
     let result =
         evaluate_layer(&description, "hyperparameters").unwrap_or_else(|error| panic!("{error}"));
-    assert_eq!(result.structural.elements.len(), 1);
+    assert_eq!(result.structural.elements.len(), 3);
     assert_eq!(result.decorations.len(), 1);
     assert_eq!(result.checks[0].observed, 1);
     assert!(result.checks[0].passed);

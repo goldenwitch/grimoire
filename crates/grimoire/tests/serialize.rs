@@ -42,7 +42,7 @@ const LAYERED: &str = r#"
             consumes {
                 projection-language 1.0.0;
                 schemas {
-                    "https://github.com/goldenwitch/grimoire/extension" / shapes @1.0.0;
+                    "https://github.com/goldenwitch/grimoire/extension/shapes" / shapes @1.0.0;
                 }
             }
             projection {
@@ -77,6 +77,9 @@ fn known_extension_values_are_canonicalized_and_round_trip() {
         panic!("expected a typed extension value");
     };
     assert_eq!(fields.get("name"), Some(&Value::Text("frames".to_owned())));
+    let name = serialized.find("name: \"frames\"").unwrap();
+    let description = serialized.find("description: absent").unwrap();
+    assert!(name < description);
 }
 
 #[test]
@@ -102,6 +105,76 @@ fn layered_projection_serialization_round_trips() {
     let reparsed = parse_description(&serialized).unwrap_or_else(|error| panic!("{error}"));
     assert_eq!(reparsed, parsed);
     assert_eq!(serialize_description(&reparsed).unwrap(), serialized);
+}
+
+#[test]
+fn noncanonical_layer_and_schema_order_preserves_the_parsed_value() {
+    let source = r#"
+        grimoire 1.0.0
+        description @d {
+            core-spec 1.0.0;
+            core { block @b "Block" { port @b/input; } }
+            layer "zeta" {
+                inputs { core };
+                consumes {
+                    projection-language 1.0.0;
+                    schemas {
+                        "https://github.com/goldenwitch/grimoire/extension/shapes" / shapes @1.0.0;
+                        "https://github.com/goldenwitch/grimoire/extension/axes" / axes @1.0.0;
+                    }
+                }
+                projection { select { use @b; } }
+            }
+            layer "alpha" {
+                inputs { "zeta", core };
+                consumes {
+                    projection-language 1.0.0;
+                    schemas {
+                        "https://github.com/goldenwitch/grimoire/extension/shapes" / shapes @1.0.0;
+                        "https://github.com/goldenwitch/grimoire/extension/axes" / axes @1.0.0;
+                    }
+                }
+                projection { select { use @b; } }
+            }
+        }
+    "#;
+    let parsed = parse_description(source).unwrap_or_else(|error| panic!("{error}"));
+    let serialized = serialize_description(&parsed).unwrap_or_else(|error| panic!("{error}"));
+    let reparsed = parse_description(&serialized).unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(reparsed, parsed);
+}
+
+#[test]
+fn noncanonical_known_extension_order_preserves_opaque_slots_and_bytes() {
+    let source = r#"
+        grimoire 1.0.0
+        description @d {
+            core-spec 1.0.0;
+            extensions {
+                extension "https://github.com/goldenwitch/grimoire/extension/axes" zeta schema axes @1.0.0 = {
+                    name: "zeta",
+                    description: absent
+                };
+                extension "https://other.example/opaque" first schema unknown @1.0.0 = { raw: "first" };
+                extension "https://github.com/goldenwitch/grimoire/extension/axes" alpha schema axes @1.0.0 = {
+                    name: "alpha",
+                    description: absent
+                };
+                extension "https://other.example/opaque" second schema unknown @1.0.0 = { raw: "second" };
+            }
+            core {}
+        }
+    "#;
+    let parsed = parse_description(source).unwrap_or_else(|error| panic!("{error}"));
+    let serialized = serialize_description(&parsed).unwrap_or_else(|error| panic!("{error}"));
+    let alpha = serialized.find("name: \"alpha\"").unwrap();
+    let zeta = serialized.find("name: \"zeta\"").unwrap();
+    let first = serialized.find("raw: \"first\"").unwrap();
+    let second = serialized.find("raw: \"second\"").unwrap();
+    assert!(alpha < zeta);
+    assert!(first < second);
+    let reparsed = parse_description(&serialized).unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(reparsed, parsed);
 }
 
 #[test]

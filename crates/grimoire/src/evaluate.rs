@@ -2,22 +2,29 @@ use core::fmt;
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::{
-    Address, Block, Connection, CoreGraph, Decoration, Description, Group, Layer, LayerInput,
-    Projection, SelectItem,
+    Address, Block, Connection, Decoration, Description, Group, Layer, LayerInput, Projection,
+    SelectItem,
 };
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Element {
+    Description(Address),
     Block(Block),
     Port(crate::Port),
     Connection(Connection),
     Group(Group),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct StructuralReprojection {
     pub elements: BTreeMap<Address, Element>,
     origins: BTreeMap<Address, DefinitionOrigin>,
+}
+
+impl PartialEq for StructuralReprojection {
+    fn eq(&self, other: &Self) -> bool {
+        self.elements == other.elements
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -53,9 +60,7 @@ pub fn evaluate_layer(
     layer_name: &str,
 ) -> Result<FinalizedReprojection, ProjectionError> {
     let mut stack = BTreeSet::new();
-    let structural = evaluate_structural(description, layer_name, &mut stack)?;
-    let layer = find_layer(description, layer_name)?;
-    finalize(structural, &layer.projection)
+    evaluate_reprojection(description, layer_name, &mut stack)
 }
 
 impl StructuralReprojection {
@@ -66,9 +71,14 @@ impl StructuralReprojection {
         }
     }
 
-    fn from_core(core: &CoreGraph) -> Result<Self, ProjectionError> {
+    fn from_core(description: &Description) -> Result<Self, ProjectionError> {
         let mut result = Self::empty();
-        for block in core.blocks.values() {
+        result.add(
+            description.address.clone(),
+            Element::Description(description.address.clone()),
+            DefinitionOrigin::Core,
+        )?;
+        for block in description.core.blocks.values() {
             result.add(
                 block.address.clone(),
                 Element::Block(block.clone()),
@@ -82,14 +92,14 @@ impl StructuralReprojection {
                 )?;
             }
         }
-        for connection in core.connections.values() {
+        for connection in description.core.connections.values() {
             result.add(
                 connection.address.clone(),
                 Element::Connection(connection.clone()),
                 DefinitionOrigin::Core,
             )?;
         }
-        for group in core.groups.values() {
+        for group in description.core.groups.values() {
             result.add(
                 group.address.clone(),
                 Element::Group(group.clone()),
@@ -157,11 +167,11 @@ impl StructuralReprojection {
     }
 }
 
-fn evaluate_structural(
+fn evaluate_reprojection(
     description: &Description,
     layer_name: &str,
     stack: &mut BTreeSet<String>,
-) -> Result<StructuralReprojection, ProjectionError> {
+) -> Result<FinalizedReprojection, ProjectionError> {
     if !stack.insert(layer_name.to_owned()) {
         return Err(ProjectionError::new(
             "select",
@@ -171,20 +181,26 @@ fn evaluate_structural(
     }
     let layer = find_layer(description, layer_name)?;
     let mut inputs = StructuralReprojection::empty();
+    let mut inherited_decorations = Vec::new();
     for input in &layer.inputs {
         let input_result = match input {
-            LayerInput::Core => StructuralReprojection::from_core(&description.core)?,
-            LayerInput::Layer(name) => evaluate_structural(description, name, stack)?,
+            LayerInput::Core => FinalizedReprojection {
+                structural: StructuralReprojection::from_core(description)?,
+                decorations: Vec::new(),
+                checks: Vec::new(),
+            },
+            LayerInput::Layer(name) => evaluate_reprojection(description, name, stack)?,
         };
-        inputs.merge(input_result)?;
+        inputs.merge(input_result.structural)?;
+        inherited_decorations.extend(input_result.decorations);
     }
     let mut selected = StructuralReprojection::empty();
     for item in &layer.projection.select {
         match item {
             SelectItem::Use(addresses) => {
+                let mut expanded_groups = BTreeSet::new();
                 for address in addresses {
-                    let (address, element, origin) = inputs.selected(address)?;
-                    selected.add(address, element, origin)?;
+                    select_address(&inputs, &mut selected, address, &mut expanded_groups)?;
                 }
             }
             SelectItem::GenerateBlock(block) => {
@@ -216,7 +232,29 @@ fn evaluate_structural(
     }
     apply_invert(&mut selected, &layer.projection)?;
     stack.remove(layer_name);
-    Ok(selected)
+    finalize(selected, inherited_decorations, &layer.projection)
+}
+
+fn select_address(
+    inputs: &StructuralReprojection,
+    selected: &mut StructuralReprojection,
+    address: &Address,
+    expanded_groups: &mut BTreeSet<Address>,
+) -> Result<(), ProjectionError> {
+    let (address, element, origin) = inputs.selected(address)?;
+    let group_members = match &element {
+        Element::Group(group) if expanded_groups.insert(address.clone()) => {
+            Some(group.members.clone())
+        }
+        _ => None,
+    };
+    selected.add(address, element, origin)?;
+    if let Some(group_members) = group_members {
+        for member in group_members {
+            select_address(inputs, selected, &member, expanded_groups)?;
+        }
+    }
+    Ok(())
 }
 
 fn apply_invert(
@@ -263,9 +301,13 @@ fn collect_group_connections(
 
 fn finalize(
     structural: StructuralReprojection,
+    inherited_decorations: Vec<Decoration>,
     projection: &Projection,
 ) -> Result<FinalizedReprojection, ProjectionError> {
-    let mut decorations = Vec::new();
+    let mut decorations: Vec<Decoration> = inherited_decorations
+        .into_iter()
+        .filter(|decoration| structural.elements.contains_key(&decoration.target))
+        .collect();
     for decoration in &projection.decorate {
         if !structural.elements.contains_key(&decoration.target) {
             return Err(ProjectionError::new(

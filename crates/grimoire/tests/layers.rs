@@ -15,7 +15,7 @@ const LAYERED: &str = r#"
             consumes {
                 projection-language 1.0.0;
                 schemas {
-                    "https://github.com/goldenwitch/grimoire/extension" / shapes @1.0.0;
+                    "https://github.com/goldenwitch/grimoire/extension/shapes" / shapes @1.0.0;
                 }
             }
             projection {
@@ -48,7 +48,11 @@ fn parses_layer_inputs_schema_uses_and_all_projection_stages() {
     let description = parse_description(LAYERED).unwrap_or_else(|error| panic!("{error}"));
     assert_eq!(description.layers.len(), 2);
 
-    let pretraining = &description.layers[0];
+    let pretraining = description
+        .layers
+        .iter()
+        .find(|layer| layer.name == "pretraining")
+        .unwrap();
     assert_eq!(pretraining.inputs, vec![LayerInput::Core]);
     assert_eq!(pretraining.schemas[0].name, "shapes");
     assert_eq!(pretraining.projection.select.len(), 2);
@@ -65,7 +69,11 @@ fn parses_layer_inputs_schema_uses_and_all_projection_stages() {
         ExtensionValue::Known(Value::Product(_))
     ));
 
-    let consumer = &description.layers[1];
+    let consumer = description
+        .layers
+        .iter()
+        .find(|layer| layer.name == "consumer")
+        .unwrap();
     assert_eq!(
         consumer.inputs,
         vec![
@@ -79,7 +87,12 @@ fn parses_layer_inputs_schema_uses_and_all_projection_stages() {
 #[test]
 fn generated_layer_definition_is_retained_as_an_ordinary_definition() {
     let description = parse_description(LAYERED).unwrap_or_else(|error| panic!("{error}"));
-    let SelectItem::GenerateBlock(block) = &description.layers[0].projection.select[1] else {
+    let pretraining = description
+        .layers
+        .iter()
+        .find(|layer| layer.name == "pretraining")
+        .unwrap();
+    let SelectItem::GenerateBlock(block) = &pretraining.projection.select[1] else {
         panic!("expected generated block");
     };
     assert_eq!(block.address.as_str(), "@predictor");

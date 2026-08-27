@@ -310,6 +310,7 @@ impl<'source> Parser<'source> {
             }
             layers.push(layer);
         }
+        layers.sort_by(|left, right| left.name.cmp(&right.name));
         self.expect(TokenKind::RightBrace)?;
         self.expect_end()?;
         let description = Description {
@@ -535,6 +536,7 @@ impl<'source> Parser<'source> {
         }
         self.expect(TokenKind::RightBrace)?;
         self.expect(TokenKind::Semicolon)?;
+        inputs.sort_by(layer_input_order);
         Ok(inputs)
     }
 
@@ -552,6 +554,7 @@ impl<'source> Parser<'source> {
         }
         self.expect(TokenKind::RightBrace)?;
         self.expect(TokenKind::RightBrace)?;
+        schemas.sort_by(schema_use_order);
         Ok((projection_language, schemas))
     }
 
@@ -822,6 +825,7 @@ impl<'source> Parser<'source> {
             extensions.push(self.parse_extension_parameter(start)?);
         }
         self.expect(TokenKind::RightBrace)?;
+        canonicalize_extensions(&mut extensions);
         Ok(extensions)
     }
 
@@ -1140,3 +1144,47 @@ impl fmt::Display for ParseError {
 }
 
 impl std::error::Error for ParseError {}
+
+fn layer_input_order(left: &LayerInput, right: &LayerInput) -> std::cmp::Ordering {
+    match left {
+        LayerInput::Core => match right {
+            LayerInput::Core => std::cmp::Ordering::Equal,
+            LayerInput::Layer(_) => std::cmp::Ordering::Less,
+        },
+        LayerInput::Layer(left) => match right {
+            LayerInput::Core => std::cmp::Ordering::Greater,
+            LayerInput::Layer(right) => left.cmp(right),
+        },
+    }
+}
+
+fn schema_use_order(left: &SchemaUse, right: &SchemaUse) -> std::cmp::Ordering {
+    left.namespace
+        .cmp(&right.namespace)
+        .then_with(|| left.name.cmp(&right.name))
+        .then_with(|| left.version.cmp(&right.version))
+}
+
+fn extension_order(left: &ExtensionParameter, right: &ExtensionParameter) -> std::cmp::Ordering {
+    left.namespace
+        .cmp(&right.namespace)
+        .then_with(|| left.name.cmp(&right.name))
+        .then_with(|| left.schema.cmp(&right.schema))
+        .then_with(|| left.version.cmp(&right.version))
+}
+
+fn canonicalize_extensions(extensions: &mut [ExtensionParameter]) {
+    let mut known: Vec<ExtensionParameter> = extensions
+        .iter()
+        .filter(|extension| matches!(&extension.value, ExtensionValue::Known(_)))
+        .cloned()
+        .collect();
+    known.sort_by(extension_order);
+    let mut known_index = 0;
+    for extension in extensions {
+        if matches!(&extension.value, ExtensionValue::Known(_)) {
+            *extension = known[known_index].clone();
+            known_index += 1;
+        }
+    }
+}

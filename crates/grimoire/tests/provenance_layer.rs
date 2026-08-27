@@ -46,7 +46,7 @@ fn provenance_layer_validates_and_checks_finalized_group_data() {
         .unwrap_or_else(|errors| panic!("validation errors: {errors:?}"));
     let result =
         evaluate_layer(&description, "provenance").unwrap_or_else(|error| panic!("{error}"));
-    assert_eq!(result.structural.elements.len(), 1);
+    assert_eq!(result.structural.elements.len(), 2);
     assert_eq!(result.decorations.len(), 1);
     assert_eq!(result.checks.len(), 1);
     assert_eq!(result.checks[0].observed, 1);
