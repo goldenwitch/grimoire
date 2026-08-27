@@ -438,7 +438,12 @@ Accept: A reproducibility cut for one DARE/TIES-style merge has an explicit vali
 -> architecture/vocabulary
 -> schemas/inventory
 ---
-[execution/boundary] Specify static execution boundary (notstarted)
-Define the static account for streaming, recurrent, and closed-loop systems without binding projections to runtime. Use the execution schema proposal and case studies to state what is represented, what is an external consumer, and what becomes unresolvable when runtime inputs are absent.
-Accept: Speech, latent-dynamics, and V-JEPA 2 planning fixtures distinguish static structure from runtime execution without adding run semantics to projections.
+[execution/boundary] Specify static execution boundary (reviewing)
+Artifact: proposals/execution-boundary.md.
+Define the static account for streaming, recurrent, and closed-loop systems. Execution regime is finalized metadata; structural state, causal, and action paths remain ordinary connections; runtime clocks, buffers, rollouts, controllers, and replanning remain external. Missing runtime-facing producers in a cut are visibly unresolvable.
+@artifact text/markdown ./proposals/execution-boundary.md
 -> architecture/vocabulary
+> 2026-08-26: Execution values use regimes static, streaming, recurrent, and closed-loop, with optional horizon and rate plus required external-consumer status.
+> 2026-08-26: Execution values never create feedback or causal paths; those paths are structural only when the described model interface contains them.
+> 2026-08-26: Runtime observation, buffering, state progression, action execution, sampling, and replanning remain outside pure projection evaluation.
+> 2026-08-26: A missing runtime-facing producer in a cut is reported as an unresolvable dependent layer, not silently treated as empty or open-loop.
