@@ -87,12 +87,18 @@ Accept: Placement decorations parse, validate, evaluate, and extract; block plac
 > 2026-08-27: A collective is an ordinary addressed block plus an explicit transfer list and payload shape; collective algorithm and network semantics remain deferred.
 > 2026-08-27: Shape-to-byte accounting requires explicit bytes_per_element and axis extent bindings because shapes/1 and precision/1 do not define a universal dtype-width mapping.
 ---
-[layers/cost] Cost layer (notstarted)
-Compositional symbolic accounting over declared axes and aggregation over groups.
+[layers/cost] Cost layer (reviewing)
+Files: crates/grimoire/src/cost.rs, crates/grimoire/src/lib.rs, crates/grimoire/tests/cost.rs, and proposals/cost-layer.md.
+Provide a static cost analysis boundary with constant, addressed-axis, sum, and product expressions. Evaluate only with caller-supplied positive axis extents and checked u64 arithmetic. Assign expressions to visible addressed elements, then recursively aggregate priced leaves through visible groups; repeated members, cycles, absent elements, missing prices, and overflow fail visibly. Keep this algebra outside the current text grammar until symbolic projection syntax has a separate contract. Do not infer FLOPs, bytes, sparsity, precision widths, hardware throughput, or runtime behavior from labels or topology.
+Accept: V-JEPA-style axis products, bridge/projector terms, low-bit variant terms, and group totals evaluate deterministically; missing symbolic inputs and malformed aggregation fail visibly; cost values do not participate in structural selection.
 -> core/freeze
 -> projlang/spec
 -> schemas/axes
 -> schemas/shapes
+> 2026-08-27: The first cost algebra is a host-side static analysis API over an evaluated reprojection, not a new grammar/value constructor.
+> 2026-08-27: Axis terms resolve only from explicit positive extent bindings; no semantic meaning is inferred from axis names.
+> 2026-08-27: Group totals sum explicitly priced leaves and reject unpriced leaves, duplicate members, missing elements, and cycles rather than returning partial totals.
+> 2026-08-27: Cost units remain authored and unitless until a later convention names a FLOP, memory, or hardware interpretation.
 ---
 [layers/provenance] Technique provenance layer (reviewing)
 Files: crates/grimoire/tests/provenance_layer.rs.

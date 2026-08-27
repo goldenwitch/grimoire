@@ -1,4 +1,5 @@
 mod address;
+mod cost;
 mod cut;
 mod evaluate;
 mod information;
@@ -14,6 +15,7 @@ mod value;
 mod version;
 
 pub use address::{Address, AddressError};
+pub use cost::{CostError, CostExpression, CostModel, CostReport};
 pub use cut::{CutError, extract_cut};
 pub use evaluate::{
     CheckResult, Element, FinalizedReprojection, ProjectionError, StructuralReprojection,
