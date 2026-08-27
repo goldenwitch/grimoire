@@ -2,14 +2,16 @@ vine 1.2.0
 prefix: grimoire
 title: Grimoire plan for the full vision
 ---
-[grimoire] Grimoire v1 (started)
-The full vision: a frozen core specification satisfied by its grammar, projection language, schemas, and layers, with one worked description that exercises all of it.
+[grimoire] Grimoire v1 (complete)
+Artifacts: spec/grimoire.md, grammar/grimoire.md, proposals/visualization.md, viz/index.html, crates/grimoire, and the reference/cross-paper fixtures.
+Complete the current Grimoire v1 static description path: frozen core specification, reviewed concrete grammar and projection semantics, executable Rust parser/validator/serializer/cut/evaluator, ten-family schema registry, domain layer fixtures, finite channel and Bayesian analysis, placement and symbolic cost boundaries, canonical V-JEPA 2 and cross-paper worked-description coverage, synthetic consumer exercise, and a browser-openable static architecture atlas. Preserve the separation between addressed structure, finalized metadata, sourced measurements, host-side analysis inputs, opaque extension data, and deferred runtime/parameter/continuous semantics.
+Accept: The repository has one valid end-to-end reference description and a static HTML viewer over its evaluated-view model; Rust tests, strict lint, formatting, editor diagnostics, VINE validation, serializer/cut properties, target-paper fixtures, and browser smoke checks pass; visualization compares reprojections by address and remains static/offline; unresolved continuous estimators, runtime loops, parameter updates, causal interventions, fixed points, compact indexed syntax, and richer collective/network semantics remain visible follow-up boundaries rather than invented behavior.
 -> example/reference
 -> implementation/language
 -> viz/design
-> Scaffolded from dependsOn out of the core skeleton; places not yet defined carry Design-with-the-user nodes.
-> Mechanical nodes are annotated dispatch(mechanical) and carry step-level guidance a weaker agent can execute; design and review stay with the user and Claude.
-> Fauxlden Retriever is a synthetic consumption exercise, not a source of product priorities.
+> 2026-08-27: Grimoire v1 closes at the static visualization boundary with viz/index.html; viewer implementation does not imply runtime execution or editable descriptions.
+> 2026-08-27: V-JEPA 2 is the canonical worked system, cross-paper fixtures test generality, and Fauxlden tests dense arbitrary consumption without becoming normative vocabulary.
+> 2026-08-27: The completed static path does not claim complete empirical measurement or runtime semantics; those boundaries remain explicit future work.
 ---
 [example/reference] Reference worked description (complete)
 Files: crates/grimoire/tests/reference_validation.rs, reference_core.rs, information_targets.rs, consumer_targets.rs, fauxlden_retriever.rs, the domain layer fixtures, and the attached case-study proposals.
