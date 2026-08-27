@@ -314,7 +314,7 @@ Accept: Fixtures prove closed-algebra validation, address-reference validation, 
 ---
 [tools/validator/parse] Parse reviewed descriptions (started)
 Files: crates/grimoire/src/value.rs, schema.rs, model.rs, parser.rs, serialize.rs, validate.rs and focused fixtures.
-Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, and exact parser boundary in Rust. Start with the minimal description/core form, then add layers, extensions, and projection sections while preserving source locations and opaque unknown spans. The bootstrap model slice is complete; parser text handling is now the active slice.
+Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, and exact parser boundary in Rust. The first parser slice now handles the grammar header, description core-spec version, blocks, optional port/group labels, directed connections, groups, comments, JSON-style strings, global core address uniqueness, and byte-offset errors. Layers, extensions, and projection text remain the next slices.
 Accept: The first fixture parses a minimal description into one internal form; malformed input fails with location; no recovery or accepted dialect is introduced; focused Cargo tests pass.
 -> grammar/namespace-uri
 -> grammar/review
@@ -323,6 +323,7 @@ Accept: The first fixture parses a minimal description into one internal form; m
 -> implementation/language
 > 2026-08-26: The validator implementation begins as a library-first Rust crate; parser and serializer share the internal model but never define the specification.
 > 2026-08-26: Parser work starts from the minimal description/core grammar and grows only when a fixture requires the next production.
+> 2026-08-26: The initial parser reports byte offsets and rejects duplicate core addresses before returning a description.
 ---
 [tools/validator/structure] Validate structural invariants (notstarted)
 Files: validator structural checks and fixtures named at dispatch.
