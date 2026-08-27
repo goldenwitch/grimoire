@@ -334,11 +334,12 @@ Do: Exercise valid and invalid values for every concrete schema instance, includ
 Accept: Fixtures prove closed-algebra validation, address-reference validation, absent versus present values, attachment-kind/domain failures, duplicate and below-scope references, and preservation of unrecognized extension namespaces.
 @artifact text/rust ./crates/grimoire/tests/schemas.rs
 @artifact text/rust ./crates/grimoire/tests/address_references.rs
+@artifact text/rust ./crates/grimoire/tests/schema_documents.rs
 -> schemas/instances
 ---
 [tools/validator/parse] Parse reviewed descriptions (started)
 Files: crates/grimoire/src/parser.rs, projection.rs, and focused parser/layer/extension fixtures.
-Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, layers, schema uses, extensions, and ordered projection sections in Rust. Current slices handle headers, core elements, comments, JSON-style strings, global core address uniqueness, known closed values, opaque unknown extension parameters, bundled layer inputs, generated definitions, select/invert/decorate/check syntax, duplicate inputs, and phase-order rejection. Standalone layer and schema-document forms remain next.
+Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, layers, schema uses, extensions, and ordered projection sections in Rust. Current slices handle headers, core elements, comments, JSON-style strings, global core address uniqueness, known closed values, opaque unknown extension parameters, bundled layer inputs, generated definitions, select/invert/decorate/check syntax, duplicate inputs, phase-order rejection, and standalone schema documents. Standalone layer documents and full semantic schema attachment remain next.
 Accept: Valid current fixtures parse into one internal form; malformed input fails with location; unknown namespace bytes survive; no recovery or accepted dialect is introduced; focused Cargo tests pass.
 -> grammar/namespace-uri
 -> grammar/review
@@ -349,6 +350,7 @@ Accept: Valid current fixtures parse into one internal form; malformed input fai
 > 2026-08-26: The initial parser reports byte offsets and rejects duplicate core addresses before returning a description.
 > 2026-08-26: The prototype recognizes the provisional Grimoire namespace root as typed extension data and stores all other extension parameter spans opaquely from `extension` through the terminating semicolon.
 > 2026-08-26: Bundled layers parse as named viewports with declared inputs, schema uses, and fixed select/invert/decorate/check stage order.
+> 2026-08-26: Schema documents parse through the same closed recursive constructors used by the executable registry; duplicate fields, tags, and attachment kinds fail visibly.
 ---
 [tools/validator/structure] Validate structural invariants (reviewing)
 Files: crates/grimoire/src/validate.rs and crates/grimoire/tests/validate.rs.

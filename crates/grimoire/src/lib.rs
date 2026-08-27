@@ -21,7 +21,7 @@ pub use model::{
     Block, Connection, CoreGraph, Description, ExtensionParameter, ExtensionValue, Group, Port,
 };
 pub use namespace::{Namespace, NamespaceError};
-pub use parser::{ParseError, parse_description};
+pub use parser::{ParseError, parse_description, parse_schema_document};
 pub use projection::{
     Check, Decoration, ExpectedCardinality, Layer, LayerInput, Projection, SchemaUse, SelectItem,
 };

@@ -1,9 +1,10 @@
 use core::fmt;
 
 use crate::{
-    Address, Block, Check, Connection, CoreGraph, Decoration, Description, ExpectedCardinality,
-    ExtensionParameter, ExtensionValue, FiniteNumber, Group, Layer, LayerInput, Namespace, Port,
-    Projection, SchemaUse, SelectItem, Value, Version,
+    Address, Block, Check, Connection, CoreGraph, Decoration, Description, ElementKind,
+    ExpectedCardinality, ExtensionParameter, ExtensionValue, FiniteNumber, Group, Layer,
+    LayerInput, Namespace, Port, Projection, Schema, SchemaExpr, SchemaExprArm, SchemaExprField,
+    SchemaUse, SelectItem, Value, Version,
 };
 
 const PROTOTYPE_NAMESPACE_ROOT: &str = "https://github.com/goldenwitch/grimoire/extension";
@@ -25,6 +26,8 @@ enum TokenKind {
     RightBracket,
     LeftParen,
     RightParen,
+    LessThan,
+    GreaterThan,
     Colon,
     Comma,
     Equal,
@@ -51,6 +54,10 @@ struct Parser<'source> {
 
 pub fn parse_description(source: &str) -> Result<Description, ParseError> {
     Parser::new(source)?.parse_description()
+}
+
+pub fn parse_schema_document(source: &str) -> Result<crate::Schema, ParseError> {
+    Parser::new(source)?.parse_schema_document()
 }
 
 impl<'source> Lexer<'source> {
@@ -92,6 +99,14 @@ impl<'source> Lexer<'source> {
             ')' => {
                 self.advance();
                 TokenKind::RightParen
+            }
+            '<' => {
+                self.advance();
+                TokenKind::LessThan
+            }
+            '>' => {
+                self.advance();
+                TokenKind::GreaterThan
             }
             ':' => {
                 self.advance();
@@ -226,7 +241,19 @@ impl<'source> Lexer<'source> {
             !character.is_whitespace()
                 && !matches!(
                     character,
-                    '{' | '}' | '[' | ']' | '(' | ')' | ':' | ',' | '=' | ';' | '"' | '#'
+                    '{' | '}'
+                        | '['
+                        | ']'
+                        | '('
+                        | ')'
+                        | '<'
+                        | '>'
+                        | ':'
+                        | ','
+                        | '='
+                        | ';'
+                        | '"'
+                        | '#'
                 )
         }) {
             if self.source[self.offset..].starts_with("->") {
@@ -291,6 +318,157 @@ impl<'source> Parser<'source> {
         };
         ensure_unique_addresses(&description)?;
         Ok(description)
+    }
+
+    fn parse_schema_document(mut self) -> Result<Schema, ParseError> {
+        self.expect_word("grimoire-schema")?;
+        let _grammar_version = self.parse_version()?;
+        self.expect_word("schema")?;
+        self.expect(TokenKind::LeftBrace)?;
+        self.expect_word("namespace")?;
+        let namespace = self.parse_namespace()?;
+        self.expect(TokenKind::Semicolon)?;
+        self.expect_word("name")?;
+        let name = self.take_word()?;
+        self.expect(TokenKind::Semicolon)?;
+        self.expect_word("version")?;
+        let version = self.parse_version()?;
+        self.expect(TokenKind::Semicolon)?;
+        self.expect_word("allows")?;
+        self.expect(TokenKind::LeftBrace)?;
+        let mut allowed_elements = std::collections::BTreeSet::new();
+        loop {
+            let kind = self.parse_element_kind()?;
+            if !allowed_elements.insert(kind) {
+                return self.error("duplicate schema attachment kind");
+            }
+            if self.current.kind != TokenKind::Comma {
+                break;
+            }
+            self.advance()?;
+        }
+        self.expect(TokenKind::RightBrace)?;
+        self.expect(TokenKind::Semicolon)?;
+        self.expect_word("value")?;
+        let value = self.parse_schema_expression()?;
+        self.expect(TokenKind::Semicolon)?;
+        self.expect(TokenKind::RightBrace)?;
+        self.expect_end()?;
+        Ok(Schema {
+            namespace,
+            name,
+            version,
+            allowed_elements,
+            value,
+        })
+    }
+
+    fn parse_element_kind(&mut self) -> Result<ElementKind, ParseError> {
+        match self.take_word()?.as_str() {
+            "description" => Ok(ElementKind::Description),
+            "block" => Ok(ElementKind::Block),
+            "port" => Ok(ElementKind::Port),
+            "connection" => Ok(ElementKind::Connection),
+            "group" => Ok(ElementKind::Group),
+            kind => self.error(format!("unknown schema attachment kind `{kind}`")),
+        }
+    }
+
+    fn parse_schema_expression(&mut self) -> Result<SchemaExpr, ParseError> {
+        let keyword = self.take_word()?;
+        match keyword.as_str() {
+            "finite-scalar" => Ok(SchemaExpr::FiniteScalar),
+            "positive-integer" => Ok(SchemaExpr::PositiveInteger),
+            "finite-number" => Ok(SchemaExpr::FiniteNumber),
+            "text" => Ok(SchemaExpr::Text),
+            "enumeration" => {
+                self.expect(TokenKind::LeftBrace)?;
+                let mut values = Vec::new();
+                loop {
+                    let value = self.take_word()?;
+                    if !is_identifier(&value) {
+                        return self.error("enumeration value is not an identifier");
+                    }
+                    if values.contains(&value) {
+                        return self.error(format!("duplicate enumeration value `{value}`"));
+                    }
+                    values.push(value);
+                    if self.current.kind != TokenKind::Comma {
+                        break;
+                    }
+                    self.advance()?;
+                }
+                self.expect(TokenKind::RightBrace)?;
+                Ok(SchemaExpr::Enumeration(values))
+            }
+            "product" => {
+                self.expect(TokenKind::LeftBrace)?;
+                let mut fields = Vec::new();
+                loop {
+                    let name = self.take_word()?;
+                    if !is_identifier(&name) {
+                        return self.error("product field is not an identifier");
+                    }
+                    self.expect(TokenKind::Colon)?;
+                    let schema = self.parse_schema_expression()?;
+                    if fields
+                        .iter()
+                        .any(|field: &SchemaExprField| field.name == name)
+                    {
+                        return self.error(format!("duplicate product field `{name}`"));
+                    }
+                    fields.push(SchemaExprField {
+                        name,
+                        schema: Box::new(schema),
+                    });
+                    if self.current.kind != TokenKind::Comma {
+                        break;
+                    }
+                    self.advance()?;
+                }
+                self.expect(TokenKind::RightBrace)?;
+                Ok(SchemaExpr::Product(fields))
+            }
+            "sequence" => {
+                self.expect(TokenKind::LessThan)?;
+                let item = self.parse_schema_expression()?;
+                self.expect(TokenKind::GreaterThan)?;
+                Ok(SchemaExpr::Sequence(Box::new(item)))
+            }
+            "alternative" => {
+                self.expect(TokenKind::LeftBrace)?;
+                let mut arms = Vec::new();
+                loop {
+                    let tag = self.take_word()?;
+                    if !is_identifier(&tag) {
+                        return self.error("alternative tag is not an identifier");
+                    }
+                    self.expect(TokenKind::Colon)?;
+                    let schema = self.parse_schema_expression()?;
+                    if arms.iter().any(|arm: &SchemaExprArm| arm.tag == tag) {
+                        return self.error(format!("duplicate alternative tag `{tag}`"));
+                    }
+                    arms.push(SchemaExprArm {
+                        tag,
+                        schema: Box::new(schema),
+                    });
+                    if self.current.kind != TokenKind::Comma {
+                        break;
+                    }
+                    self.advance()?;
+                }
+                self.expect(TokenKind::RightBrace)?;
+                Ok(SchemaExpr::Alternative(arms))
+            }
+            "address-reference" => Ok(SchemaExpr::AddressReference),
+            "presence" => {
+                self.expect(TokenKind::LessThan)?;
+                let inner = self.parse_schema_expression()?;
+                self.expect(TokenKind::GreaterThan)?;
+                Ok(SchemaExpr::Presence(Box::new(inner)))
+            }
+            keyword => self.error(format!("unknown schema expression `{keyword}`")),
+        }
     }
 
     fn parse_layer(&mut self) -> Result<Layer, ParseError> {
@@ -927,6 +1105,8 @@ fn token_name(token: &TokenKind) -> &'static str {
         TokenKind::RightBracket => "`]`",
         TokenKind::LeftParen => "`(`",
         TokenKind::RightParen => "`)`",
+        TokenKind::LessThan => "`<`",
+        TokenKind::GreaterThan => "`>`",
         TokenKind::Colon => "`:`",
         TokenKind::Comma => "`,`",
         TokenKind::Equal => "`=`",
