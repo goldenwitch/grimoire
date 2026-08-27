@@ -5,6 +5,7 @@ mod information;
 mod model;
 mod namespace;
 mod parser;
+mod placement;
 mod projection;
 mod schema;
 mod schemas;
@@ -29,6 +30,11 @@ pub use model::{
 };
 pub use namespace::{Namespace, NamespaceError};
 pub use parser::{ParseError, parse_description, parse_layer_document, parse_schema_document};
+pub use placement::{
+    BandwidthReport, Collective, CollectiveTransfer, PLACEMENT_NAMESPACE, PLACEMENT_PARAMETER,
+    PLACEMENT_SCHEMA, Placement, PlacementError, ShapeDimension, TensorShape, WireTransfer,
+    bytes_on_wire,
+};
 pub use projection::{
     Check, Decoration, ExpectedCardinality, Layer, LayerFile, LayerInput, Projection, SchemaUse,
     SelectItem,

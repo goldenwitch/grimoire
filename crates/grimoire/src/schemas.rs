@@ -144,6 +144,19 @@ pub fn prototype_schemas() -> Result<Vec<Schema>, NamespaceError> {
             ]),
         },
         Schema {
+            namespace: namespace("placement")?,
+            name: "placement".to_owned(),
+            version,
+            allowed_elements: kinds([
+                ElementKind::Description,
+                ElementKind::Block,
+                ElementKind::Port,
+                ElementKind::Connection,
+                ElementKind::Group,
+            ]),
+            value: product(vec![field("location", SchemaExpr::Text)]),
+        },
+        Schema {
             namespace: namespace("measurement")?,
             name: "measurement".to_owned(),
             version,

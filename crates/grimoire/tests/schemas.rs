@@ -45,7 +45,7 @@ fn reference(value: &str) -> Value {
 #[test]
 fn registry_has_one_schema_per_shared_family() {
     let schemas = schemas();
-    assert_eq!(schemas.len(), 9);
+    assert_eq!(schemas.len(), 10);
     assert!(
         schemas
             .iter()

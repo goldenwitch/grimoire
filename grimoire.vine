@@ -74,12 +74,18 @@ Accept: The valid layer parses and validates, the training check is visible afte
 > 2026-08-26: Training dials and phase records are finalized values attached to a training-stage group; symbolic schedule functions remain deferred rather than becoming runtime behavior or a new schema constructor.
 @artifact text/rust ./crates/grimoire/tests/hyperparameters_layer.rs
 ---
-[layers/placement] Placement and bandwidth layer (notstarted)
-Placement as decorate on addresses, collectives as elements, bytes-on-wire from shapes plus placement.
+[layers/placement] Placement and bandwidth layer (reviewing)
+Files: crates/grimoire/src/placement.rs, crates/grimoire/src/schemas.rs, crates/grimoire/tests/placement.rs, crates/grimoire/tests/schemas.rs, proposals/placement-bandwidth.md, and proposals/schema-inventory.md.
+Represent deployment placement as a finalized placement/1 decoration on an addressed element. Keep collectives within the frozen vocabulary by selecting an ordinary addressed block and supplying an explicit participant-transfer list. Derive static bytes-on-wire only for cross-location directed connections and explicit collective transfers, using caller-supplied tensor dimensions, axis extents, and positive bytes per element. Do not infer device topology, collective algorithms, dtype widths, contention, latency, or runtime behavior.
+Accept: Placement decorations parse, validate, evaluate, and extract; block placement is available to owned ports; same-location links report zero traffic without a shape; cross-location connections and collective transfers report deterministic byte counts; symbolic extents, missing placement, missing shape, duplicate placement, invalid widths, and overflow fail visibly; the logical structural reprojection is unchanged by placement values.
 -> core/freeze
 -> projlang/spec
 -> schemas/axes
 -> schemas/shapes
+> 2026-08-27: placement/1 is a ten-family prototype schema with one opaque text location field; locations are labels and are never dereferenced or normalized.
+> 2026-08-27: A port uses its exact placement when present, otherwise its owning block placement; this is structural ownership lookup, not label-based inference.
+> 2026-08-27: A collective is an ordinary addressed block plus an explicit transfer list and payload shape; collective algorithm and network semantics remain deferred.
+> 2026-08-27: Shape-to-byte accounting requires explicit bytes_per_element and axis extent bindings because shapes/1 and precision/1 do not define a universal dtype-width mapping.
 ---
 [layers/cost] Cost layer (notstarted)
 Compositional symbolic accounting over declared axes and aggregation over groups.

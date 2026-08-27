@@ -50,6 +50,7 @@ concrete grammar exists.
 | `measurement/1` | The element whose attached value is measured | Carries a literal value, unit, and source record. | Benchmark scores, latency, memory, bandwidth, success rates, and profiled facts. |
 | `provenance/1` | Groups, and possibly other elements if a later layer requires it | Carries citations, assumptions, and novelty state. | Every architecture comparison and the provenance layer. |
 | `lineage/1` | A model block or future parameter-state artifact | Records parameter-state ancestry and merge operation without pretending it is activation flow. | DARE, TIES-Merging, continual adaptation, and checkpoint reproducibility. |
+| `placement/1` | Description, block, port, connection, or group | Records the authored deployment location of an addressed element. | Placement and bandwidth views, distributed bridges, and low-bit deployment variants. |
 
 There are no separate `janus`, `chameleon`, `jepa`, `bitnet`, `qwen`, or
 `dreamer` schemas. Those names are values of `architecture.family`,
@@ -57,7 +58,7 @@ There are no separate `janus`, `chameleon`, `jepa`, `bitnet`, `qwen`, or
 
 ## Candidate channel-claim family
 
-The initial executable registry intentionally remains the nine families above.
+The initial executable registry now contains the ten families above.
 Shannon channel claims are the next candidate family, but they do not fit the
 current single-element attachment model without an explicit source-terminal
 relation boundary.
