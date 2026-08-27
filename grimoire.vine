@@ -435,9 +435,9 @@ Accept: The suite covers every validator requirement currently implemented and b
 @artifact text/rust ./crates/grimoire/tests/conformance.rs
 ---
 [layers/fixtures] Layer and schema coverage fixtures (notstarted)
-Files: domain layer fixtures named per subtask, currently crates/grimoire/tests/provenance_layer.rs, mode_layer.rs, info_flow_layer.rs, and hyperparameters_layer.rs.
+Files: domain layer fixtures named per subtask, currently crates/grimoire/tests/provenance_layer.rs, mode_layer.rs, info_flow_layer.rs, hyperparameters_layer.rs, and execution_boundary.rs.
 After the indexed-visibility and execution-boundary decisions are settled, encode the initial information-flow, hyperparameter, placement, cost, provenance, and mode layers against the concrete schema family and reviewed projection language. Include empty checks, coverage checks, symbolic axes, local elements, and cut boundaries. Each deferred boundary must remain a visible fixture outcome rather than acquire guessed runtime semantics.
-Current slices: provenance selects a core group, decorates it with provenance/1, validates the group-only attachment, and checks finalized data without structural feedback; mode layers share one backbone, select distinct ordinary core alternatives, and own separate local blocks; information-flow layers select forward structure, invert a differentiable group backward, and exclude a stopped connection, with reach agreement deferred; hyperparameters attaches training/1 to a training-stage group and checks typed finalized dials, with symbolic schedule functions deferred.
+Current slices: provenance selects a core group, decorates it with provenance/1, validates the group-only attachment, and checks finalized data without structural feedback; mode layers share one backbone, select distinct ordinary core alternatives, and own separate local blocks; information-flow layers select forward structure, invert a differentiable group backward, and exclude a stopped connection, with reach agreement deferred; hyperparameters attaches training/1 to a training-stage group and checks typed finalized dials, with symbolic schedule functions deferred; execution covers static metadata for streaming, recurrent, and closed-loop layers, structural state feedback, and C12 runtime-producer absence.
 Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; settled architectural decisions are exercised; any intentionally deferred boundary is recorded as an explicit deferred outcome rather than hidden in prose; decorations never feed structural selection; fixtures remain static and runtime-free.
 -> architecture/indexed-visibility
 -> execution/boundary
@@ -453,6 +453,7 @@ Accept: Every initial layer has one valid fixture and one relevant visible failu
 @artifact text/rust ./crates/grimoire/tests/info_flow_layer.rs
 @artifact text/rust ./crates/grimoire/tests/hyperparameters_layer.rs
 @artifact text/rust ./crates/grimoire/tests/mode_layer.rs
+@artifact text/rust ./crates/grimoire/tests/execution_boundary.rs
 ---
 [example/core-graph] Reference shared architecture graph (reviewing)
 Files: crates/grimoire/tests/reference_core.rs.
@@ -520,11 +521,14 @@ Accept: A mixed known/unknown fixture proves raw unknown bytes survive parse/ser
 > 2026-08-26: The prototype opaque boundary is the complete unknown extension-parameter source span from the `extension` keyword through its terminating semicolon, inclusive; this is an explicit canonical-serialization exception.
 ---
 [architecture/indexed-visibility] Resolve indexed visibility structure (reviewing)
-Prototype ruling: indexed modality and time visibility expands to ordinary addressed elements and directed connections before validation. No compact indexed grammar is introduced in v1. A small fixture proves the expanded connection set for two time steps and two modalities.
-Accept: Block-causal and mixed-attention fixtures distinguish structural visibility from finalized attention metadata and report generated addresses deterministically.
+Files: crates/grimoire/tests/indexed_visibility.rs.
+Keep indexed modality and time visibility as ordinary addressed elements and directed connections before validation. No compact indexed grammar is introduced in v1. The fixture uses two time steps and two modalities, with separate block-causal and mixed-attention connection sets and architecture metadata.
+Accept: Block-causal and mixed-attention fixtures validate and evaluate with deterministic expanded addresses; their structural connection sets differ; attention metadata remains finalized data and does not create visibility.
 -> architecture/vocabulary
 -> projlang/design
-> 2026-08-26: The first implementation expands indexed visibility into ordinary addressed connections before structural validation; compact indexed syntax is deferred until the expanded fixture exposes real duplication or size pressure.
+> 2026-08-26: The fixture expands two-time-step, two-modality visibility to 12 block-causal and 16 mixed ordinary connections; the two regimes remain separate layer-selected sets.
+> 2026-08-26: Attention-regime metadata is attached to the visibility groups and cannot substitute for explicit structural connections.
+@artifact text/rust ./crates/grimoire/tests/indexed_visibility.rs
 ---
 [architecture/parameter-lineage] Resolve parameter-state lineage (reviewing)
 Prototype ruling: parameter states, deltas, continual updates, and merges remain external lineage artifacts or schema-governed values in v1. They are never activation connections and do not become new frozen element kinds. A reproducibility fixture records a DARE/TIES-style merge as visibly deferred until a future artifact relation exists.
@@ -535,14 +539,14 @@ Accept: The fixture preserves logical architecture identity, names base/delta/re
 > 2026-08-26: A parameter merge is not represented as an activation connection; reproducibility is either supplied by an external lineage artifact or reported as deferred.
 ---
 [execution/boundary] Specify static execution boundary (reviewing)
-Artifact: proposals/execution-boundary.md.
+Files: proposals/execution-boundary.md and crates/grimoire/tests/execution_boundary.rs.
 Define the static account for streaming, recurrent, and closed-loop systems. Execution regime is finalized metadata; structural state, causal, and action paths remain ordinary connections; runtime clocks, buffers, rollouts, controllers, and replanning remain external. Missing runtime-facing producers in a cut are visibly unresolvable.
+Accept: Streaming, recurrent, and closed-loop fixtures validate; structural state feedback remains a connection; unknown regimes fail schema validation; a planning cut without its recurrent producer returns explicit C12; no runtime behavior is evaluated.
 -> architecture/vocabulary
-> 2026-08-26: Execution values use regimes static, streaming, recurrent, and closed-loop, with optional horizon and rate plus required external-consumer status.
-> 2026-08-26: Execution values never create feedback or causal paths; those paths are structural only when the described model interface contains them.
-> 2026-08-26: Runtime observation, buffering, state progression, action execution, sampling, and replanning remain outside pure projection evaluation.
-> 2026-08-26: A missing runtime-facing producer in a cut is reported as an unresolvable dependent layer, not silently treated as empty or open-loop.
+> 2026-08-26: The execution fixture covers streaming speech, recurrent latent dynamics with explicit state feedback, and closed-loop planning with an external consumer flag.
+> 2026-08-26: Execution values remain finalized metadata; runtime loops are represented only by static structure plus a visible C12 cut outcome when a producer is absent.
 @artifact text/markdown ./proposals/execution-boundary.md
+@artifact text/rust ./crates/grimoire/tests/execution_boundary.rs
 ---
 [implementation/bootstrap] Bootstrap Rust validator crate (complete)
 Files: crates/grimoire/Cargo.toml, crates/grimoire/src/lib.rs, address.rs, namespace.rs, version.rs, value.rs, schema.rs, model.rs, tests/model.rs.
