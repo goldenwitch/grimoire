@@ -451,10 +451,10 @@ Accept: The suite covers every validator requirement currently implemented and b
 > 2026-08-26: A valid layered fixture must satisfy parse, validation, serializer fixpoint, and cut revalidation as one end-to-end property; a missing declared layer input remains an explicit C12 outcome.
 @artifact text/rust ./crates/grimoire/tests/conformance.rs
 ---
-[layers/fixtures] Layer and schema coverage fixtures (notstarted)
-Files: domain layer fixtures named per subtask, currently crates/grimoire/tests/provenance_layer.rs, mode_layer.rs, info_flow_layer.rs, hyperparameters_layer.rs, and execution_boundary.rs.
-The information-flow slice now has a channel-semantics branch: proposals/information-flow.md defines source-terminal Shannon quantities, finite stochastic kernels, confidence-aware estimates, branch/merge semantics, and visible limits for continuous variables, cycles, causal claims, and route attribution. Existing structural information-flow remains the topology foundation.
-Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; settled architectural decisions are exercised; any intentionally deferred boundary is recorded as an explicit deferred outcome rather than hidden in prose; decorations never feed structural selection; fixtures remain static and runtime-free.
+[layers/fixtures] Layer and schema coverage fixtures (reviewing)
+Files: crates/grimoire/tests/provenance_layer.rs, mode_layer.rs, info_flow_layer.rs, hyperparameters_layer.rs, execution_boundary.rs, indexed_visibility.rs, placement.rs, cost.rs, information.rs, information_graph.rs, and information_targets.rs.
+Use the focused fixtures as the coverage gate for the initial layer families and the observed paper boundaries. Provenance covers valid group metadata and an attachment-kind failure; mode covers distinct alternatives and mode-local empty visibility; structural information flow covers forward/backward selection and stopped-flow exclusion; hyperparameters covers typed training values and an invalid port attachment; execution covers streaming, recurrent, and closed-loop metadata plus a C12 cut and unknown-regime failure; indexed visibility covers expanded block-causal versus mixed connection sets; placement covers explicit deployment locations, same-device empty traffic, cross-device bytes, and missing placement; cost covers symbolic axis products, group sums, and missing/overflow inputs; channel fixtures cover finite laws, Bayesian updates, graph composition, and V-JEPA target representability.
+Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; observed architecture boundaries remain structural where visibility changes and finalized where they are metadata; continuous estimators, runtime execution, fixed points, correlated internal kernels, parameter updates, causal interventions, and symbolic text syntax remain explicit deferred outcomes; decorations never feed structural selection; fixtures remain static and runtime-free.
 -> architecture/indexed-visibility
 -> execution/boundary
 -> information/bayesian-update
@@ -467,7 +467,9 @@ Accept: Every initial layer has one valid fixture and one relevant visible failu
 -> layers/provenance
 -> projlang/spec
 -> schemas/conformance
-> 2026-08-27: Channel semantics supersede placement as the next design thread because the target is information quantity, not only route location or measurement storage.
+> 2026-08-27: The aggregate gate is satisfied by focused fixtures rather than a second duplicate mega-fixture; each domain fixture owns its valid and invalid/empty behavior.
+> 2026-08-27: V-JEPA 2 coverage is split between static structure fixtures and finite channel target fixtures; real continuous neural-channel measurements are not inferred from paper prose.
+> 2026-08-27: Placement and cost are now included in the initial coverage set, with explicit caller inputs and visible unresolved semantics.
 @artifact text/rust ./crates/grimoire/tests/provenance_layer.rs
 @artifact text/rust ./crates/grimoire/tests/info_flow_layer.rs
 @artifact text/rust ./crates/grimoire/tests/hyperparameters_layer.rs
