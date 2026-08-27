@@ -539,7 +539,7 @@ Accept: The reference description parses, validates, evaluates every static laye
 -> schemas/conformance
 -> tools/validator
 ---
-[implementation/language] Name implementation language (reviewing)
+[implementation/language] Name implementation language (complete)
 Prototype implementation language: Rust 2024 using Cargo and rustc 1.94. The executable crate is `crates/grimoire`; library modules remain small and dependency-light. Mechanical work proceeds through focused unit and integration fixtures, with a commit after each validated slice.
 Accept: Cargo check/test runs from the repository root and every implementation task names its owned module or fixture paths.
 > 2026-08-26: Prototype implementation language is Rust 2024, chosen to match the neighboring Scry repository and the available rustc/cargo 1.94 toolchain; reversible before public API freeze.
