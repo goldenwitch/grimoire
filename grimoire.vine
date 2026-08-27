@@ -51,7 +51,7 @@ Visualization is specified separately and nothing exists yet. Views render repro
 -> projlang/spec
 ---
 [layers/info-flow] Information flow layer (reviewing)
-Files: crates/grimoire/tests/info_flow_layer.rs and the information channel artifacts.
+Files: crates/grimoire/tests/info_flow_layer.rs, crates/grimoire/tests/information_graph.rs, crates/grimoire/tests/information_targets.rs, and the information channel artifacts.
 Retain the existing forward/backward structural views as the topology foundation, then extend the information-flow work toward a channel interpretation: an addressed source port, explicit terminal ports, finite stochastic block channels, and confidence-aware Shannon claims. Keep declared-versus-derived structural reach separate from mutual information and route attribution; do not use invert to mean Shannon reversal.
 Accept: Existing forward/backward behavior remains valid; the channel contract and finite calculus define how information quantities are computed or qualified; any uncomputed continuous, cyclic, causal, or attribution boundary is explicit rather than guessed.
 -> core/freeze
@@ -63,6 +63,7 @@ Accept: Existing forward/backward behavior remains valid; the channel contract a
 > 2026-08-26: Stop-gradient exclusion is represented by omitting the stopped addressed connection from the backward select; no separate exclusion primitive is added.
 > 2026-08-26: Declared-versus-derived reach agreement remains deferred because the current static check surface only counts finalized decoration values and does not define graph-reach aggregation.
 @artifact text/rust ./crates/grimoire/tests/info_flow_layer.rs
+@artifact text/rust ./crates/grimoire/tests/information_targets.rs
 @guidance text/markdown ./proposals/information-flow.md
 ---
 [layers/hyperparameters] Hyperparameters layer (reviewing)
@@ -446,6 +447,7 @@ The information-flow slice now has a channel-semantics branch: proposals/informa
 Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; settled architectural decisions are exercised; any intentionally deferred boundary is recorded as an explicit deferred outcome rather than hidden in prose; decorations never feed structural selection; fixtures remain static and runtime-free.
 -> architecture/indexed-visibility
 -> execution/boundary
+-> information/bayesian-update
 -> information/conformance
 -> layers/cost
 -> layers/hyperparameters
@@ -475,16 +477,17 @@ Accept: The core graph parses and validates; encoder, tokenizer, bridge, predict
 @artifact text/rust ./crates/grimoire/tests/reference_core.rs
 ---
 [example/pretraining-ac] Reference pretraining and dynamics views (notstarted)
-Files: V-JEPA 2 pretraining and action-conditioned reference layers named at dispatch.
+Files: V-JEPA 2 pretraining and action-conditioned reference layers named at dispatch. Current representability checkpoint: crates/grimoire/tests/information_targets.rs.
 After the execution-boundary and indexed-visibility decisions are settled, encode action-free mask-denoising pretraining, the EMA target boundary, the separate V-JEPA 2-AC predictor, action/state inputs, teacher forcing, rollout, and static planning inputs. Keep any parameter-update or runtime-loop gap visible.
 Accept: The pretraining and AC cuts validate independently; the two predictors remain distinct; the frozen encoder is shared by address; settled visibility and execution decisions are exercised; any unresolved update semantics have an explicit visible deferred outcome rather than an improvised relation.
 -> architecture/indexed-visibility
 -> example/core-graph
 -> execution/boundary
 -> layers/fixtures
+@artifact text/rust ./crates/grimoire/tests/information_targets.rs
 ---
 [example/consumers] Reference downstream consumers (notstarted)
-Files: downstream reference layers named at dispatch.
+Files: downstream reference layers named at dispatch. Current VidQA representability checkpoint: crates/grimoire/tests/information_targets.rs.
 After the indexed-visibility, parameter-lineage, and execution-boundary decisions are settled or explicitly deferred, add classification, action anticipation, video-language alignment, multimodal bridge, unified discrete, continuous latent, speech, tokenizer, low-bit, and parameter-lineage case consumers using the cross-paper architecture proposal.
 Accept: Each consumer owns its local blocks and values; shared addresses fold only where justified; bridge and unified-core accounts stay distinguishable; parameter merges do not become activation connections; every unresolved architectural boundary is named in the fixture outcome.
 -> architecture/indexed-visibility
@@ -492,6 +495,7 @@ Accept: Each consumer owns its local blocks and values; shared addresses fold on
 -> example/pretraining-ac
 -> execution/boundary
 -> layers/fixtures
+@artifact text/rust ./crates/grimoire/tests/information_targets.rs
 ---
 [example/validation] Validate reference cuts and properties (notstarted)
 Files: reference-description validation fixtures named at dispatch.
@@ -602,24 +606,40 @@ Accept: Exact claims, Bayesian posterior claims, interval estimates, normalized 
 @guidance text/markdown ./proposals/information-flow.md
 ---
 [information/graph-composition] Compose channels over addressed graphs (reviewing)
-Files: crates/grimoire/src/information.rs and crates/grimoire/tests/information_graph.rs.
-Map evaluated addressed reprojections to finite channels through explicit block-channel assignments. Support explicit source and terminal ports, branch fan-out, conditional-independence merges, layer visibility, and finite addressed acyclic graphs. Report bare cyclic queries as unresolved until a fixed-point or process contract exists.
-Accept: Acyclic addressed graphs compose to the finite calculus; evaluated Grimoire layers supply wiring; joint terminal queries do not sum marginal information; source and terminal visibility follows the selected reprojection; graph-populated claims carry exact finite results; no channel behavior is inferred from labels or topology alone.
+Files: crates/grimoire/src/information.rs, crates/grimoire/tests/information_graph.rs, and crates/grimoire/tests/information_targets.rs.
+Map evaluated addressed reprojections to finite channels through explicit block-channel assignments. Support explicit source and terminal ports, branch fan-out, correlated multi-source input distributions, conditional-independence merges where explicitly assumed, layer visibility, and finite addressed acyclic graphs. Report bare cyclic queries as unresolved until a fixed-point or process contract exists.
+Accept: Acyclic addressed graphs compose to the finite calculus; evaluated Grimoire layers supply wiring; joint terminal queries do not sum marginal information; source and terminal visibility follows the selected reprojection; visual, action, and state inputs can remain distinct in an AC query; graph-populated claims carry exact finite results; no channel behavior is inferred from labels or topology alone.
 -> information/claims
 -> information/finite-calculus
 -> layers/info-flow
 > 2026-08-27: Graph composition consumes explicit ChannelNode assignments; topology alone never supplies a channel kernel or information value.
 > 2026-08-27: A merge uses an explicit conditional-independence product of its source-conditioned input channels in the first prototype; correlated merge behavior remains a future joint-kernel boundary.
+> 2026-08-27: JointSource carries a named finite joint distribution for multiple exogenous ports; component mutual information marginalizes side inputs rather than reporting information about the whole tuple.
+@artifact text/rust ./crates/grimoire/tests/information_graph.rs
+@artifact text/rust ./crates/grimoire/tests/information_targets.rs
 @guidance text/markdown ./proposals/information-flow.md
 ---
 [information/conformance] Exercise channel conformance (reviewing)
-Files: crates/grimoire/tests/information.rs and crates/grimoire/tests/information_graph.rs.
-Exercise the finite channel laws, addressed graph interpretation, exact source-terminal claims, Bayesian posterior summaries, branch and merge semantics, layer visibility, finite-horizon unrolling, and unresolved bare cycles.
-Accept: The suite distinguishes structural reachability from Shannon quantities, proves joint-information behavior, checks confidence/interval and claim shape, and records continuous estimators, fixed points, correlated merges, and causal interventions as visible follow-up boundaries.
+Files: crates/grimoire/tests/information.rs, crates/grimoire/tests/information_graph.rs, and crates/grimoire/tests/information_targets.rs.
+Exercise the finite channel laws, addressed graph interpretation, exact source-terminal claims, Bayesian posterior summaries, branch and merge semantics, correlated multi-source AC inputs, layer visibility, V-JEPA 2 target scenarios, finite-horizon unrolling, and unresolved bare cycles.
+Accept: The suite distinguishes structural reachability from Shannon quantities, proves joint-information behavior, checks confidence/interval and claim shape, validates shared-encoder/pretraining/AC/VidQA/planning representation, and records continuous estimators, fixed points, correlated joint kernels, Bayesian update priors, and causal interventions as visible follow-up boundaries.
 -> information/graph-composition
-> 2026-08-27: Channel conformance is split between mathematical laws and evaluated-reprojection graph fixtures; text grammar integration remains downstream.
+> 2026-08-27: Channel conformance is split between mathematical laws, addressed graph fixtures, and a V-JEPA 2 target-scenario fixture; text grammar integration remains downstream.
 > 2026-08-27: Finite-horizon recurrence is represented by explicit acyclic addressed state nodes; a bare cycle remains unresolved.
-> 2026-08-27: The current graph adapter requires explicit ChannelNode assignments and uses conditional-independence products at multi-input nodes; correlated joint kernels remain a future boundary.
+> 2026-08-27: The target AC fixture keeps visual, action, and state source ports distinct and computes information about visual input under their explicit joint distribution.
 @artifact text/rust ./crates/grimoire/tests/information.rs
 @artifact text/rust ./crates/grimoire/tests/information_graph.rs
+@artifact text/rust ./crates/grimoire/tests/information_targets.rs
+@guidance text/markdown ./proposals/information-flow.md
+---
+[information/bayesian-update] Update channel posteriors from observations (reviewing)
+Files: crates/grimoire/src/information.rs and crates/grimoire/tests/information.rs.
+Replace purely caller-weighted channel scenarios with an evidence-driven finite categorical posterior path. Define a validated prior over channel hypotheses, update it from finite source/target observations using likelihood, and expose posterior channel weights, credible intervals, and threshold decision probabilities. Keep the prior, likelihood, posterior, and information estimand visible; do not conflate posterior uncertainty with Bayesian mutual information.
+Accept: A supplied prior updates reproducibly from observations; empty evidence preserves the prior; impossible observations fail visibly; posterior weights normalize; posterior mutual-information and retention summaries produce credible intervals and threshold probabilities; prior sensitivity remains inspectable.
+-> information/channel-contract
+-> information/claims
+-> information/finite-calculus
+> 2026-08-27: ChannelObservation records finite source/target transitions; ChannelPosterior::update reweights explicit hypotheses in log space and reports posterior collapse when all hypotheses assign zero likelihood.
+@artifact text/rust ./crates/grimoire/src/information.rs
+@artifact text/rust ./crates/grimoire/tests/information.rs
 @guidance text/markdown ./proposals/information-flow.md

@@ -1,7 +1,8 @@
 use grimoire::{
-    BayesianSummary, Channel, ChannelPosterior, ChannelScenario, ClaimEstimate, CredibleInterval,
-    Distribution, InformationClaim, InformationDenominator, InformationError, InformationQuantity,
-    PosteriorSamples, RouteAllocationClaim, RouteShare, data_processing_holds,
+    BayesianSummary, Channel, ChannelObservation, ChannelPosterior, ChannelScenario, ClaimEstimate,
+    CredibleInterval, Distribution, InformationClaim, InformationDenominator, InformationError,
+    InformationQuantity, JointSource, PosteriorSamples, RouteAllocationClaim, RouteShare,
+    data_processing_holds,
 };
 
 fn binary_source() -> Distribution {
@@ -128,6 +129,32 @@ fn joint_branch_information_is_not_the_sum_of_marginals() {
 }
 
 #[test]
+fn joint_source_keeps_correlated_side_inputs_explicit() {
+    let joint_source = JointSource::new(
+        vec![address("@visual"), address("@action")],
+        vec![2, 2],
+        Distribution::new(vec![0.45, 0.05, 0.05, 0.45]).unwrap_or_else(|error| panic!("{error}")),
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    let channel =
+        Channel::deterministic(vec![0, 1, 0, 1], 2).unwrap_or_else(|error| panic!("{error}"));
+    let visual = joint_source
+        .component_distribution(&address("@visual"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(visual.probabilities(), &[0.5, 0.5]);
+    let information = joint_source
+        .mutual_information_bits(&channel, &address("@visual"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    assert!(information > 0.4);
+    assert!(information < 0.7);
+    let retention = joint_source
+        .retention_fraction(&channel, &address("@visual"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    assert!(retention > 0.4);
+    assert!(retention < 0.7);
+}
+
+#[test]
 fn posterior_channels_produce_credible_decisions() {
     let source = binary_source();
     let identity = Channel::identity(2).unwrap_or_else(|error| panic!("{error}"));
@@ -158,6 +185,56 @@ fn posterior_channels_produce_credible_decisions() {
     assert_close(summary.probability_at_least, 0.75);
     assert_close(summary.interval.lower, 0.0);
     assert_close(summary.interval.upper, 1.0);
+}
+
+#[test]
+fn posterior_update_reweights_channel_hypotheses_from_observations() {
+    let source = binary_source();
+    let prior = ChannelPosterior::new(vec![
+        ChannelScenario {
+            source: source.clone(),
+            channel: Channel::identity(2).unwrap_or_else(|error| panic!("{error}")),
+            weight: 0.6,
+        },
+        ChannelScenario {
+            source,
+            channel: Channel::deterministic(vec![1, 0], 2)
+                .unwrap_or_else(|error| panic!("{error}")),
+            weight: 0.4,
+        },
+    ])
+    .unwrap_or_else(|error| panic!("{error}"));
+    let updated = prior
+        .update(&[ChannelObservation::new(0, 0), ChannelObservation::new(1, 1)])
+        .unwrap_or_else(|error| panic!("{error}"));
+    let weights = updated.scenario_weights();
+    assert_close(weights[0], 1.0);
+    assert_close(weights[1], 0.0);
+    let posterior = updated
+        .mutual_information_posterior()
+        .unwrap_or_else(|error| panic!("{error}"));
+    assert_close(posterior.posterior_mean(), 1.0);
+    assert_close(posterior.probability_at_least(0.9), 1.0);
+}
+
+#[test]
+fn empty_evidence_preserves_the_prior_and_impossible_evidence_fails() {
+    let source = binary_source();
+    let prior = ChannelPosterior::new(vec![ChannelScenario {
+        source,
+        channel: Channel::identity(2).unwrap_or_else(|error| panic!("{error}")),
+        weight: 1.0,
+    }])
+    .unwrap_or_else(|error| panic!("{error}"));
+    let unchanged = prior.update(&[]).unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(unchanged.scenario_weights(), vec![1.0]);
+    let error = unchanged
+        .update(&[ChannelObservation::new(0, 2)])
+        .expect_err("impossible observation should collapse the posterior");
+    assert!(matches!(
+        error,
+        grimoire::InformationError::ImpossibleObservations { count: 1 }
+    ));
 }
 
 #[test]

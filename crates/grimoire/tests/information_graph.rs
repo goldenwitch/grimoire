@@ -1,6 +1,6 @@
 use grimoire::{
     Channel, ChannelGraph, ChannelLink, ChannelNode, ClaimEstimate, Distribution, InformationError,
-    evaluate_layer, parse_description, prototype_schemas, validate_description,
+    JointSource, evaluate_layer, parse_description, prototype_schemas, validate_description,
 };
 
 fn address(value: &str) -> grimoire::Address {
@@ -213,6 +213,55 @@ fn finite_horizon_recurrence_is_an_acyclic_addressed_graph() {
             .unwrap_or_else(|error| panic!("{error}"))
             < 1.0
     );
+}
+
+#[test]
+fn action_conditioned_graph_keeps_visual_information_distinct_from_side_inputs() {
+    let graph = ChannelGraph::new(
+        vec![node(
+            "@ac/predictor",
+            "@ac/predictor",
+            &["@ac/visual", "@ac/action", "@ac/state"],
+            "@ac/output",
+            Channel::deterministic(vec![0, 0, 1, 1, 0, 0, 1, 1], 2)
+                .unwrap_or_else(|error| panic!("{error}")),
+        )],
+        vec![
+            link("@visual/out", "@ac/visual"),
+            link("@action/out", "@ac/action"),
+            link("@state/out", "@ac/state"),
+        ],
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    let source = JointSource::new(
+        vec![
+            address("@visual/out"),
+            address("@action/out"),
+            address("@state/out"),
+        ],
+        vec![2, 2, 2],
+        Distribution::new(vec![0.225, 0.225, 0.025, 0.025, 0.025, 0.025, 0.225, 0.225])
+            .unwrap_or_else(|error| panic!("{error}")),
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    let channel = graph
+        .channel_to_terminal_with_joint_source(&source, &address("@ac/output"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    let information = source
+        .mutual_information_bits(&channel, &address("@visual/out"))
+        .unwrap_or_else(|error| panic!("{error}"));
+    assert!(information > 0.4);
+    assert!(information < 0.7);
+    let claim = graph
+        .information_claim_with_joint_source(
+            &source,
+            &address("@visual/out"),
+            &address("@ac/output"),
+            "finite-joint-channel".to_owned(),
+            "action-conditioned graph fixture".to_owned(),
+        )
+        .unwrap_or_else(|error| panic!("{error}"));
+    assert!(matches!(claim.estimate, ClaimEstimate::Exact(value) if value == information));
 }
 
 #[test]

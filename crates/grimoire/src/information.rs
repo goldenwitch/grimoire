@@ -49,6 +49,178 @@ impl Distribution {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct JointSource {
+    ports: Vec<Address>,
+    cardinalities: Vec<usize>,
+    distribution: Distribution,
+}
+
+impl JointSource {
+    pub fn new(
+        ports: Vec<Address>,
+        cardinalities: Vec<usize>,
+        distribution: Distribution,
+    ) -> Result<Self, InformationError> {
+        if ports.is_empty() || ports.len() != cardinalities.len() {
+            return Err(InformationError::JointSourceShapeMismatch {
+                expected: ports.len(),
+                actual: cardinalities.len(),
+            });
+        }
+        if let Some(duplicate) = find_duplicate(&ports) {
+            return Err(InformationError::DuplicateJointSourcePort(duplicate));
+        }
+        let mut joint_cardinality = 1usize;
+        for cardinality in &cardinalities {
+            if *cardinality == 0 {
+                return Err(InformationError::ZeroCardinality);
+            }
+            joint_cardinality = joint_cardinality
+                .checked_mul(*cardinality)
+                .ok_or(InformationError::JointSourceCardinalityOverflow)?;
+        }
+        if distribution.cardinality() != joint_cardinality {
+            return Err(InformationError::JointSourceDistributionMismatch {
+                expected: joint_cardinality,
+                actual: distribution.cardinality(),
+            });
+        }
+        Ok(Self {
+            ports,
+            cardinalities,
+            distribution,
+        })
+    }
+
+    pub fn independent(
+        ports: Vec<Address>,
+        marginals: Vec<Distribution>,
+    ) -> Result<Self, InformationError> {
+        let cardinalities: Vec<usize> = marginals.iter().map(Distribution::cardinality).collect();
+        let mut joint_cardinality = 1usize;
+        for cardinality in &cardinalities {
+            joint_cardinality = joint_cardinality
+                .checked_mul(*cardinality)
+                .ok_or(InformationError::JointSourceCardinalityOverflow)?;
+        }
+        let mut probabilities = Vec::with_capacity(joint_cardinality);
+        for joint_index in 0..joint_cardinality {
+            let values = self_component_values(joint_index, &cardinalities);
+            let probability = values
+                .iter()
+                .enumerate()
+                .map(|(index, value)| marginals[index].probabilities()[*value])
+                .product();
+            probabilities.push(probability);
+        }
+        Self::new(ports, cardinalities, Distribution::new(probabilities)?)
+    }
+
+    #[must_use]
+    pub fn ports(&self) -> &[Address] {
+        &self.ports
+    }
+
+    #[must_use]
+    pub fn distribution(&self) -> &Distribution {
+        &self.distribution
+    }
+
+    pub fn component_distribution(&self, port: &Address) -> Result<Distribution, InformationError> {
+        let component = self.component_index(port)?;
+        let mut probabilities = vec![0.0; self.cardinalities[component]];
+        for (joint_index, probability) in self.distribution.probabilities().iter().enumerate() {
+            let value = self_component_values(joint_index, &self.cardinalities)[component];
+            probabilities[value] += probability;
+        }
+        Distribution::new(probabilities)
+    }
+
+    fn component_index(&self, port: &Address) -> Result<usize, InformationError> {
+        self.ports
+            .iter()
+            .position(|candidate| candidate == port)
+            .ok_or_else(|| InformationError::UnknownJointSourcePort(port.clone()))
+    }
+
+    fn projection_channel(&self, port: &Address) -> Result<Channel, InformationError> {
+        let component = self.component_index(port)?;
+        let mapping = (0..self.distribution.cardinality())
+            .map(|joint_index| self_component_values(joint_index, &self.cardinalities)[component])
+            .collect();
+        Channel::deterministic(mapping, self.cardinalities[component])
+    }
+
+    pub fn mutual_information_bits(
+        &self,
+        channel: &Channel,
+        source_port: &Address,
+    ) -> Result<f64, InformationError> {
+        let component = self.component_index(source_port)?;
+        if channel.source_cardinality() != self.distribution.cardinality() {
+            return Err(InformationError::DimensionMismatch {
+                context: "joint source channel",
+                expected: self.distribution.cardinality(),
+                actual: channel.source_cardinality(),
+            });
+        }
+        let source_cardinality = self.cardinalities[component];
+        let mut source_probabilities = vec![0.0; source_cardinality];
+        let mut joint_probabilities =
+            vec![vec![0.0; channel.target_cardinality()]; source_cardinality];
+        let mut target_probabilities = vec![0.0; channel.target_cardinality()];
+        for (joint_index, source_probability) in
+            self.distribution.probabilities().iter().enumerate()
+        {
+            let source_value = self_component_values(joint_index, &self.cardinalities)[component];
+            source_probabilities[source_value] += source_probability;
+            for (target_index, channel_probability) in channel.rows[joint_index].iter().enumerate()
+            {
+                let probability = source_probability * channel_probability;
+                joint_probabilities[source_value][target_index] += probability;
+                target_probabilities[target_index] += probability;
+            }
+        }
+        let mut mutual_information = 0.0;
+        for source_index in 0..source_cardinality {
+            for target_index in 0..channel.target_cardinality() {
+                let joint_probability = joint_probabilities[source_index][target_index];
+                if joint_probability <= 0.0 {
+                    continue;
+                }
+                let denominator =
+                    source_probabilities[source_index] * target_probabilities[target_index];
+                mutual_information += joint_probability * (joint_probability / denominator).log2();
+            }
+        }
+        Ok(mutual_information.max(0.0))
+    }
+
+    pub fn retention_fraction(
+        &self,
+        channel: &Channel,
+        source_port: &Address,
+    ) -> Result<f64, InformationError> {
+        let source = self.component_distribution(source_port)?;
+        let entropy = source.entropy_bits();
+        if entropy <= PROBABILITY_TOLERANCE {
+            return Err(InformationError::ZeroEntropy);
+        }
+        Ok((self.mutual_information_bits(channel, source_port)? / entropy).clamp(0.0, 1.0))
+    }
+}
+
+fn self_component_values(joint_index: usize, cardinalities: &[usize]) -> Vec<usize> {
+    let mut values = vec![0; cardinalities.len()];
+    let mut remainder = joint_index;
+    for index in (0..cardinalities.len()).rev() {
+        values[index] = remainder % cardinalities[index];
+        remainder /= cardinalities[index];
+    }
+    values
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct Channel {
     rows: Vec<Vec<f64>>,
     target_cardinality: usize,
@@ -538,6 +710,22 @@ pub struct ChannelScenario {
     pub weight: f64,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ChannelObservation {
+    pub source_index: usize,
+    pub target_index: usize,
+}
+
+impl ChannelObservation {
+    #[must_use]
+    pub const fn new(source_index: usize, target_index: usize) -> Self {
+        Self {
+            source_index,
+            target_index,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChannelPosterior {
     scenarios: Vec<ChannelScenario>,
@@ -556,6 +744,67 @@ impl ChannelPosterior {
     #[must_use]
     pub fn scenario_count(&self) -> usize {
         self.scenarios.len()
+    }
+
+    #[must_use]
+    pub fn scenario_weights(&self) -> Vec<f64> {
+        self.scenarios
+            .iter()
+            .map(|scenario| scenario.weight)
+            .collect()
+    }
+
+    pub fn update(&self, observations: &[ChannelObservation]) -> Result<Self, InformationError> {
+        let mut log_weights = Vec::with_capacity(self.scenarios.len());
+        for scenario in &self.scenarios {
+            let mut log_weight = if scenario.weight > 0.0 {
+                scenario.weight.ln()
+            } else {
+                f64::NEG_INFINITY
+            };
+            for observation in observations {
+                let likelihood = scenario
+                    .channel
+                    .row(observation.source_index)
+                    .and_then(|row| row.get(observation.target_index))
+                    .copied()
+                    .unwrap_or(0.0);
+                if likelihood <= 0.0 {
+                    log_weight = f64::NEG_INFINITY;
+                    break;
+                }
+                log_weight += likelihood.ln();
+            }
+            log_weights.push(log_weight);
+        }
+        let maximum_log_weight = log_weights
+            .iter()
+            .copied()
+            .fold(f64::NEG_INFINITY, f64::max);
+        if !maximum_log_weight.is_finite() {
+            return Err(InformationError::ImpossibleObservations {
+                count: observations.len(),
+            });
+        }
+        let mut weights: Vec<f64> = log_weights
+            .iter()
+            .map(|log_weight| (*log_weight - maximum_log_weight).exp())
+            .collect();
+        let normalizer: f64 = weights.iter().sum();
+        for weight in &mut weights {
+            *weight /= normalizer;
+        }
+        let scenarios = self
+            .scenarios
+            .iter()
+            .cloned()
+            .zip(weights)
+            .map(|(mut scenario, weight)| {
+                scenario.weight = weight;
+                scenario
+            })
+            .collect();
+        Self::new(scenarios)
     }
 
     pub fn mutual_information_posterior(&self) -> Result<PosteriorSamples, InformationError> {
@@ -697,6 +946,19 @@ impl ChannelGraph {
         resolver.resolve_port(terminal)
     }
 
+    pub fn channel_to_terminal_with_joint_source(
+        &self,
+        source: &JointSource,
+        terminal: &Address,
+    ) -> Result<Channel, InformationError> {
+        for port in source.ports() {
+            self.check_visible_port(port)?;
+        }
+        self.check_visible_port(terminal)?;
+        let mut resolver = GraphResolver::from_joint_source(self, source)?;
+        resolver.resolve_port(terminal)
+    }
+
     pub fn from_reprojection(
         reprojection: &StructuralReprojection,
         nodes: Vec<ChannelNode>,
@@ -800,6 +1062,27 @@ impl ChannelGraph {
         )
     }
 
+    pub fn information_claim_with_joint_source(
+        &self,
+        source: &JointSource,
+        source_port: &Address,
+        terminal: &Address,
+        method: String,
+        evidence: String,
+    ) -> Result<InformationClaim, InformationError> {
+        let channel = self.channel_to_terminal_with_joint_source(source, terminal)?;
+        let value = source.mutual_information_bits(&channel, source_port)?;
+        InformationClaim::exact(
+            source_port.clone(),
+            vec![terminal.clone()],
+            InformationQuantity::MutualInformation,
+            None,
+            value,
+            method,
+            evidence,
+        )
+    }
+
     pub fn joint_information_claim(
         &self,
         source_port: &Address,
@@ -835,8 +1118,7 @@ impl ChannelGraph {
 
 struct GraphResolver<'graph> {
     graph: &'graph ChannelGraph,
-    source_port: Address,
-    source: &'graph Distribution,
+    external_sources: BTreeMap<Address, Channel>,
     incoming: BTreeMap<Address, Address>,
     input_nodes: BTreeMap<Address, Address>,
     output_nodes: BTreeMap<Address, Address>,
@@ -856,6 +1138,29 @@ impl<'graph> GraphResolver<'graph> {
         source_port: &Address,
         source: &'graph Distribution,
     ) -> Result<Self, InformationError> {
+        let mut external_sources = BTreeMap::new();
+        external_sources.insert(
+            source_port.clone(),
+            Channel::identity(source.cardinality())?,
+        );
+        Self::with_external_sources(graph, external_sources)
+    }
+
+    fn from_joint_source(
+        graph: &'graph ChannelGraph,
+        source: &'graph JointSource,
+    ) -> Result<Self, InformationError> {
+        let mut external_sources = BTreeMap::new();
+        for port in source.ports() {
+            external_sources.insert(port.clone(), source.projection_channel(port)?);
+        }
+        Self::with_external_sources(graph, external_sources)
+    }
+
+    fn with_external_sources(
+        graph: &'graph ChannelGraph,
+        external_sources: BTreeMap<Address, Channel>,
+    ) -> Result<Self, InformationError> {
         let mut incoming = BTreeMap::new();
         for link in &graph.links {
             incoming.insert(link.destination.clone(), link.source.clone());
@@ -870,8 +1175,7 @@ impl<'graph> GraphResolver<'graph> {
         }
         Ok(Self {
             graph,
-            source_port: source_port.clone(),
-            source,
+            external_sources,
             incoming,
             input_nodes,
             output_nodes,
@@ -881,8 +1185,8 @@ impl<'graph> GraphResolver<'graph> {
     }
 
     fn resolve_port(&mut self, port: &Address) -> Result<Channel, InformationError> {
-        if port == &self.source_port {
-            return Channel::identity(self.source.cardinality());
+        if let Some(channel) = self.external_sources.get(port) {
+            return Ok(channel.clone());
         }
         if let Some(node_address) = self.output_nodes.get(port).cloned() {
             self.resolve_node(&node_address)?;
@@ -1065,8 +1369,23 @@ fn validate_claim_estimate_bounds(
 #[derive(Clone, Debug, PartialEq)]
 pub enum InformationError {
     EmptyDistribution,
+    JointSourceShapeMismatch {
+        expected: usize,
+        actual: usize,
+    },
+    DuplicateJointSourcePort(Address),
+    ZeroCardinality,
+    JointSourceCardinalityOverflow,
+    JointSourceDistributionMismatch {
+        expected: usize,
+        actual: usize,
+    },
+    UnknownJointSourcePort(Address),
     EmptyChannel,
     EmptyPosterior,
+    ImpossibleObservations {
+        count: usize,
+    },
     InvalidProbability {
         context: &'static str,
         index: usize,
@@ -1152,8 +1471,32 @@ impl fmt::Display for InformationError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::EmptyDistribution => formatter.write_str("distribution must not be empty"),
+            Self::JointSourceShapeMismatch { expected, actual } => write!(
+                formatter,
+                "joint source has {expected} ports and {actual} cardinalities"
+            ),
+            Self::DuplicateJointSourcePort(address) => {
+                write!(formatter, "joint source repeats port `{address}`")
+            }
+            Self::ZeroCardinality => {
+                formatter.write_str("joint source cardinality must be positive")
+            }
+            Self::JointSourceCardinalityOverflow => {
+                formatter.write_str("joint source cardinality overflow")
+            }
+            Self::JointSourceDistributionMismatch { expected, actual } => write!(
+                formatter,
+                "joint source distribution has cardinality {actual}, expected {expected}"
+            ),
+            Self::UnknownJointSourcePort(address) => {
+                write!(formatter, "joint source does not contain port `{address}`")
+            }
             Self::EmptyChannel => formatter.write_str("channel must not be empty"),
             Self::EmptyPosterior => formatter.write_str("posterior must not be empty"),
+            Self::ImpossibleObservations { count } => write!(
+                formatter,
+                "all channel hypotheses assign zero likelihood to {count} observations"
+            ),
             Self::InvalidProbability {
                 context,
                 index,
