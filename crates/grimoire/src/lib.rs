@@ -5,6 +5,7 @@ mod parser;
 mod projection;
 mod schema;
 mod schemas;
+mod validate;
 mod value;
 mod version;
 
@@ -21,5 +22,6 @@ pub use schema::{ElementKind, Schema, SchemaError, SchemaExpr, SchemaExprArm, Sc
 mod serialize;
 pub use schemas::{PROTOTYPE_NAMESPACE_ROOT, prototype_schemas};
 pub use serialize::{SerializeError, serialize_description};
+pub use validate::{ValidationError, validate_description};
 pub use value::{FiniteNumber, Value};
 pub use version::{Version, VersionError};

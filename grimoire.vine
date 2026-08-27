@@ -329,21 +329,25 @@ Accept: Minimal descriptions and extension values parse into one internal form; 
 > 2026-08-26: The initial parser reports byte offsets and rejects duplicate core addresses before returning a description.
 > 2026-08-26: The prototype recognizes the provisional Grimoire namespace root as typed extension data and stores all other extension parameter spans opaquely from `extension` through the terminating semicolon.
 ---
-[tools/validator/structure] Validate structural invariants (notstarted)
-Files: validator structural checks and fixtures named at dispatch.
-Do: Implement address uniqueness, directed two-port connections, core-version declaration, one definition site, grammar conformance, reference scope, locality, legal unreferenced elements, layer-input DAG resolution, and extension-namespace preservation.
-Accept: Each failure names its check, location, and relevant identifier; valid ties are accepted without warnings; C1-C10 fixtures cover both success and failure.
+[tools/validator/structure] Validate structural invariants (reviewing)
+Files: crates/grimoire/src/validate.rs and crates/grimoire/tests/validate.rs.
+Implement the first structural validator slice: global address uniqueness and one definition site across core and generated elements; directed connection endpoints must resolve to ports; block/name and model-shape checks; layer input resolution and DAG cycles; visible references and maximal-site locality; known extension schema/attachment validation; opaque unknown namespace acceptance. C3 is structurally represented by the typed core-spec field; cut extraction remains downstream.
+Accept: Every failure names its check, location, and relevant identifier; valid ties and unreferenced elements are accepted; focused Cargo tests pass.
+@artifact text/rust ./crates/grimoire/src/validate.rs
+@artifact text/rust ./crates/grimoire/tests/validate.rs
 -> implementation/bootstrap
 -> implementation/language
 -> schemas/instances
 -> tools/validator/parse
+> 2026-08-26: Structural validation accumulates typed ValidationError records instead of failing at the first issue.
+> 2026-08-26: Layer visibility is computed over the declared input DAG; a layer must explicitly declare core or an input chain reaching core.
+> 2026-08-26: Locality computes maximal legal definition sites from all reference sites and accepts ties without warnings.
+> 2026-08-26: Recognized prototype extension namespaces validate against the executable schema registry; unknown namespaces must carry opaque payloads and are otherwise preserved.
 ---
 [tools/validator/serialize] Serialize canonical descriptions (started)
 Files: crates/grimoire/src/serialize.rs and crates/grimoire/tests/serialize.rs.
 Emit deterministic canonical text for the current description, core, layer, projection, and closed-value model. Canonicalize recognized values and ordering; emit unknown extension raw spans unchanged. Current fixtures cover core, known and unknown extensions, layers, projections, fixpoint, and malformed opaque bytes.
 Accept: Core, extension, and layered valid fixtures round-trip; unknown payload bytes survive; malformed opaque bytes fail visibly; focused Cargo tests pass.
-@artifact text/rust ./crates/grimoire/src/serialize.rs
-@artifact text/rust ./crates/grimoire/tests/serialize.rs
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
@@ -353,6 +357,8 @@ Accept: Core, extension, and layered valid fixtures round-trip; unknown payload 
 > 2026-08-26: The first serializer returns canonical UTF-8 text for the typed model and treats parser-captured unknown extension spans as opaque source fragments.
 > 2026-08-26: Core maps are emitted in address order; recognized products are emitted in deterministic field order until schema declaration order is wired into the registry.
 > 2026-08-26: The serializer rejects opaque payload bytes that cannot be emitted as UTF-8 rather than silently replacing them.
+@artifact text/rust ./crates/grimoire/src/serialize.rs
+@artifact text/rust ./crates/grimoire/tests/serialize.rs
 ---
 [tools/validator/cuts] Validate cuts and erasure (notstarted)
 Files: validator cut extraction and resolution fixtures named at dispatch.
