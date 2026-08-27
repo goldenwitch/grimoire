@@ -10,6 +10,12 @@ pub struct Layer {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct LayerFile {
+    pub description: Address,
+    pub layer: Layer,
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum LayerInput {
     Core,
     Layer(String),

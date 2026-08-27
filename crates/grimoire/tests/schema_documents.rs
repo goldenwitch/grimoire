@@ -1,4 +1,6 @@
-use grimoire::{ElementKind, SchemaExpr, parse_schema_document, prototype_schemas};
+use grimoire::{
+    ElementKind, SchemaExpr, parse_schema_document, prototype_schemas, serialize_schema_document,
+};
 
 const SHAPES: &str = r#"
     grimoire-schema 1.0.0
@@ -108,4 +110,12 @@ fn rejects_unknown_schema_expression() {
     "#;
     let error = parse_schema_document(source).expect_err("unknown constructor should fail");
     assert!(error.message.contains("unknown schema expression"));
+}
+
+#[test]
+fn schema_serialization_round_trips() {
+    let schema = parse_schema_document(SHAPES).unwrap_or_else(|error| panic!("{error}"));
+    let serialized = serialize_schema_document(&schema).unwrap_or_else(|error| panic!("{error}"));
+    let reparsed = parse_schema_document(&serialized).unwrap_or_else(|error| panic!("{error}"));
+    assert_eq!(reparsed, schema);
 }

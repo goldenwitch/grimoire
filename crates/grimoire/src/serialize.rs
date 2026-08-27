@@ -1,9 +1,9 @@
 use core::fmt;
 
 use crate::{
-    Address, Block, Check, Connection, CoreGraph, Description, ExpectedCardinality,
-    ExtensionParameter, ExtensionValue, Group, Layer, LayerInput, Port, Projection, SchemaUse,
-    SelectItem, Value,
+    Address, Block, Check, Connection, CoreGraph, Description, ElementKind, ExpectedCardinality,
+    ExtensionParameter, ExtensionValue, Group, Layer, LayerFile, LayerInput, Port, Projection,
+    Schema, SchemaExpr, SchemaUse, SelectItem, Value,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -34,6 +34,122 @@ pub fn serialize_description(description: &Description) -> Result<String, Serial
     }
     output.push_str("}\n");
     Ok(output)
+}
+
+pub fn serialize_layer_document(document: &LayerFile) -> Result<String, SerializeError> {
+    let mut output = String::new();
+    output.push_str("grimoire-layer 1.0.0\nfor ");
+    write_address(&mut output, &document.description);
+    output.push_str(";\n");
+    write_layer(&mut output, &document.layer, 0)?;
+    Ok(output)
+}
+
+pub fn serialize_schema_document(schema: &Schema) -> Result<String, SerializeError> {
+    let mut output = String::new();
+    output.push_str("grimoire-schema 1.0.0\nschema {\n");
+    write_indent(&mut output, 1);
+    output.push_str("namespace ");
+    write_string(&mut output, schema.namespace.as_str());
+    output.push_str(";\n");
+    write_indent(&mut output, 1);
+    output.push_str("name ");
+    output.push_str(&schema.name);
+    output.push_str(";\n");
+    write_indent(&mut output, 1);
+    output.push_str("version ");
+    output.push_str(&schema.version.to_string());
+    output.push_str(";\n");
+    write_indent(&mut output, 1);
+    output.push_str("allows { ");
+    for (index, kind) in schema.allowed_elements.iter().enumerate() {
+        if index > 0 {
+            output.push_str(", ");
+        }
+        output.push_str(element_kind_name(*kind));
+    }
+    output.push_str(" };\n");
+    write_indent(&mut output, 1);
+    output.push_str("value ");
+    write_schema_expression(&mut output, &schema.value, 1)?;
+    output.push_str(";\n}");
+    output.push('\n');
+    Ok(output)
+}
+
+fn element_kind_name(kind: ElementKind) -> &'static str {
+    match kind {
+        ElementKind::Description => "description",
+        ElementKind::Block => "block",
+        ElementKind::Port => "port",
+        ElementKind::Connection => "connection",
+        ElementKind::Group => "group",
+    }
+}
+
+fn write_schema_expression(
+    output: &mut String,
+    expression: &SchemaExpr,
+    indent: usize,
+) -> Result<(), SerializeError> {
+    match expression {
+        SchemaExpr::FiniteScalar => output.push_str("finite-scalar"),
+        SchemaExpr::PositiveInteger => output.push_str("positive-integer"),
+        SchemaExpr::FiniteNumber => output.push_str("finite-number"),
+        SchemaExpr::Text => output.push_str("text"),
+        SchemaExpr::Enumeration(values) => {
+            output.push_str("enumeration { ");
+            for (index, value) in values.iter().enumerate() {
+                if index > 0 {
+                    output.push_str(", ");
+                }
+                output.push_str(value);
+            }
+            output.push_str(" }");
+        }
+        SchemaExpr::Product(fields) => {
+            output.push_str("product {\n");
+            for (index, field) in fields.iter().enumerate() {
+                write_indent(output, indent + 1);
+                output.push_str(&field.name);
+                output.push_str(": ");
+                write_schema_expression(output, &field.schema, indent + 1)?;
+                if index + 1 < fields.len() {
+                    output.push(',');
+                }
+                output.push('\n');
+            }
+            write_indent(output, indent);
+            output.push('}');
+        }
+        SchemaExpr::Sequence(item) => {
+            output.push_str("sequence<");
+            write_schema_expression(output, item, indent)?;
+            output.push('>');
+        }
+        SchemaExpr::Alternative(arms) => {
+            output.push_str("alternative {\n");
+            for (index, arm) in arms.iter().enumerate() {
+                write_indent(output, indent + 1);
+                output.push_str(&arm.tag);
+                output.push_str(": ");
+                write_schema_expression(output, &arm.schema, indent + 1)?;
+                if index + 1 < arms.len() {
+                    output.push(',');
+                }
+                output.push('\n');
+            }
+            write_indent(output, indent);
+            output.push('}');
+        }
+        SchemaExpr::AddressReference => output.push_str("address-reference"),
+        SchemaExpr::Presence(inner) => {
+            output.push_str("presence<");
+            write_schema_expression(output, inner, indent)?;
+            output.push('>');
+        }
+    }
+    Ok(())
 }
 
 fn write_core(output: &mut String, core: &CoreGraph, indent: usize) -> Result<(), SerializeError> {

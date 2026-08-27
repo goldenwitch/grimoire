@@ -2,7 +2,7 @@ use core::fmt;
 
 use crate::{
     Address, Block, Check, Connection, CoreGraph, Decoration, Description, ElementKind,
-    ExpectedCardinality, ExtensionParameter, ExtensionValue, FiniteNumber, Group, Layer,
+    ExpectedCardinality, ExtensionParameter, ExtensionValue, FiniteNumber, Group, Layer, LayerFile,
     LayerInput, Namespace, Port, Projection, Schema, SchemaExpr, SchemaExprArm, SchemaExprField,
     SchemaUse, SelectItem, Value, Version,
 };
@@ -58,6 +58,10 @@ pub fn parse_description(source: &str) -> Result<Description, ParseError> {
 
 pub fn parse_schema_document(source: &str) -> Result<crate::Schema, ParseError> {
     Parser::new(source)?.parse_schema_document()
+}
+
+pub fn parse_layer_document(source: &str) -> Result<LayerFile, ParseError> {
+    Parser::new(source)?.parse_layer_document()
 }
 
 impl<'source> Lexer<'source> {
@@ -330,6 +334,9 @@ impl<'source> Parser<'source> {
         self.expect(TokenKind::Semicolon)?;
         self.expect_word("name")?;
         let name = self.take_word()?;
+        if !is_identifier(&name) {
+            return self.error("schema name is not an identifier");
+        }
         self.expect(TokenKind::Semicolon)?;
         self.expect_word("version")?;
         let version = self.parse_version()?;
@@ -361,6 +368,17 @@ impl<'source> Parser<'source> {
             allowed_elements,
             value,
         })
+    }
+
+    fn parse_layer_document(mut self) -> Result<LayerFile, ParseError> {
+        self.expect_word("grimoire-layer")?;
+        let _grammar_version = self.parse_version()?;
+        self.expect_word("for")?;
+        let description = self.parse_address()?;
+        self.expect(TokenKind::Semicolon)?;
+        let layer = self.parse_layer()?;
+        self.expect_end()?;
+        Ok(LayerFile { description, layer })
     }
 
     fn parse_element_kind(&mut self) -> Result<ElementKind, ParseError> {
