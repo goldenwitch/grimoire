@@ -292,19 +292,22 @@ Accept: The ledger names the existing account for every recurring paper term and
 -> schemas/inventory
 @artifact text/markdown ./proposals/architecture-vocabulary.md
 ---
-[schemas/instances] Concrete schema instances (blocked)
-Files: concrete schema definitions and fixtures named at dispatch.
-Translate the reviewed minimal inventory into versioned schema instances for axes, shapes, architecture, training, execution, precision, measurement, provenance, and the bounded lineage candidate. Assign a real author-controlled extension namespace before writing concrete identifiers; keep all value bodies inside the closed Grimoire algebra.
-Blocked until the repository owner supplies or configures the namespace authority. Do not substitute an example, local, or guessed URI.
-Accept: Each schema declares its allowed element kinds; every valid value in the case-study coverage matrix has a schema account; unresolved topology, parameter-update, symbolic-cost, and lineage behavior fails visibly or remains explicitly deferred.
+[schemas/instances] Concrete schema instances (reviewing)
+Files: crates/grimoire/src/schemas.rs and crates/grimoire/tests/schemas.rs.
+Translate the reviewed minimal inventory into executable versioned schema instances for axes, shapes, architecture, training, execution, precision, measurement, provenance, and the bounded lineage candidate. Use the provisional author-controlled namespace root and boolean finite-scalar ruling; keep all value bodies inside the closed Grimoire algebra.
+The registry and representative value fixtures are complete-for-review. Textual schema-document parsing and bootstrap integration remain parser follow-up work.
+Accept: Each schema declares allowed element kinds; every valid value in the case-study coverage matrix has a schema account; attachment-kind and value failures are visible; unresolved topology, parameter-update, symbolic-cost, and lineage behavior remains explicit.
+@artifact text/rust ./crates/grimoire/src/schemas.rs
+@artifact text/rust ./crates/grimoire/tests/schemas.rs
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
 -> schemas/inventory
 -> schemas/meta/scalar-domain
-> 2026-08-26: Concrete schema identifiers are not minted while this checkout has no configured repository origin or other verified author-controlled https authority.
-> 2026-08-26: Example namespace URIs in extension-namespaces.md remain examples and must not be promoted to canonical schema identifiers by an agent.
-> 2026-08-26: Candidate schema bodies remain usable for grammar and fixture design, but concrete schema documents wait at the namespace boundary.
+> 2026-08-26: Concrete prototype schemas use the provisional namespace root `https://github.com/goldenwitch/grimoire/extension` with one child namespace per schema family.
+> 2026-08-26: The executable registry is Rust data first; textual schema-document parsing remains downstream of the grammar parser and can falsify the registry shape through fixtures.
+> 2026-08-26: Prototype schema instances keep parameter lineage as a value-level candidate and do not add a new core element kind.
+> 2026-08-26: Representative registry fixtures cover V-JEPA 2 shapes/execution, TiTok sequence topology, BitNet precision, sourced measurements, provenance, and lineage values.
 ---
 [schemas/conformance] Schema conformance fixtures (notstarted)
 Files: schema conformance fixtures named at dispatch.

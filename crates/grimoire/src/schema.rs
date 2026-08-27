@@ -138,6 +138,18 @@ impl SchemaExpr {
     }
 }
 
+impl Schema {
+    pub fn validate(&self, element_kind: ElementKind, value: &Value) -> Result<(), SchemaError> {
+        if !self.allowed_elements.contains(&element_kind) {
+            return Err(SchemaError {
+                path: "$".to_owned(),
+                message: format!("schema does not allow {element_kind:?} elements"),
+            });
+        }
+        self.value.validate(value)
+    }
+}
+
 impl Value {
     fn kind(&self) -> &'static str {
         match self {

@@ -4,6 +4,7 @@ mod namespace;
 mod parser;
 mod projection;
 mod schema;
+mod schemas;
 mod value;
 mod version;
 
@@ -17,5 +18,6 @@ pub use projection::{
     Check, Decoration, ExpectedCardinality, Layer, LayerInput, Projection, SchemaUse, SelectItem,
 };
 pub use schema::{ElementKind, Schema, SchemaError, SchemaExpr, SchemaExprArm, SchemaExprField};
+pub use schemas::{PROTOTYPE_NAMESPACE_ROOT, prototype_schemas};
 pub use value::{FiniteNumber, Value};
 pub use version::{Version, VersionError};
