@@ -613,6 +613,9 @@ impl<'description> Context<'description> {
             else {
                 continue;
             };
+            if definition_site == Site::Core {
+                continue;
+            }
             let candidate_sites: Vec<Site> = self
                 .definitions
                 .values()

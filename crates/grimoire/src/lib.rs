@@ -1,4 +1,5 @@
 mod address;
+mod cut;
 mod model;
 mod namespace;
 mod parser;
@@ -10,6 +11,7 @@ mod value;
 mod version;
 
 pub use address::{Address, AddressError};
+pub use cut::{CutError, extract_cut};
 pub use model::{
     Block, Connection, CoreGraph, Description, ExtensionParameter, ExtensionValue, Group, Port,
 };
