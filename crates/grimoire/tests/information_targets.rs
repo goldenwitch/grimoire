@@ -1,6 +1,6 @@
 use grimoire::{
     Channel, ChannelGraph, ChannelNode, ClaimEstimate, Distribution, JointSource, Schema,
-    evaluate_layer, parse_description, prototype_schemas, validate_description,
+    evaluate_layer, extract_cut, parse_description, prototype_schemas, validate_description,
 };
 
 fn address(value: &str) -> grimoire::Address {
@@ -68,23 +68,64 @@ const TARGET: &str = r#"
         }
         layer "pretraining" {
             inputs { core };
-            consumes { projection-language 1.0.0; schemas { } }
+            consumes {
+                projection-language 1.0.0;
+                schemas {
+                    "https://github.com/goldenwitch/grimoire/extension/training" / training @1.0.0;
+                }
+            }
             projection {
                 select {
                     use @vjepa2/observation, @vjepa2/observation/output,
                         @vjepa2/encoder, @vjepa2/encoder/input, @vjepa2/encoder/output,
                         @vjepa2/observation-to-encoder;
+                    block @vjepa2/pretraining/target-encoder "EMA target encoder" {
+                        port @vjepa2/pretraining/target-encoder/input;
+                        port @vjepa2/pretraining/target-encoder/output;
+                    }
+                    block @vjepa2/pretraining/mask-token "Learned mask token" {
+                        port @vjepa2/pretraining/mask-token/output;
+                    }
                     block @vjepa2/pretraining/predictor "Representation predictor" {
                         port @vjepa2/pretraining/predictor/input;
+                        port @vjepa2/pretraining/predictor/mask;
                         port @vjepa2/pretraining/predictor/output;
                     }
+                    block @vjepa2/pretraining/objective "Masked representation objective" {
+                        port @vjepa2/pretraining/objective/prediction;
+                        port @vjepa2/pretraining/objective/target;
+                    }
                     connection @vjepa2/pretraining/encoder-to-predictor @vjepa2/encoder/output -> @vjepa2/pretraining/predictor/input;
+                    group @vjepa2/pretraining/structure "Action-free pretraining structure" {
+                        @vjepa2/pretraining/target-encoder,
+                        @vjepa2/pretraining/mask-token,
+                        @vjepa2/pretraining/predictor,
+                        @vjepa2/pretraining/objective,
+                        @vjepa2/pretraining/encoder-to-predictor;
+                    }
+                }
+                decorate {
+                    on @vjepa2/pretraining/structure extension "https://github.com/goldenwitch/grimoire/extension/training" training schema training @1.0.0 = {
+                        objective: "masked representation prediction",
+                        optimizer: absent,
+                        batch_size: absent,
+                        steps: absent,
+                        phases: [],
+                        trainable_targets: [ref(@vjepa2/pretraining/predictor)],
+                        frozen_targets: [ref(@vjepa2/encoder)],
+                        data_sources: ["VideoMix22M"]
+                    };
                 }
             }
         }
         layer "ac" {
             inputs { core };
-            consumes { projection-language 1.0.0; schemas { } }
+            consumes {
+                projection-language 1.0.0;
+                schemas {
+                    "https://github.com/goldenwitch/grimoire/extension/training" / training @1.0.0;
+                }
+            }
             projection {
                 select {
                     use @vjepa2/observation, @vjepa2/observation/output,
@@ -98,6 +139,14 @@ const TARGET: &str = r#"
                         port @vjepa2/ac/predictor/state;
                         port @vjepa2/ac/predictor/output;
                     }
+                    block @vjepa2/ac/teacher-forcing "Teacher-forcing objective" {
+                        port @vjepa2/ac/teacher-forcing/input;
+                        port @vjepa2/ac/teacher-forcing/output;
+                    }
+                    block @vjepa2/ac/rollout "Two-step rollout objective" {
+                        port @vjepa2/ac/rollout/input;
+                        port @vjepa2/ac/rollout/output;
+                    }
                     connection @vjepa2/ac/encoder-to-predictor @vjepa2/encoder/output -> @vjepa2/ac/predictor/visual;
                     connection @vjepa2/ac/action-to-predictor @vjepa2/action/output -> @vjepa2/ac/predictor/action;
                     connection @vjepa2/ac/state-to-predictor @vjepa2/state/output -> @vjepa2/ac/predictor/state;
@@ -108,6 +157,18 @@ const TARGET: &str = r#"
                         @vjepa2/ac/action-to-predictor,
                         @vjepa2/ac/state-to-predictor;
                     }
+                }
+                decorate {
+                    on @vjepa2/ac/structure extension "https://github.com/goldenwitch/grimoire/extension/training" training schema training @1.0.0 = {
+                        objective: "action-conditioned representation prediction",
+                        optimizer: absent,
+                        batch_size: absent,
+                        steps: absent,
+                        phases: [],
+                        trainable_targets: [ref(@vjepa2/ac/predictor)],
+                        frozen_targets: [ref(@vjepa2/encoder)],
+                        data_sources: ["Droid"]
+                    };
                 }
             }
         }
@@ -228,6 +289,80 @@ fn shared_encoder_and_distinct_terminals_are_queryable() {
         !ac.structural
             .elements
             .contains_key(&address("@vjepa2/pretraining/predictor"))
+    );
+    assert!(
+        pretraining
+            .structural
+            .elements
+            .contains_key(&address("@vjepa2/pretraining/target-encoder"))
+    );
+    assert!(
+        pretraining
+            .structural
+            .elements
+            .contains_key(&address("@vjepa2/pretraining/mask-token"))
+    );
+    assert!(
+        ac.structural
+            .elements
+            .contains_key(&address("@vjepa2/ac/teacher-forcing"))
+    );
+    assert!(
+        ac.structural
+            .elements
+            .contains_key(&address("@vjepa2/ac/rollout"))
+    );
+}
+
+#[test]
+fn pretraining_and_ac_cuts_validate_independently() {
+    let description = parse_description(TARGET).unwrap_or_else(|error| panic!("{error}"));
+    let pretraining = extract_cut(&description, &["pretraining"], &schemas())
+        .unwrap_or_else(|error| panic!("{error}"));
+    let ac =
+        extract_cut(&description, &["ac"], &schemas()).unwrap_or_else(|error| panic!("{error}"));
+
+    validate_description(&pretraining, &schemas())
+        .unwrap_or_else(|errors| panic!("pretraining cut errors: {errors:?}"));
+    validate_description(&ac, &schemas())
+        .unwrap_or_else(|errors| panic!("AC cut errors: {errors:?}"));
+    assert_eq!(pretraining.layers.len(), 1);
+    assert_eq!(ac.layers.len(), 1);
+    assert!(
+        !ac.layers[0]
+            .projection
+            .select
+            .iter()
+            .any(|item| matches!(item, grimoire::SelectItem::GenerateBlock(block) if block.address == address("@vjepa2/pretraining/predictor")))
+    );
+    assert!(
+        !pretraining.layers[0]
+            .projection
+            .select
+            .iter()
+            .any(|item| matches!(item, grimoire::SelectItem::GenerateBlock(block) if block.address == address("@vjepa2/ac/predictor")))
+    );
+}
+
+#[test]
+fn parameter_updates_and_runtime_rollouts_remain_explicitly_deferred() {
+    let description = parse_description(TARGET).unwrap_or_else(|error| panic!("{error}"));
+    let pretraining =
+        evaluate_layer(&description, "pretraining").unwrap_or_else(|error| panic!("{error}"));
+    let ac = evaluate_layer(&description, "ac").unwrap_or_else(|error| panic!("{error}"));
+
+    assert_eq!(pretraining.decorations.len(), 1);
+    assert_eq!(ac.decorations.len(), 1);
+    assert!(
+        !pretraining
+            .structural
+            .elements
+            .contains_key(&address("@vjepa2/pretraining/ema-update"))
+    );
+    assert!(
+        !ac.structural
+            .elements
+            .contains_key(&address("@vjepa2/ac/runtime-rollout"))
     );
 }
 

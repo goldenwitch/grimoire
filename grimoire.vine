@@ -488,15 +488,18 @@ Accept: The core graph parses and validates; encoder, tokenizer, bridge, predict
 > 2026-08-26: Axes and shapes remain schema-governed values on ports; architecture and provenance facts remain finalized extension values; none introduces a new core element kind.
 @artifact text/rust ./crates/grimoire/tests/reference_core.rs
 ---
-[example/pretraining-ac] Reference pretraining and dynamics views (notstarted)
-Files: V-JEPA 2 pretraining and action-conditioned reference layers named at dispatch. Current representability checkpoint: crates/grimoire/tests/information_targets.rs.
-The checkpoint proves that action-free pretraining and action-conditioned predictor structure can be represented with a shared encoder, distinct local predictors, explicit action/state ports, and finite source-terminal channel claims. Full worked-layer coverage remains downstream: EMA/stop-gradient parameter relations, complete training values, and continuous neural-channel interpretation are not silently filled in.
-Accept: The pretraining and AC cuts validate independently; the two predictors remain distinct; the frozen encoder is shared by address; settled visibility and execution decisions are exercised; any unresolved update, continuous-channel, or runtime semantics have an explicit visible deferred outcome rather than an improvised relation.
+[example/pretraining-ac] Reference pretraining and dynamics views (reviewing)
+Files: crates/grimoire/tests/information_targets.rs and proposals/v-jepa-2-case-studies.md.
+Extend the V-JEPA 2 representability checkpoint with action-free pretraining participants (EMA target encoder, learned mask token, predictor, masked objective), a distinct action-conditioned predictor, explicit action/state ports, teacher-forcing and two-step rollout objective participants, finalized training values, and independent pretraining and AC cuts. Keep the shared encoder address folded into both views. Keep EMA parameter updates, stop-gradient as parameter semantics, continuous neural-channel estimation, token-level rollout execution, and runtime control outside ordinary activation structure; the fixture must expose those as deferred boundaries.
+Accept: The pretraining and AC cuts validate independently; the two predictors remain distinct; the frozen encoder is shared by address; local target/mask/objective and teacher-forcing/rollout participants are visible; finite source-terminal claims remain available as reference kernels only; no unresolved update, continuous-channel, or runtime semantics are silently given a relation.
 -> architecture/indexed-visibility
 -> example/core-graph
 -> execution/boundary
 -> layers/fixtures
-> 2026-08-27: information_targets.rs is a representability checkpoint, not completion of the full pretraining/AC worked description; EMA and parameter-update semantics remain deferred.
+> 2026-08-27: The pretraining and AC layers use ordinary local blocks for objective participants, while training values record objective, trainable targets, frozen targets, and data source.
+> 2026-08-27: The EMA target relationship is not an activation connection; the fixture asserts its absence until a parameter-lineage relation is designed.
+> 2026-08-27: Teacher forcing and rollout are static objective participants; runtime autoregressive rollout remains outside projection evaluation.
+> 2026-08-27: information_targets.rs is now an executable representability checkpoint with independently validated pretraining and AC cuts, not a full empirical training reproduction.
 @artifact text/rust ./crates/grimoire/tests/information_targets.rs
 ---
 [example/consumers] Reference downstream consumers (notstarted)

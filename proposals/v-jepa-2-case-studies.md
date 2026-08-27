@@ -440,11 +440,27 @@ not infer information quantities from architecture topology or training prose.
   design work.
 - Entry trigger: schema work begins for the reference description.
 
+## Executable Representability Checkpoint
+
+The current Rust fixture in
+[`information_targets.rs`](../crates/grimoire/tests/information_targets.rs)
+exercises this boundary with one shared encoder, local pretraining target and
+mask participants, a distinct pretraining predictor, a distinct
+action-conditioned predictor, explicit action and state ports, teacher-forcing
+and rollout objective participants, and independent pretraining and AC cuts.
+The fixture also attaches finalized training values for the two objectives and
+asserts that EMA parameter updates and runtime rollouts are not silently
+represented as activation structure.
+
+The same fixture supplies finite reference kernels for source-terminal claims.
+Those kernels demonstrate the claim interface only; they are not estimates of
+the continuous neural channels in the paper. A real estimate still needs an
+explicit estimator, data protocol, uncertainty record, and source distribution.
+
 ## Next Consumption Step
 
-The next artifact should be a small reviewed-grammar fixture for the
-encoder/pretraining/AC boundary only. It should include one encoder, one
-pretraining predictor, one EMA target path, one action-conditioned predictor,
-and two declared cuts. The fixture should be small enough to expose address,
-locality, shape, and parameter-update questions before the full downstream
-surface is attempted.
+The next artifact should extend the executable checkpoint to the downstream
+consumer surface: classification, human action anticipation, VidQA, and the
+static planning structure. It should preserve the independent pretraining and
+AC cuts while exposing any conditional-information, continuous-estimator, and
+runtime-loop boundaries as explicit deferred outcomes.
