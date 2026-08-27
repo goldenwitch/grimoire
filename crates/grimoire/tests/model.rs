@@ -92,6 +92,8 @@ fn description_collects_core_and_nested_port_addresses() {
         address: address("@system"),
         label: Some("system".to_owned()),
         core_spec: Version::new(1, 0, 0),
+        extensions: Vec::new(),
+        layers: Vec::new(),
         core: grimoire::CoreGraph {
             blocks: BTreeMap::from([(
                 encoder.clone(),
@@ -103,8 +105,10 @@ fn description_collects_core_and_nested_port_addresses() {
                         grimoire::Port {
                             address: input.clone(),
                             label: Some("input".to_owned()),
+                            extensions: Vec::new(),
                         },
                     )]),
+                    extensions: Vec::new(),
                 },
             )]),
             ..grimoire::CoreGraph::default()

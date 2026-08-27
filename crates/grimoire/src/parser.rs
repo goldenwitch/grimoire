@@ -1,6 +1,11 @@
 use core::fmt;
 
-use crate::{Address, Block, Connection, CoreGraph, Description, Group, Port, Version};
+use crate::{
+    Address, Block, Connection, CoreGraph, Description, ExtensionParameter, ExtensionValue,
+    FiniteNumber, Group, Namespace, Port, Value, Version,
+};
+
+const PROTOTYPE_NAMESPACE_ROOT: &str = "https://github.com/goldenwitch/grimoire/extension";
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ParseError {
@@ -15,7 +20,13 @@ enum TokenKind {
     Arrow,
     LeftBrace,
     RightBrace,
+    LeftBracket,
+    RightBracket,
+    LeftParen,
+    RightParen,
+    Colon,
     Comma,
+    Equal,
     Semicolon,
     End,
 }
@@ -24,6 +35,7 @@ enum TokenKind {
 struct Token {
     kind: TokenKind,
     offset: usize,
+    end: usize,
 }
 
 struct Lexer<'source> {
@@ -52,6 +64,7 @@ impl<'source> Lexer<'source> {
             return Ok(Token {
                 kind: TokenKind::End,
                 offset,
+                end: offset,
             });
         };
         let kind = match character {
@@ -63,9 +76,33 @@ impl<'source> Lexer<'source> {
                 self.advance();
                 TokenKind::RightBrace
             }
+            '[' => {
+                self.advance();
+                TokenKind::LeftBracket
+            }
+            ']' => {
+                self.advance();
+                TokenKind::RightBracket
+            }
+            '(' => {
+                self.advance();
+                TokenKind::LeftParen
+            }
+            ')' => {
+                self.advance();
+                TokenKind::RightParen
+            }
+            ':' => {
+                self.advance();
+                TokenKind::Colon
+            }
             ',' => {
                 self.advance();
                 TokenKind::Comma
+            }
+            '=' => {
+                self.advance();
+                TokenKind::Equal
             }
             ';' => {
                 self.advance();
@@ -78,7 +115,11 @@ impl<'source> Lexer<'source> {
             '"' => TokenKind::String(self.read_string()?),
             _ => TokenKind::Word(self.read_word()),
         };
-        Ok(Token { kind, offset })
+        Ok(Token {
+            kind,
+            offset,
+            end: self.offset,
+        })
     }
 
     fn skip_ignored(&mut self) {
@@ -181,7 +222,11 @@ impl<'source> Lexer<'source> {
     fn read_word(&mut self) -> String {
         let start = self.offset;
         while self.peek().is_some_and(|character| {
-            !character.is_whitespace() && !matches!(character, '{' | '}' | ',' | ';' | '"' | '#')
+            !character.is_whitespace()
+                && !matches!(
+                    character,
+                    '{' | '}' | '[' | ']' | '(' | ')' | ':' | ',' | '=' | ';' | '"' | '#'
+                )
         }) {
             if self.source[self.offset..].starts_with("->") {
                 break;
@@ -219,6 +264,7 @@ impl<'source> Parser<'source> {
         self.expect_word("core-spec")?;
         let core_spec = self.parse_version()?;
         self.expect(TokenKind::Semicolon)?;
+        let extensions = self.optional_extensions()?;
         self.expect_word("core")?;
         let core = self.parse_core()?;
         self.expect(TokenKind::RightBrace)?;
@@ -228,6 +274,8 @@ impl<'source> Parser<'source> {
             label,
             core_spec,
             core,
+            extensions,
+            layers: Vec::new(),
         };
         ensure_unique_addresses(&description)?;
         Ok(description)
@@ -275,24 +323,32 @@ impl<'source> Parser<'source> {
         };
         self.expect(TokenKind::LeftBrace)?;
         let mut ports = std::collections::BTreeMap::new();
-        while self.current.kind != TokenKind::RightBrace {
+        while self.is_word("port") {
             self.expect_word("port")?;
-            let port_address = self.parse_address()?;
-            let label = self.optional_string()?;
-            self.expect(TokenKind::Semicolon)?;
-            let port = Port {
-                address: port_address.clone(),
-                label,
-            };
-            if ports.insert(port_address, port).is_some() {
+            let port = self.parse_port()?;
+            if ports.insert(port.address.clone(), port).is_some() {
                 return self.error("duplicate port address");
             }
         }
+        let extensions = self.optional_extensions()?;
         self.expect(TokenKind::RightBrace)?;
         Ok(Block {
             address,
             name,
             ports,
+            extensions,
+        })
+    }
+
+    fn parse_port(&mut self) -> Result<Port, ParseError> {
+        let address = self.parse_address()?;
+        let label = self.optional_string()?;
+        let extensions = self.optional_extensions()?;
+        self.expect(TokenKind::Semicolon)?;
+        Ok(Port {
+            address,
+            label,
+            extensions,
         })
     }
 
@@ -301,12 +357,14 @@ impl<'source> Parser<'source> {
         let source = self.parse_address()?;
         self.expect(TokenKind::Arrow)?;
         let destination = self.parse_address()?;
+        let extensions = self.optional_extensions()?;
         self.expect(TokenKind::Semicolon)?;
         Ok(Connection {
             address,
             label: None,
             source,
             destination,
+            extensions,
         })
     }
 
@@ -315,7 +373,7 @@ impl<'source> Parser<'source> {
         let label = self.optional_string()?;
         self.expect(TokenKind::LeftBrace)?;
         let mut members = Vec::new();
-        if self.current.kind != TokenKind::RightBrace {
+        if self.current.kind != TokenKind::RightBrace && !self.is_word("extensions") {
             members.push(self.parse_address()?);
             while self.current.kind == TokenKind::Comma {
                 self.advance()?;
@@ -323,12 +381,172 @@ impl<'source> Parser<'source> {
             }
             self.expect(TokenKind::Semicolon)?;
         }
+        let extensions = self.optional_extensions()?;
         self.expect(TokenKind::RightBrace)?;
         Ok(Group {
             address,
             label,
             members,
+            extensions,
         })
+    }
+
+    fn optional_extensions(&mut self) -> Result<Vec<ExtensionParameter>, ParseError> {
+        if self.is_word("extensions") {
+            self.parse_extensions()
+        } else {
+            Ok(Vec::new())
+        }
+    }
+
+    fn parse_extensions(&mut self) -> Result<Vec<ExtensionParameter>, ParseError> {
+        self.expect_word("extensions")?;
+        self.expect(TokenKind::LeftBrace)?;
+        let mut extensions = Vec::new();
+        while self.current.kind != TokenKind::RightBrace {
+            let start = self.current.offset;
+            self.expect_word("extension")?;
+            let namespace = self.parse_namespace()?;
+            let name = self.take_word()?;
+            self.expect_word("schema")?;
+            let schema = self.take_word()?;
+            let version = self.parse_at_version()?;
+            self.expect(TokenKind::Equal)?;
+            let parsed_value = self.parse_value()?;
+            let end = self.current.end;
+            self.expect(TokenKind::Semicolon)?;
+            let value = if is_known_namespace(&namespace) {
+                ExtensionValue::Known(parsed_value)
+            } else {
+                ExtensionValue::Opaque(self.lexer.source.as_bytes()[start..end].to_vec())
+            };
+            extensions.push(ExtensionParameter {
+                namespace,
+                name,
+                schema,
+                version,
+                value,
+            });
+        }
+        self.expect(TokenKind::RightBrace)?;
+        Ok(extensions)
+    }
+
+    fn parse_namespace(&mut self) -> Result<Namespace, ParseError> {
+        let token = self.current.clone();
+        let Some(value) = self.take_string()? else {
+            return self.error("extension namespace requires a string");
+        };
+        Namespace::parse(&value).map_err(|error| ParseError {
+            offset: token.offset,
+            message: error.to_string(),
+        })
+    }
+
+    fn parse_at_version(&mut self) -> Result<Version, ParseError> {
+        let token = self.current.clone();
+        let value = self.take_word()?;
+        let Some(value) = value.strip_prefix('@') else {
+            return Err(ParseError {
+                offset: token.offset,
+                message: "schema version requires `@`".to_owned(),
+            });
+        };
+        Version::parse(value).map_err(|error| ParseError {
+            offset: token.offset,
+            message: error.to_string(),
+        })
+    }
+
+    fn parse_value(&mut self) -> Result<Value, ParseError> {
+        match self.current.kind.clone() {
+            TokenKind::String(_) => {
+                let Some(value) = self.take_string()? else {
+                    return self.error("expected string value");
+                };
+                Ok(Value::Text(value))
+            }
+            TokenKind::Word(_) => self.parse_word_value(),
+            TokenKind::LeftBrace => self.parse_product_value(),
+            TokenKind::LeftBracket => self.parse_sequence_value(),
+            _ => self.error("expected a value"),
+        }
+    }
+
+    fn parse_word_value(&mut self) -> Result<Value, ParseError> {
+        let token = self.current.clone();
+        let word = self.take_word()?;
+        match word.as_str() {
+            "true" => Ok(Value::Bool(true)),
+            "false" => Ok(Value::Bool(false)),
+            "absent" => Ok(Value::Absent),
+            "present" => {
+                self.expect(TokenKind::LeftParen)?;
+                let value = self.parse_value()?;
+                self.expect(TokenKind::RightParen)?;
+                Ok(Value::Present(Box::new(value)))
+            }
+            "ref" => {
+                self.expect(TokenKind::LeftParen)?;
+                let address = self.parse_address()?;
+                self.expect(TokenKind::RightParen)?;
+                Ok(Value::AddressReference(address))
+            }
+            _ if self.current.kind == TokenKind::LeftParen => {
+                self.expect(TokenKind::LeftParen)?;
+                let value = self.parse_value()?;
+                self.expect(TokenKind::RightParen)?;
+                Ok(Value::Tagged {
+                    tag: word,
+                    value: Box::new(value),
+                })
+            }
+            _ => parse_scalar_word(&word).map_err(|message| ParseError {
+                offset: token.offset,
+                message,
+            }),
+        }
+    }
+
+    fn parse_product_value(&mut self) -> Result<Value, ParseError> {
+        self.expect(TokenKind::LeftBrace)?;
+        let mut fields = std::collections::BTreeMap::new();
+        while self.current.kind != TokenKind::RightBrace {
+            let name = self.take_word()?;
+            self.expect(TokenKind::Colon)?;
+            let value = self.parse_value()?;
+            if fields.insert(name.clone(), value).is_some() {
+                return self.error(format!("duplicate product field `{name}`"));
+            }
+            if self.current.kind == TokenKind::Comma {
+                self.advance()?;
+                if self.current.kind == TokenKind::RightBrace {
+                    return self.error("trailing product comma");
+                }
+            } else {
+                break;
+            }
+        }
+        self.expect(TokenKind::RightBrace)?;
+        Ok(Value::Product(fields))
+    }
+
+    fn parse_sequence_value(&mut self) -> Result<Value, ParseError> {
+        self.expect(TokenKind::LeftBracket)?;
+        let mut values = Vec::new();
+        while self.current.kind != TokenKind::RightBracket {
+            values.push(self.parse_value()?);
+            if self.current.kind == TokenKind::Comma {
+                self.advance()?;
+                if self.current.kind == TokenKind::RightBracket {
+                    return self.error("trailing sequence comma");
+                }
+            } else {
+                break;
+            }
+        }
+        self.expect(TokenKind::RightBracket)?;
+        Ok(Value::Sequence(values))
     }
 
     fn parse_address(&mut self) -> Result<Address, ParseError> {
@@ -380,6 +598,10 @@ impl<'source> Parser<'source> {
         Ok(value)
     }
 
+    fn is_word(&self, expected: &str) -> bool {
+        matches!(&self.current.kind, TokenKind::Word(value) if value == expected)
+    }
+
     fn expect(&mut self, expected: TokenKind) -> Result<(), ParseError> {
         if self.current.kind == expected {
             self.advance()
@@ -416,6 +638,46 @@ impl<'source> Parser<'source> {
     }
 }
 
+fn parse_scalar_word(word: &str) -> Result<Value, String> {
+    if let Ok(value) = word.parse::<u64>() {
+        if value > 0 {
+            return Ok(Value::PositiveInteger(value));
+        }
+        return FiniteNumber::new(0.0)
+            .map(Value::Number)
+            .ok_or_else(|| "invalid finite number".to_owned());
+    }
+    if let Ok(value) = word.parse::<f64>() {
+        return FiniteNumber::new(value)
+            .map(Value::Number)
+            .ok_or_else(|| "number must be finite".to_owned());
+    }
+    if is_identifier(word) {
+        Ok(Value::Enum(word.to_owned()))
+    } else {
+        Err(format!("invalid scalar value `{word}`"))
+    }
+}
+
+fn is_identifier(value: &str) -> bool {
+    let mut characters = value.chars();
+    let Some(first) = characters.next() else {
+        return false;
+    };
+    first.is_ascii_alphabetic()
+        && characters.all(|character| {
+            character.is_ascii_alphanumeric() || character == '_' || character == '-'
+        })
+}
+
+fn is_known_namespace(namespace: &Namespace) -> bool {
+    namespace.as_str() == PROTOTYPE_NAMESPACE_ROOT
+        || namespace
+            .as_str()
+            .strip_prefix(PROTOTYPE_NAMESPACE_ROOT)
+            .is_some_and(|rest| rest.starts_with('/'))
+}
+
 fn ensure_unique_addresses(description: &Description) -> Result<(), ParseError> {
     let mut addresses = std::collections::BTreeSet::new();
     for address in description.addresses() {
@@ -436,7 +698,13 @@ fn token_name(token: &TokenKind) -> &'static str {
         TokenKind::Arrow => "`->`",
         TokenKind::LeftBrace => "`{`",
         TokenKind::RightBrace => "`}`",
+        TokenKind::LeftBracket => "`[`",
+        TokenKind::RightBracket => "`]`",
+        TokenKind::LeftParen => "`(`",
+        TokenKind::RightParen => "`)`",
+        TokenKind::Colon => "`:`",
         TokenKind::Comma => "`,`",
+        TokenKind::Equal => "`=`",
         TokenKind::Semicolon => "`;`",
         TokenKind::End => "end of input",
     }

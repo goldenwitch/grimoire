@@ -313,9 +313,9 @@ Accept: Fixtures prove closed-algebra validation, address-reference validation, 
 -> schemas/instances
 ---
 [tools/validator/parse] Parse reviewed descriptions (started)
-Files: crates/grimoire/src/value.rs, schema.rs, model.rs, parser.rs, serialize.rs, validate.rs and focused fixtures.
-Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, and exact parser boundary in Rust. The first parser slice now handles the grammar header, description core-spec version, blocks, optional port/group labels, directed connections, groups, comments, JSON-style strings, global core address uniqueness, and byte-offset errors. Layers, extensions, and projection text remain the next slices.
-Accept: The first fixture parses a minimal description into one internal form; malformed input fails with location; no recovery or accepted dialect is introduced; focused Cargo tests pass.
+Files: crates/grimoire/src/value.rs, schema.rs, model.rs, projection.rs, parser.rs, serialize.rs, validate.rs and focused fixtures.
+Implement the reviewed grammar's closed value algebra, schema declarations, addressed description model, and exact parser boundary in Rust. Current slices handle the grammar header, description core-spec version, blocks, optional labels, directed connections, groups, comments, JSON-style strings, global core address uniqueness, layer/projection-ready model fields, known closed values, and unknown extension parameters preserved as raw spans. Layers, schema documents, projection sections, and semantic checks remain next.
+Accept: Minimal descriptions and extension values parse into one internal form; malformed input fails with location; unknown namespace bytes survive; no recovery or accepted dialect is introduced; focused Cargo tests pass.
 -> grammar/namespace-uri
 -> grammar/review
 -> grammar/unknown-extension
@@ -324,6 +324,7 @@ Accept: The first fixture parses a minimal description into one internal form; m
 > 2026-08-26: The validator implementation begins as a library-first Rust crate; parser and serializer share the internal model but never define the specification.
 > 2026-08-26: Parser work starts from the minimal description/core grammar and grows only when a fixture requires the next production.
 > 2026-08-26: The initial parser reports byte offsets and rejects duplicate core addresses before returning a description.
+> 2026-08-26: The prototype recognizes the provisional Grimoire namespace root as typed extension data and stores all other extension parameter spans opaquely from `extension` through the terminating semicolon.
 ---
 [tools/validator/structure] Validate structural invariants (notstarted)
 Files: validator structural checks and fixtures named at dispatch.
