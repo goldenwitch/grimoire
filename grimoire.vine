@@ -50,18 +50,27 @@ Accept: The complete current Rust suite passes; valid document forms parse and s
 Visualization is specified separately and nothing exists yet. Views render reprojections; per-layer rendering is the open ground.
 -> projlang/spec
 ---
-[layers/info-flow] Information flow layer (notstarted)
-Forward and backward views with honest quantities: invert over selections, exclusions for stop-gradients, declared versus derived reach agreeing as a check.
+[layers/info-flow] Information flow layer (reviewing)
+Files: crates/grimoire/tests/info_flow_layer.rs.
+Build forward and backward static views over one core graph. Select the forward path, invert a selected differentiable group in the backward view, and omit a stopped connection as an explicit exclusion. Keep declared-versus-derived reach agreement as a deferred check outcome until the projection language has a settled reach aggregation form.
+Accept: Forward and backward fixtures parse, validate, and evaluate; selected differentiable connections reverse direction; omitted stop-gradient connections are absent; the reach-check gap is visible and no runtime behavior is introduced.
 -> core/freeze
 -> projlang/spec
 -> schemas/measurement
 -> schemas/shapes
+> 2026-08-26: Stop-gradient exclusion is represented by omitting the stopped addressed connection from the backward select; no separate exclusion primitive is added.
+> 2026-08-26: Declared-versus-derived reach agreement remains deferred because the current static check surface only counts finalized decoration values and does not define graph-reach aggregation.
+@artifact text/rust ./crates/grimoire/tests/info_flow_layer.rs
 ---
-[layers/hyperparameters] Hyperparameters layer (notstarted)
-Every dial attached to the structure it modulates: typed and domained decorate, schedules as declared functions of symbolic variables, coverage as a check.
+[layers/hyperparameters] Hyperparameters layer (reviewing)
+Files: crates/grimoire/tests/hyperparameters_layer.rs.
+Build a typed hyperparameter layer against training/1: attach objective, optimizer, batch/step dials, phase records, trainable/frozen target references, and data sources to the group representing the training stage. Observe coverage through a finalized decoration check. Keep symbolic schedule functions deferred because the current schema/value algebra has no symbolic arithmetic or function constructor.
+Accept: The valid layer parses and validates, the training check is visible after evaluation, changing a training dial leaves selected structure unchanged, and attaching training/1 to a port fails by schema attachment kind.
 -> core/freeze
 -> projlang/spec
 -> schemas/axes
+> 2026-08-26: Training dials and phase records are finalized values attached to a training-stage group; symbolic schedule functions remain deferred rather than becoming runtime behavior or a new schema constructor.
+@artifact text/rust ./crates/grimoire/tests/hyperparameters_layer.rs
 ---
 [layers/placement] Placement and bandwidth layer (notstarted)
 Placement as decorate on addresses, collectives as elements, bytes-on-wire from shapes plus placement.
@@ -87,10 +96,14 @@ Accept: A valid provenance layer parses and validates, its check result is visib
 > 2026-08-26: The first provenance layer attaches provenance/1 only to a selected group, matching the proposal's initial convention; novelty remains finalized data and cannot alter selection.
 @artifact text/rust ./crates/grimoire/tests/provenance_layer.rs
 ---
-[layers/mode] Mode layer (notstarted)
-Per-regime views by selection, mode-local structure as elements, alternatives coexisting at a site every mode can see.
+[layers/mode] Mode layer (reviewing)
+Files: crates/grimoire/tests/mode_layer.rs.
+Build per-regime layers over one shared backbone. Keep alternative core paths as ordinary addressed elements that every mode can see; each mode selects its own path and may define mode-local structure without leaking it to the other mode.
+Accept: Understanding and generation mode fixtures share the backbone address, select distinct alternatives, preserve their mode-local elements, validate independently, and do not introduce a mode-specific core element kind.
 -> core/freeze
 -> projlang/spec
+> 2026-08-26: Mode alternatives are ordinary core blocks selected by per-regime layers; mode-local probe/head elements are generated at each layer definition site and are invisible to the other mode.
+@artifact text/rust ./crates/grimoire/tests/mode_layer.rs
 ---
 [consumers/golden-retriever] Fauxlden Retriever consumption exercise (started)
 A synthetic whole-system description used to consume Grimoire before a real consumer exists. It stress-tests whether the language can describe arbitrary hot-path facts without making r3/r4 terminology, priorities, or mechanisms normative.
@@ -422,9 +435,9 @@ Accept: The suite covers every validator requirement currently implemented and b
 @artifact text/rust ./crates/grimoire/tests/conformance.rs
 ---
 [layers/fixtures] Layer and schema coverage fixtures (notstarted)
-Files: domain layer fixtures named per subtask, beginning with crates/grimoire/tests/provenance_layer.rs.
+Files: domain layer fixtures named per subtask, currently crates/grimoire/tests/provenance_layer.rs, mode_layer.rs, info_flow_layer.rs, and hyperparameters_layer.rs.
 After the indexed-visibility and execution-boundary decisions are settled, encode the initial information-flow, hyperparameter, placement, cost, provenance, and mode layers against the concrete schema family and reviewed projection language. Include empty checks, coverage checks, symbolic axes, local elements, and cut boundaries. Each deferred boundary must remain a visible fixture outcome rather than acquire guessed runtime semantics.
-Current slice: provenance selects a core group, decorates it with provenance/1, validates the group-only attachment, and checks finalized data without structural feedback.
+Current slices: provenance selects a core group, decorates it with provenance/1, validates the group-only attachment, and checks finalized data without structural feedback; mode layers share one backbone, select distinct ordinary core alternatives, and own separate local blocks; information-flow layers select forward structure, invert a differentiable group backward, and exclude a stopped connection, with reach agreement deferred; hyperparameters attaches training/1 to a training-stage group and checks typed finalized dials, with symbolic schedule functions deferred.
 Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; settled architectural decisions are exercised; any intentionally deferred boundary is recorded as an explicit deferred outcome rather than hidden in prose; decorations never feed structural selection; fixtures remain static and runtime-free.
 -> architecture/indexed-visibility
 -> execution/boundary
@@ -437,6 +450,9 @@ Accept: Every initial layer has one valid fixture and one relevant visible failu
 -> projlang/spec
 -> schemas/conformance
 @artifact text/rust ./crates/grimoire/tests/provenance_layer.rs
+@artifact text/rust ./crates/grimoire/tests/info_flow_layer.rs
+@artifact text/rust ./crates/grimoire/tests/hyperparameters_layer.rs
+@artifact text/rust ./crates/grimoire/tests/mode_layer.rs
 ---
 [example/core-graph] Reference shared architecture graph (reviewing)
 Files: crates/grimoire/tests/reference_core.rs.
