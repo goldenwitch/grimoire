@@ -170,6 +170,7 @@ Accept: Decorated and undecorated structural results compare equal; inherited an
 -> implementation/language
 -> projlang/projlang/fold
 > 2026-08-27: Chained reprojections propagate inherited finalized decorations for surviving addressed targets; upstream check results are not treated as structural data or re-run by downstream layers.
+> 2026-08-27: Deduplication or conflict resolution for the same inherited decoration arriving through redundant direct and indirect input paths remains unspecified; the current prototype preserves input-path multiplicity.
 @artifact text/rust ./crates/grimoire/src/evaluate.rs
 @artifact text/rust ./crates/grimoire/tests/evaluate.rs
 @guidance text/markdown ./proposals/projection-language.md
