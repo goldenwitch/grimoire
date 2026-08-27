@@ -5,6 +5,7 @@ title: Grimoire plan for the full vision
 [grimoire] Grimoire v1 (started)
 The full vision: a frozen core specification satisfied by its grammar, projection language, schemas, and layers, with one worked description that exercises all of it.
 -> example/reference
+-> implementation/language
 -> viz/design
 > Scaffolded from dependsOn out of the core skeleton; places not yet defined carry Design-with-the-user nodes.
 > Mechanical nodes are annotated dispatch(mechanical) and carry step-level guidance a weaker agent can execute; design and review stay with the user and Claude.
@@ -97,6 +98,8 @@ Implement the reviewed projection language from its grammar and settled semantic
 Files: Projection-language implementation files named at dispatch.
 Do: Map every reviewed projection-language production to an internal form and its settled stage: select, invert, decorate, or check. Reject any form that needs unruled semantics.
 Accept: Every reviewed production maps to exactly one settled stage; failures identify the source location; no task-local syntax or semantic rule is introduced.
+-> grammar/review
+-> implementation/language
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
 ---
@@ -104,6 +107,7 @@ Accept: Every reviewed production maps to exactly one settled stage; failures id
 Files: Structural projection evaluator files introduced by this task.
 Do: Evaluate select-generated definitions and references, then apply invert to the selected group. Keep finalization values unavailable during structural evaluation.
 Accept: Fixtures cover generated and referenced definitions as ordinary definitions, plus inversion of selected connections; no finalization value changes structural output.
+-> implementation/language
 -> projlang/projlang/surface
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
@@ -112,6 +116,7 @@ Accept: Fixtures cover generated and referenced definitions as ordinary definiti
 Files: Structural fold implementation files introduced by this task.
 Do: Join structural references by address and chain structural results by composition. Surface a competing definition at one address as an error.
 Accept: Fixtures prove shared references join, chained results compose, and competing definitions fail visibly.
+-> implementation/language
 -> projlang/projlang/structural
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
@@ -120,6 +125,7 @@ Accept: Fixtures prove shared references join, chained results compose, and comp
 Files: Projection finalization implementation files introduced by this task.
 Do: Apply decorate once to the folded structural result, attaching schema-governed values without feeding them back into structural evaluation.
 Accept: Finalization runs after structural folding; finalized values remain attached to folded elements; structural evaluation has no finalization-value input.
+-> implementation/language
 -> projlang/projlang/fold
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
@@ -128,6 +134,7 @@ Accept: Finalization runs after structural folding; finalized values remain atta
 Files: Projection check implementation files introduced by this task.
 Do: Evaluate expected empty or nonempty cardinality only over finalized decoration values. Return the check result without altering finalized structure or values.
 Accept: Fixtures cover expected-empty and expected-nonempty outcomes; checks cannot observe structural data except through finalized decorations; finalized data is unchanged afterward.
+-> implementation/language
 -> projlang/projlang/finalize
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
@@ -136,6 +143,7 @@ Accept: Fixtures cover expected-empty and expected-nonempty outcomes; checks can
 Files: Projection-language conformance fixtures introduced by this task.
 Do: Build fixtures in the reviewed grammar that exercise every implemented stage and the required error paths. Keep runtime execution out of the fixtures.
 Accept: Fixtures cover stage order, generated and referenced definitions, invert, address folding, competing-definition failure, finalization non-feedback, and decoration-only checks.
+-> implementation/language
 -> projlang/projlang/checks
 @guidance text/markdown ./proposals/projection-language.md
 @guidance text/markdown ./spec/grimoire.md
@@ -216,6 +224,9 @@ The format schemas themselves are written in: versioned and machine-checkable.
 Artifact: grammar/grimoire.md.
 Review the concrete grammar against the frozen core specification, schema contracts, namespace rule, and settled projection semantics. Accept the repaired structural, layer, value, and phase-order clauses; retain explicit blockers for finite-scalar bootstrap semantics, namespace URI lexical rules, and the exact opaque-byte boundary.
 -> grammar/build
+-> grammar/namespace-uri
+-> grammar/unknown-extension
+-> schemas/meta/scalar-domain
 > 2026-08-26: The description production explicitly declares core spec version; grammar header version remains syntax version.
 > 2026-08-26: Tagged alternatives serialize as tag(value) and select exactly one schema arm.
 > 2026-08-26: Checks aggregate finalized values matching one namespace and parameter across visible folded elements only.
@@ -269,24 +280,27 @@ Mint extension namespaces using author-controlled absolute https URIs with uniqu
 Artifact: proposals/schema-inventory.md.
 The closed-algebra schema family that covers the empirical architecture cases without one schema per paper. Record allowed attachment kinds, candidate value bodies, coverage, minimality, and sized gaps. Preserve the boundary between finalized schema values and structural graph/projection semantics.
 Accept: Every case-family row maps to a schema or an explicit gap; no paper-specific primitive is introduced; all candidate bodies use only the settled schema constructors.
-@artifact text/markdown ./proposals/schema-inventory.md
 -> extension-namespaces/minting
 -> schemas/meta
+@artifact text/markdown ./proposals/schema-inventory.md
 ---
 [architecture/vocabulary] Architecture vocabulary ledger (reviewing)
 Artifact: proposals/architecture-vocabulary.md.
 Map empirical architecture terms to existing blocks, ports, connections, groups, layers, projections, and schema values. Record decisions for shared addresses, local consumers, unified and decoupled backbones, runtime boundaries, parameter flow, and precision variants.
 Accept: The ledger names the existing account for every recurring paper term and records unresolved parameter-state and update relations without adding them to frozen core vocabulary.
-@artifact text/markdown ./proposals/architecture-vocabulary.md
 -> schemas/inventory
+@artifact text/markdown ./proposals/architecture-vocabulary.md
 ---
 [schemas/instances] Concrete schema instances (blocked)
 Files: concrete schema definitions and fixtures named at dispatch.
 Translate the reviewed minimal inventory into versioned schema instances for axes, shapes, architecture, training, execution, precision, measurement, provenance, and the bounded lineage candidate. Assign a real author-controlled extension namespace before writing concrete identifiers; keep all value bodies inside the closed Grimoire algebra.
 Blocked until the repository owner supplies or configures the namespace authority. Do not substitute an example, local, or guessed URI.
 Accept: Each schema declares its allowed element kinds; every valid value in the case-study coverage matrix has a schema account; unresolved topology, parameter-update, symbolic-cost, and lineage behavior fails visibly or remains explicitly deferred.
+-> grammar/namespace-uri
 -> grammar/review
+-> grammar/unknown-extension
 -> schemas/inventory
+-> schemas/meta/scalar-domain
 > 2026-08-26: Concrete schema identifiers are not minted while this checkout has no configured repository origin or other verified author-controlled https authority.
 > 2026-08-26: Example namespace URIs in extension-namespaces.md remain examples and must not be promoted to canonical schema identifiers by an agent.
 > 2026-08-26: Candidate schema bodies remain usable for grammar and fixture design, but concrete schema documents wait at the namespace boundary.
@@ -301,12 +315,16 @@ Accept: Fixtures prove closed-algebra validation, address-reference validation, 
 Files: validator parser implementation and parser fixtures named at dispatch.
 Do: Implement the reviewed grammar exactly, with source locations on rejection and no recovery or accepted dialects. Preserve extension namespaces and values byte-exactly where the grammar requires it.
 Accept: Every reviewed production parses into one internal form; malformed input fails with a location and identifier where available; no parser behavior is invented locally.
+-> grammar/namespace-uri
 -> grammar/review
+-> grammar/unknown-extension
+-> implementation/language
 ---
 [tools/validator/structure] Validate structural invariants (notstarted)
 Files: validator structural checks and fixtures named at dispatch.
 Do: Implement address uniqueness, directed two-port connections, core-version declaration, one definition site, grammar conformance, reference scope, locality, legal unreferenced elements, layer-input DAG resolution, and extension-namespace preservation.
 Accept: Each failure names its check, location, and relevant identifier; valid ties are accepted without warnings; C1-C10 fixtures cover both success and failure.
+-> implementation/language
 -> schemas/instances
 -> tools/validator/parse
 ---
@@ -314,27 +332,34 @@ Accept: Each failure names its check, location, and relevant identifier; valid t
 Files: validator canonical serializer and round-trip fixtures named at dispatch.
 Do: Emit the grammar's canonical serialization with deterministic ordering and byte-preserving extension values. Assert parse(serialize(parse(x))) value preservation and serialize(parse(x)) fixpoint behavior over all valid fixtures.
 Accept: Both serializer properties hold for every valid fixture; serializer failures identify the source value or fixture that violates the property.
+-> grammar/namespace-uri
 -> grammar/review
+-> grammar/unknown-extension
+-> implementation/language
 -> tools/validator/parse
 ---
 [tools/validator/cuts] Validate cuts and erasure (notstarted)
 Files: validator cut extraction and resolution fixtures named at dispatch.
 Do: Extract downward-closed layer subsets as standalone descriptions, revalidate each erasure, and report a non-cut subset as unresolvable at the layers whose declared inputs are absent.
 Accept: C11 successful transformations and C12 visible unresolvable outcomes are fixtures; extraction never silently retains an absent input or crashes.
+-> implementation/language
 -> tools/validator/structure
 ---
 [tools/validator/conformance] Validator conformance suite (notstarted)
 Files: end-to-end validator conformance fixtures named at dispatch.
 Do: Combine parser, structural checks, canonical serialization, extension preservation, schema validation, cuts, and error-message assertions over the reviewed reference fixtures.
 Accept: The suite covers every validator requirement and both serializer properties; failures identify check, location, and identifier; no projection evaluation is introduced.
+-> implementation/language
 -> schemas/conformance
 -> tools/validator/cuts
 -> tools/validator/serialize
 ---
 [layers/fixtures] Layer and schema coverage fixtures (notstarted)
 Files: layer fixtures named at dispatch.
-Do: Encode the initial information-flow, hyperparameter, placement, cost, provenance, and mode layers against the concrete schema family and reviewed projection language. Include empty checks, coverage checks, symbolic axes, local elements, and cut boundaries.
-Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; decorations never feed structural selection; fixtures remain static and runtime-free.
+After the indexed-visibility and execution-boundary decisions are settled, encode the initial information-flow, hyperparameter, placement, cost, provenance, and mode layers against the concrete schema family and reviewed projection language. Include empty checks, coverage checks, symbolic axes, local elements, and cut boundaries.
+Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; settled architectural decisions are exercised; any intentionally deferred boundary is recorded as an explicit deferred outcome rather than hidden in prose; decorations never feed structural selection; fixtures remain static and runtime-free.
+-> architecture/indexed-visibility
+-> execution/boundary
 -> layers/cost
 -> layers/hyperparameters
 -> layers/info-flow
@@ -354,22 +379,66 @@ Accept: The core graph is independently valid; encoder, tokenizer, bridge, predi
 ---
 [example/pretraining-ac] Reference pretraining and dynamics views (notstarted)
 Files: V-JEPA 2 pretraining and action-conditioned reference layers named at dispatch.
-Do: Encode action-free mask-denoising pretraining, the EMA target boundary, the separate V-JEPA 2-AC predictor, action/state inputs, teacher forcing, rollout, and static planning inputs. Keep parameter-update and runtime-loop gaps visible.
-Accept: The pretraining and AC cuts validate independently; the two predictors remain distinct; the frozen encoder is shared by address; unresolved update and runtime semantics are reported rather than improvised.
+After the execution-boundary and indexed-visibility decisions are settled, encode action-free mask-denoising pretraining, the EMA target boundary, the separate V-JEPA 2-AC predictor, action/state inputs, teacher forcing, rollout, and static planning inputs. Keep any parameter-update or runtime-loop gap visible.
+Accept: The pretraining and AC cuts validate independently; the two predictors remain distinct; the frozen encoder is shared by address; settled visibility and execution decisions are exercised; any unresolved update semantics have an explicit visible deferred outcome rather than an improvised relation.
+-> architecture/indexed-visibility
 -> example/core-graph
+-> execution/boundary
 -> layers/fixtures
 ---
 [example/consumers] Reference downstream consumers (notstarted)
 Files: downstream reference layers named at dispatch.
-Do: Add classification, action anticipation, video-language alignment, multimodal bridge, unified discrete, continuous latent, speech, tokenizer, low-bit, and parameter-lineage case consumers using the cross-paper architecture proposal.
-Accept: Each consumer owns its local blocks and values; shared addresses fold only where justified; bridge and unified-core accounts stay distinguishable; parameter merges do not become activation connections.
+After the indexed-visibility, parameter-lineage, and execution-boundary decisions are settled or explicitly deferred, add classification, action anticipation, video-language alignment, multimodal bridge, unified discrete, continuous latent, speech, tokenizer, low-bit, and parameter-lineage case consumers using the cross-paper architecture proposal.
+Accept: Each consumer owns its local blocks and values; shared addresses fold only where justified; bridge and unified-core accounts stay distinguishable; parameter merges do not become activation connections; every unresolved architectural boundary is named in the fixture outcome.
+-> architecture/indexed-visibility
+-> architecture/parameter-lineage
 -> example/pretraining-ac
+-> execution/boundary
 -> layers/fixtures
 ---
 [example/validation] Validate reference cuts and properties (notstarted)
 Files: reference-description validation fixtures named at dispatch.
-Do: Run the complete reference description through the validator, projection conformance, schema conformance, canonical serializer, and cut extraction. Record the empirical source for architecture values and benchmark measurements.
-Accept: Minimal cuts erase and revalidate; non-cuts report absent declared inputs; serializer properties hold; all unresolved boundaries have explicit visible outcomes.
+Run the complete reference description through the validator, projection conformance, schema conformance, canonical serializer, and cut extraction after the required architecture decisions are settled or explicitly deferred. Record the empirical source for architecture values and benchmark measurements.
+Accept: Minimal cuts erase and revalidate; non-cuts report absent declared inputs; serializer properties hold; every blocked or deferred boundary has a named visible outcome; no unresolved relation is silently given semantics.
+-> architecture/indexed-visibility
+-> architecture/parameter-lineage
 -> example/consumers
+-> execution/boundary
 -> schemas/conformance
 -> tools/validator
+---
+[implementation/language] Name implementation language (blocked)
+Design with the user: the mechanical guidance requires an implementation language named at dispatch. Record the language before starting parser, serializer, validator, projection, or executable fixture work. An agent must not choose it from local preference or repository memory.
+Accept: The language is named in the plan and every mechanical task's files and commands can be stated against it.
+---
+[schemas/meta/scalar-domain] Resolve finite scalar refinement (blocked)
+Design with the user: resolve the undefined finite-scalar schema refinement inherited by schema-format.md. Define its exact closed value set and validation behavior, or remove it from the initial algebra if the case inventory does not require it.
+Accept: Bootstrap schema validation has one unambiguous scalar contract and valid/invalid fixtures; no schema instance or validator invents the meaning locally.
+-> schemas/meta
+---
+[grammar/namespace-uri] Resolve namespace URI grammar (blocked)
+Design with the user: fix the exact lexical and canonical identity rules for author-controlled absolute https extension namespace URIs, including escaped string bytes and percent-encoding treatment.
+Accept: One offline URI production and canonical identity rule is recorded, with malformed and equivalent-looking URI fixtures; the rule preserves the namespace collision boundary.
+-> extension-namespaces/minting
+---
+[grammar/unknown-extension] Resolve opaque extension boundary (notstarted)
+Define the exact source span preserved for an unrecognized extension namespace and reconcile that span with canonical serialization. Do not normalize or reparse unknown data.
+Accept: The parser/serializer contract names the opaque boundary and a fixture proves byte-preserving round-trip alongside canonical known values.
+-> grammar/namespace-uri
+---
+[architecture/indexed-visibility] Resolve indexed visibility structure (blocked)
+Design with the user: decide how token-indexed modality paths, mixed attention, and block-causal visibility become checkable structure. Keep the existing ordinary connection model and explicit generated-form deferral visible; do not invent compact syntax.
+Accept: One small two-step, two-modality fixture distinguishes structural visibility from finalized attention metadata and states whether expansion or a reviewed indexed production is used.
+-> architecture/vocabulary
+-> projlang/design
+---
+[architecture/parameter-lineage] Resolve parameter-state lineage (blocked)
+Design with the user: decide whether parameter states, deltas, continual updates, and merges remain external artifacts or become a future element/relation. They must not be represented as activation connections by accident.
+Accept: A reproducibility cut for one DARE/TIES-style merge has an explicit valid or visibly deferred account, with no new frozen vocabulary added by an agent.
+-> architecture/vocabulary
+-> schemas/inventory
+---
+[execution/boundary] Specify static execution boundary (notstarted)
+Define the static account for streaming, recurrent, and closed-loop systems without binding projections to runtime. Use the execution schema proposal and case studies to state what is represented, what is an external consumer, and what becomes unresolvable when runtime inputs are absent.
+Accept: Speech, latent-dynamics, and V-JEPA 2 planning fixtures distinguish static structure from runtime execution without adding run semantics to projections.
+-> architecture/vocabulary
