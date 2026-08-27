@@ -1,5 +1,6 @@
 mod address;
 mod cut;
+mod evaluate;
 mod model;
 mod namespace;
 mod parser;
@@ -12,6 +13,10 @@ mod version;
 
 pub use address::{Address, AddressError};
 pub use cut::{CutError, extract_cut};
+pub use evaluate::{
+    CheckResult, Element, FinalizedReprojection, ProjectionError, StructuralReprojection,
+    evaluate_layer,
+};
 pub use model::{
     Block, Connection, CoreGraph, Description, ExtensionParameter, ExtensionValue, Group, Port,
 };

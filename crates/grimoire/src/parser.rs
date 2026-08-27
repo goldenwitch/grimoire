@@ -1,8 +1,9 @@
 use core::fmt;
 
 use crate::{
-    Address, Block, Connection, CoreGraph, Description, ExtensionParameter, ExtensionValue,
-    FiniteNumber, Group, Namespace, Port, Value, Version,
+    Address, Block, Check, Connection, CoreGraph, Decoration, Description, ExpectedCardinality,
+    ExtensionParameter, ExtensionValue, FiniteNumber, Group, Layer, LayerInput, Namespace, Port,
+    Projection, SchemaUse, SelectItem, Value, Version,
 };
 
 const PROTOTYPE_NAMESPACE_ROOT: &str = "https://github.com/goldenwitch/grimoire/extension";
@@ -267,6 +268,17 @@ impl<'source> Parser<'source> {
         let extensions = self.optional_extensions()?;
         self.expect_word("core")?;
         let core = self.parse_core()?;
+        let mut layers = Vec::new();
+        while self.is_word("layer") {
+            let layer = self.parse_layer()?;
+            if layers
+                .iter()
+                .any(|existing: &Layer| existing.name == layer.name)
+            {
+                return self.error(format!("duplicate layer name `{}`", layer.name));
+            }
+            layers.push(layer);
+        }
         self.expect(TokenKind::RightBrace)?;
         self.expect_end()?;
         let description = Description {
@@ -275,10 +287,216 @@ impl<'source> Parser<'source> {
             core_spec,
             core,
             extensions,
-            layers: Vec::new(),
+            layers,
         };
         ensure_unique_addresses(&description)?;
         Ok(description)
+    }
+
+    fn parse_layer(&mut self) -> Result<Layer, ParseError> {
+        self.expect_word("layer")?;
+        let Some(name) = self.take_string()? else {
+            return self.error("layer requires a name");
+        };
+        self.expect(TokenKind::LeftBrace)?;
+        let inputs = self.parse_layer_inputs()?;
+        let (projection_language, schemas) = self.parse_layer_consumption()?;
+        let projection = self.parse_projection()?;
+        self.expect(TokenKind::RightBrace)?;
+        Ok(Layer {
+            name,
+            inputs,
+            projection_language,
+            schemas,
+            projection,
+        })
+    }
+
+    fn parse_layer_inputs(&mut self) -> Result<Vec<LayerInput>, ParseError> {
+        self.expect_word("inputs")?;
+        self.expect(TokenKind::LeftBrace)?;
+        let mut inputs = Vec::new();
+        loop {
+            let input = if self.is_word("core") {
+                self.expect_word("core")?;
+                LayerInput::Core
+            } else if matches!(self.current.kind, TokenKind::String(_)) {
+                let Some(name) = self.take_string()? else {
+                    return self.error("layer input requires a name");
+                };
+                LayerInput::Layer(name)
+            } else {
+                return self.error("expected `core` or a layer name");
+            };
+            if inputs.contains(&input) {
+                return self.error("duplicate layer input");
+            }
+            inputs.push(input);
+            if self.current.kind != TokenKind::Comma {
+                break;
+            }
+            self.advance()?;
+        }
+        self.expect(TokenKind::RightBrace)?;
+        self.expect(TokenKind::Semicolon)?;
+        Ok(inputs)
+    }
+
+    fn parse_layer_consumption(&mut self) -> Result<(Version, Vec<SchemaUse>), ParseError> {
+        self.expect_word("consumes")?;
+        self.expect(TokenKind::LeftBrace)?;
+        self.expect_word("projection-language")?;
+        let projection_language = self.parse_version()?;
+        self.expect(TokenKind::Semicolon)?;
+        self.expect_word("schemas")?;
+        self.expect(TokenKind::LeftBrace)?;
+        let mut schemas = Vec::new();
+        while self.current.kind != TokenKind::RightBrace {
+            schemas.push(self.parse_schema_use()?);
+        }
+        self.expect(TokenKind::RightBrace)?;
+        self.expect(TokenKind::RightBrace)?;
+        Ok((projection_language, schemas))
+    }
+
+    fn parse_schema_use(&mut self) -> Result<SchemaUse, ParseError> {
+        let namespace = self.parse_namespace()?;
+        let first = self.take_word()?;
+        let name = if let Some(name) = first.strip_prefix('/') {
+            if name.is_empty() {
+                self.take_word()?
+            } else {
+                name.to_owned()
+            }
+        } else {
+            if first != "/" {
+                return self.error("schema use requires `/` before its name");
+            }
+            self.take_word()?
+        };
+        let version = self.parse_at_version()?;
+        self.expect(TokenKind::Semicolon)?;
+        Ok(SchemaUse {
+            namespace,
+            name,
+            version,
+        })
+    }
+
+    fn parse_projection(&mut self) -> Result<Projection, ParseError> {
+        self.expect_word("projection")?;
+        self.expect(TokenKind::LeftBrace)?;
+        let select = self.parse_select_stage()?;
+        let invert = if self.is_word("invert") {
+            self.parse_invert_stage()?
+        } else {
+            Vec::new()
+        };
+        let decorate = if self.is_word("decorate") {
+            self.parse_decorate_stage()?
+        } else {
+            Vec::new()
+        };
+        let checks = if self.is_word("checks") {
+            self.parse_checks_stage()?
+        } else {
+            Vec::new()
+        };
+        self.expect(TokenKind::RightBrace)?;
+        Ok(Projection {
+            select,
+            invert,
+            decorate,
+            checks,
+        })
+    }
+
+    fn parse_select_stage(&mut self) -> Result<Vec<SelectItem>, ParseError> {
+        self.expect_word("select")?;
+        self.expect(TokenKind::LeftBrace)?;
+        let mut items = Vec::new();
+        while self.current.kind != TokenKind::RightBrace {
+            let item = if self.is_word("use") {
+                self.expect_word("use")?;
+                SelectItem::Use(self.parse_address_list()?)
+            } else {
+                let keyword = self.take_word()?;
+                match keyword.as_str() {
+                    "block" => SelectItem::GenerateBlock(self.parse_block()?),
+                    "connection" => SelectItem::GenerateConnection(self.parse_connection()?),
+                    "group" => SelectItem::GenerateGroup(self.parse_group()?),
+                    _ => return self.error(format!("unexpected select keyword `{keyword}`")),
+                }
+            };
+            items.push(item);
+        }
+        self.expect(TokenKind::RightBrace)?;
+        Ok(items)
+    }
+
+    fn parse_invert_stage(&mut self) -> Result<Vec<Address>, ParseError> {
+        self.expect_word("invert")?;
+        self.expect(TokenKind::LeftBrace)?;
+        let mut groups = Vec::new();
+        while self.current.kind != TokenKind::RightBrace {
+            self.expect_word("group")?;
+            groups.push(self.parse_address()?);
+            self.expect(TokenKind::Semicolon)?;
+        }
+        self.expect(TokenKind::RightBrace)?;
+        Ok(groups)
+    }
+
+    fn parse_decorate_stage(&mut self) -> Result<Vec<Decoration>, ParseError> {
+        self.expect_word("decorate")?;
+        self.expect(TokenKind::LeftBrace)?;
+        let mut decorations = Vec::new();
+        while self.current.kind != TokenKind::RightBrace {
+            self.expect_word("on")?;
+            let target = self.parse_address()?;
+            let parameter = self.parse_extension_parameter(self.current.offset)?;
+            decorations.push(Decoration { target, parameter });
+        }
+        self.expect(TokenKind::RightBrace)?;
+        Ok(decorations)
+    }
+
+    fn parse_checks_stage(&mut self) -> Result<Vec<Check>, ParseError> {
+        self.expect_word("checks")?;
+        self.expect(TokenKind::LeftBrace)?;
+        let mut checks = Vec::new();
+        while self.current.kind != TokenKind::RightBrace {
+            self.expect_word("check")?;
+            let name = self.take_word()?;
+            self.expect_word("expect")?;
+            let expected = match self.take_word()?.as_str() {
+                "empty" => ExpectedCardinality::Empty,
+                "nonempty" => ExpectedCardinality::Nonempty,
+                value => return self.error(format!("unknown check cardinality `{value}`")),
+            };
+            self.expect_word("over")?;
+            let namespace = self.parse_namespace()?;
+            let parameter = self.take_word()?;
+            self.expect(TokenKind::Semicolon)?;
+            checks.push(Check {
+                name,
+                expected,
+                namespace,
+                parameter,
+            });
+        }
+        self.expect(TokenKind::RightBrace)?;
+        Ok(checks)
+    }
+
+    fn parse_address_list(&mut self) -> Result<Vec<Address>, ParseError> {
+        let mut addresses = vec![self.parse_address()?];
+        while self.current.kind == TokenKind::Comma {
+            self.advance()?;
+            addresses.push(self.parse_address()?);
+        }
+        self.expect(TokenKind::Semicolon)?;
+        Ok(addresses)
     }
 
     fn parse_core(&mut self) -> Result<CoreGraph, ParseError> {
@@ -405,31 +623,38 @@ impl<'source> Parser<'source> {
         let mut extensions = Vec::new();
         while self.current.kind != TokenKind::RightBrace {
             let start = self.current.offset;
-            self.expect_word("extension")?;
-            let namespace = self.parse_namespace()?;
-            let name = self.take_word()?;
-            self.expect_word("schema")?;
-            let schema = self.take_word()?;
-            let version = self.parse_at_version()?;
-            self.expect(TokenKind::Equal)?;
-            let parsed_value = self.parse_value()?;
-            let end = self.current.end;
-            self.expect(TokenKind::Semicolon)?;
-            let value = if is_known_namespace(&namespace) {
-                ExtensionValue::Known(parsed_value)
-            } else {
-                ExtensionValue::Opaque(self.lexer.source.as_bytes()[start..end].to_vec())
-            };
-            extensions.push(ExtensionParameter {
-                namespace,
-                name,
-                schema,
-                version,
-                value,
-            });
+            extensions.push(self.parse_extension_parameter(start)?);
         }
         self.expect(TokenKind::RightBrace)?;
         Ok(extensions)
+    }
+
+    fn parse_extension_parameter(
+        &mut self,
+        start: usize,
+    ) -> Result<ExtensionParameter, ParseError> {
+        self.expect_word("extension")?;
+        let namespace = self.parse_namespace()?;
+        let name = self.take_word()?;
+        self.expect_word("schema")?;
+        let schema = self.take_word()?;
+        let version = self.parse_at_version()?;
+        self.expect(TokenKind::Equal)?;
+        let parsed_value = self.parse_value()?;
+        let end = self.current.end;
+        self.expect(TokenKind::Semicolon)?;
+        let value = if is_known_namespace(&namespace) {
+            ExtensionValue::Known(parsed_value)
+        } else {
+            ExtensionValue::Opaque(self.lexer.source.as_bytes()[start..end].to_vec())
+        };
+        Ok(ExtensionParameter {
+            namespace,
+            name,
+            schema,
+            version,
+            value,
+        })
     }
 
     fn parse_namespace(&mut self) -> Result<Namespace, ParseError> {
