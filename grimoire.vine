@@ -430,13 +430,16 @@ Accept: Every initial layer has one valid fixture and one relevant visible failu
 -> projlang/spec
 -> schemas/conformance
 ---
-[example/core-graph] Reference shared architecture graph (notstarted)
-Files: reference description core fixture named at dispatch.
-Do: Represent the shared V-JEPA 2 and frontier architecture elements using the architecture vocabulary ledger, concrete shapes and axes, and the reviewed grammar. Keep shared addresses limited to actual reuse within the description.
-Accept: The core graph is independently valid; encoder, tokenizer, bridge, predictor, latent, speech, and operator boundaries are addressable without paper-specific core primitives.
+[example/core-graph] Reference shared architecture graph (reviewing)
+Files: crates/grimoire/tests/reference_core.rs.
+Do: Represent the shared V-JEPA 2 and frontier architecture boundaries using the architecture vocabulary ledger, concrete shapes and axes, and the reviewed grammar. Keep shared addresses limited to actual reusable boundaries within the description, and validate the core independently with the executable prototype schemas.
+Accept: The core graph parses and validates; encoder, tokenizer, bridge, predictor, latent, speech, and operator boundaries are addressable without paper-specific core primitives; nested schema references and provenance values remain visible.
 -> architecture/vocabulary
 -> grammar/review
 -> schemas/instances
+> 2026-08-26: The reference core uses nine ordinary blocks for visual encoding, visual tokenization, bridging, shared transformer, prediction, latent state, speech input/output, and operator boundaries.
+> 2026-08-26: Axes and shapes remain schema-governed values on ports; architecture and provenance facts remain finalized extension values; none introduces a new core element kind.
+@artifact text/rust ./crates/grimoire/tests/reference_core.rs
 ---
 [example/pretraining-ac] Reference pretraining and dynamics views (notstarted)
 Files: V-JEPA 2 pretraining and action-conditioned reference layers named at dispatch.
