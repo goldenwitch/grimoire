@@ -157,13 +157,13 @@ The format schemas themselves are written in: versioned and machine-checkable.
 [grammar/review] Review the grammar (reviewing)
 Artifact: grammar/grimoire.md.
 Review the concrete grammar against the frozen core specification, schema contracts, namespace rule, and settled projection semantics. Accept the repaired structural, layer, value, and phase-order clauses; retain explicit blockers for finite-scalar bootstrap semantics, namespace URI lexical rules, and the exact opaque-byte boundary.
-@artifact text/markdown ./grammar/grimoire.md
 -> grammar/build
 > 2026-08-26: The description production explicitly declares core spec version; grammar header version remains syntax version.
 > 2026-08-26: Tagged alternatives serialize as tag(value) and select exactly one schema arm.
 > 2026-08-26: Checks aggregate finalized values matching one namespace and parameter across visible folded elements only.
 > 2026-08-26: Generated and decoration references resolve from the visible input chain or current definition site without textual-order visibility.
 > 2026-08-26: Grammar review remains incomplete until finite-scalar semantics, namespace URI lexical rules, and unknown-parameter byte boundary are resolved.
+@artifact text/markdown ./grammar/grimoire.md
 @guidance text/markdown ./spec/grimoire.md
 ---
 [grammar/build] Grammar of the format (reviewing)
@@ -220,12 +220,16 @@ Map empirical architecture terms to existing blocks, ports, connections, groups,
 Accept: The ledger names the existing account for every recurring paper term and records unresolved parameter-state and update relations without adding them to frozen core vocabulary.
 -> schemas/inventory
 ---
-[schemas/instances] Concrete schema instances (notstarted)
+[schemas/instances] Concrete schema instances (blocked)
 Files: concrete schema definitions and fixtures named at dispatch.
-Do: Translate the reviewed minimal inventory into versioned schema instances for axes, shapes, architecture, training, execution, precision, measurement, provenance, and the bounded lineage candidate. Assign minted extension namespaces and keep all value bodies inside the closed Grimoire algebra.
+Translate the reviewed minimal inventory into versioned schema instances for axes, shapes, architecture, training, execution, precision, measurement, provenance, and the bounded lineage candidate. Assign a real author-controlled extension namespace before writing concrete identifiers; keep all value bodies inside the closed Grimoire algebra.
+Blocked until the repository owner supplies or configures the namespace authority. Do not substitute an example, local, or guessed URI.
 Accept: Each schema declares its allowed element kinds; every valid value in the case-study coverage matrix has a schema account; unresolved topology, parameter-update, symbolic-cost, and lineage behavior fails visibly or remains explicitly deferred.
 -> grammar/review
 -> schemas/inventory
+> 2026-08-26: Concrete schema identifiers are not minted while this checkout has no configured repository origin or other verified author-controlled https authority.
+> 2026-08-26: Example namespace URIs in extension-namespaces.md remain examples and must not be promoted to canonical schema identifiers by an agent.
+> 2026-08-26: Candidate schema bodies remain usable for grammar and fixture design, but concrete schema documents wait at the namespace boundary.
 ---
 [schemas/conformance] Schema conformance fixtures (notstarted)
 Files: schema conformance fixtures named at dispatch.
