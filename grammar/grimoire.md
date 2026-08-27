@@ -67,8 +67,8 @@ uri-string   = string ;
 
 `string` uses the JSON string escape set. `number` is accepted only when it is
 finite; infinities and NaN have no lexical production. The semantic validator
-applies the positive-integer and finite-number refinements from the schema
-format after parsing.
+applies the positive-integer, finite-number, and provisional boolean
+`finite-scalar` refinements from the schema format after parsing.
 
 Addresses are flat identifiers. The slash is part of an address, not a nesting
 operator. Address comparison is exact and case-sensitive.
@@ -201,8 +201,10 @@ extension block. A layer is not an element, so the bundled layer wrapper does
 not acquire extension parameters through this production.
 
 The namespace URI is an exact identifier. It is validated as an absolute
-`https` URI by the namespace rule, but it is not dereferenced. Schema name and
-version are subordinate to the namespace and are not global names.
+`https` URI by the namespace rule, but it is not dereferenced. In the prototype,
+the string payload must begin with `https://`, contain a nonempty authority,
+and contain no whitespace or control characters. Schema name and version are
+subordinate to the namespace and are not global names.
 
 For a namespace recognized by the consumer, the parameter is parsed as a value
 and validated against the named schema. For an unrecognized namespace, the

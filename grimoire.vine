@@ -407,43 +407,50 @@ Accept: Minimal cuts erase and revalidate; non-cuts report absent declared input
 -> schemas/conformance
 -> tools/validator
 ---
-[implementation/language] Name implementation language (blocked)
-Design with the user: the mechanical guidance requires an implementation language named at dispatch. Record the language before starting parser, serializer, validator, projection, or executable fixture work. An agent must not choose it from local preference or repository memory.
-Accept: The language is named in the plan and every mechanical task's files and commands can be stated against it.
+[implementation/language] Name implementation language (reviewing)
+Prototype implementation language: Rust 2024 using Cargo and the installed Rust 1.94 toolchain. Keep the first crate dependency-light; add libraries only when a fixture proves the standard library is insufficient.
+Accept: The language is named in every mechanical task's dispatch context and focused Cargo checks run from the repository root.
+> 2026-08-26: Prototype implementation language is Rust 2024, chosen to match the neighboring Scry repository and the available rustc/cargo 1.94 toolchain; this choice is reversible before the first public API freeze.
 ---
-[schemas/meta/scalar-domain] Resolve finite scalar refinement (blocked)
-Design with the user: resolve the undefined finite-scalar schema refinement inherited by schema-format.md. Define its exact closed value set and validation behavior, or remove it from the initial algebra if the case inventory does not require it.
-Accept: Bootstrap schema validation has one unambiguous scalar contract and valid/invalid fixtures; no schema instance or validator invents the meaning locally.
+[schemas/meta/scalar-domain] Resolve finite scalar refinement (reviewing)
+Prototype ruling: resolve the undefined finite-scalar refinement as the closed boolean scalar `true | false`. Keep positive-integer, finite-number, text, and closed enumeration as separate refinements. Add a fixture that can falsify this choice if the full case set requires another primitive.
+Accept: Bootstrap schema validation has one executable scalar contract; boolean values round-trip; non-boolean values fail the finite-scalar fixture visibly.
 -> schemas/meta
+> 2026-08-26: For the first executable prototype, finite-scalar means boolean with exactly the values true and false; this is a provisional ruling subject to fixture pressure, not a frozen vocabulary amendment.
 ---
-[grammar/namespace-uri] Resolve namespace URI grammar (blocked)
-Design with the user: fix the exact lexical and canonical identity rules for author-controlled absolute https extension namespace URIs, including escaped string bytes and percent-encoding treatment.
-Accept: One offline URI production and canonical identity rule is recorded, with malformed and equivalent-looking URI fixtures; the rule preserves the namespace collision boundary.
+[grammar/namespace-uri] Resolve namespace URI grammar (reviewing)
+Prototype ruling: namespace identifiers are exact quoted ASCII strings whose payload begins with `https://`, has a nonempty authority, and contains no whitespace or control characters. Percent-encoding, host case, path spelling, and escapes remain exact bytes; no normalization or dereference occurs.
+Accept: Offline parser validation accepts the provisional form, rejects relative/http/whitespace/control forms, and preserves exact spelling through serialization.
 -> extension-namespaces/minting
+> 2026-08-26: The prototype namespace URI rule is an exact ASCII https URI string with nonempty authority and no whitespace/control characters; percent-encoding and case are never normalized.
 ---
-[grammar/unknown-extension] Resolve opaque extension boundary (notstarted)
-Define the exact source span preserved for an unrecognized extension namespace and reconcile that span with canonical serialization. Do not normalize or reparse unknown data.
-Accept: The parser/serializer contract names the opaque boundary and a fixture proves byte-preserving round-trip alongside canonical known values.
+[grammar/unknown-extension] Resolve opaque extension boundary (reviewing)
+Prototype ruling: an unrecognized extension parameter is preserved as the raw source span beginning at `extension` and ending at its terminating semicolon, including internal comments and insignificant whitespace. Known parameters use canonical serialization.
+Accept: A mixed known/unknown fixture proves raw unknown bytes survive parse/serialize while known values are canonicalized.
 -> grammar/namespace-uri
+> 2026-08-26: The prototype opaque boundary is the complete unknown extension-parameter source span from the `extension` keyword through its terminating semicolon, inclusive; this is an explicit canonical-serialization exception.
 ---
-[architecture/indexed-visibility] Resolve indexed visibility structure (blocked)
-Design with the user: decide how token-indexed modality paths, mixed attention, and block-causal visibility become checkable structure. Keep the existing ordinary connection model and explicit generated-form deferral visible; do not invent compact syntax.
-Accept: One small two-step, two-modality fixture distinguishes structural visibility from finalized attention metadata and states whether expansion or a reviewed indexed production is used.
+[architecture/indexed-visibility] Resolve indexed visibility structure (reviewing)
+Prototype ruling: indexed modality and time visibility expands to ordinary addressed elements and directed connections before validation. No compact indexed grammar is introduced in v1. A small fixture proves the expanded connection set for two time steps and two modalities.
+Accept: Block-causal and mixed-attention fixtures distinguish structural visibility from finalized attention metadata and report generated addresses deterministically.
 -> architecture/vocabulary
 -> projlang/design
+> 2026-08-26: The first implementation expands indexed visibility into ordinary addressed connections before structural validation; compact indexed syntax is deferred until the expanded fixture exposes real duplication or size pressure.
 ---
-[architecture/parameter-lineage] Resolve parameter-state lineage (blocked)
-Design with the user: decide whether parameter states, deltas, continual updates, and merges remain external artifacts or become a future element/relation. They must not be represented as activation connections by accident.
-Accept: A reproducibility cut for one DARE/TIES-style merge has an explicit valid or visibly deferred account, with no new frozen vocabulary added by an agent.
+[architecture/parameter-lineage] Resolve parameter-state lineage (reviewing)
+Prototype ruling: parameter states, deltas, continual updates, and merges remain external lineage artifacts or schema-governed values in v1. They are never activation connections and do not become new frozen element kinds. A reproducibility fixture records a DARE/TIES-style merge as visibly deferred until a future artifact relation exists.
+Accept: The fixture preserves logical architecture identity, names base/delta/result provenance, and returns a distinct deferred outcome rather than misrepresenting the merge as graph flow.
 -> architecture/vocabulary
 -> schemas/inventory
+> 2026-08-26: V1 keeps parameter-state lineage outside the core graph as an external artifact or finalized candidate value; no checkpoint, delta, or merge vocabulary is added to the frozen core by the prototype.
+> 2026-08-26: A parameter merge is not represented as an activation connection; reproducibility is either supplied by an external lineage artifact or reported as deferred.
 ---
 [execution/boundary] Specify static execution boundary (reviewing)
 Artifact: proposals/execution-boundary.md.
 Define the static account for streaming, recurrent, and closed-loop systems. Execution regime is finalized metadata; structural state, causal, and action paths remain ordinary connections; runtime clocks, buffers, rollouts, controllers, and replanning remain external. Missing runtime-facing producers in a cut are visibly unresolvable.
-@artifact text/markdown ./proposals/execution-boundary.md
 -> architecture/vocabulary
 > 2026-08-26: Execution values use regimes static, streaming, recurrent, and closed-loop, with optional horizon and rate plus required external-consumer status.
 > 2026-08-26: Execution values never create feedback or causal paths; those paths are structural only when the described model interface contains them.
 > 2026-08-26: Runtime observation, buffering, state progression, action execution, sampling, and replanning remain outside pure projection evaluation.
 > 2026-08-26: A missing runtime-facing producer in a cut is reported as an unresolvable dependent layer, not silently treated as empty or open-loop.
+@artifact text/markdown ./proposals/execution-boundary.md

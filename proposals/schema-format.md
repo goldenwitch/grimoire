@@ -1,6 +1,6 @@
 # Schema definition format
 
-Status: in progress.
+Status: prototype contract; in progress.
 
 ## Ruling
 
@@ -49,13 +49,20 @@ An **address** reference is a first-class constructor. It validates an **address
 
 The initial closed scalar refinements are:
 
-- finite scalar kind;
+- finite scalar kind, provisionally the boolean values `true` and `false`;
 - positive integer;
 - finite number;
 - text;
 - closed enumeration.
 
 Richer constraints are expressed by composing these constructors inside an individual **schema**. They do not add meta-algebra features.
+
+For the first executable prototype, `finite scalar kind` is the closed boolean
+kind. This is a reversible engineering choice made to give the bootstrap
+validator one executable meaning for the previously undefined constructor. A
+fixture must reject non-boolean values and preserve boolean values through
+canonical serialization. If the empirical case set later requires another
+finite scalar kind, the fixture is the trigger for revising this contract.
 
 ## Bootstrap
 

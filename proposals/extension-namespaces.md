@@ -1,6 +1,6 @@
 # Extension namespace minting
 
-Status: empirical proposal; in progress.
+Status: prototype contract; in progress.
 
 This proposal defines how an author names an extension namespace so independent
 authors do not collide unknowingly. It also records the preservation boundary
@@ -114,18 +114,18 @@ The record is provenance and documentation, not a runtime dependency. A
 validator does not fetch it. Its purpose is to make ownership and allocation
 human-auditable when two projects exchange descriptions.
 
-For this repository, a future Grimoire-owned namespace could be rooted below
-its project origin and separated by schema family, for example:
+For this repository, the prototype namespace root is:
 
 ```text
-https://github.com/goldenwitch/grimoire/extension/shapes
-https://github.com/goldenwitch/grimoire/extension/measurement
-https://github.com/goldenwitch/grimoire/extension/provenance
+https://github.com/goldenwitch/grimoire/extension
 ```
 
-These are examples for the minting rule, not minted identifiers. The repository
-must not treat them as canonical until the owning namespace record and concrete
-schema versions exist.
+Schema families use paths below this root, for example
+`https://github.com/goldenwitch/grimoire/extension/shapes`. This root is a
+provisional authoring choice for the executable prototype because this checkout
+has no configured Git remote. It remains easy to replace before a public schema
+contract is released; concrete schema documents must use this exact root until
+then rather than mixing guessed alternatives.
 
 ## Collision Cases
 
@@ -196,6 +196,9 @@ This proposal records these architecture and format decisions:
 
 - Namespace collision resistance comes from an author-controlled absolute
   `https` URI and a unique path below that origin.
+- The prototype namespace root is
+  `https://github.com/goldenwitch/grimoire/extension`; it is provisional until
+  repository ownership is verified.
 - Namespace identity is exact and offline; no network lookup or alias
   normalization participates in validation.
 - Schema name and version are subordinate to namespace identity and are not

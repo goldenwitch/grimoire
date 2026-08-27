@@ -1,6 +1,6 @@
 # Architecture vocabulary and decisions
 
-Status: empirical proposal; in progress.
+Status: prototype contract; in progress.
 
 This ledger records how the architecture terms found in the indexed papers map
 to the existing Grimoire vocabulary. It is deliberately conservative: a paper
@@ -35,6 +35,24 @@ case only needs its position, but it can be an ordinary addressed element when
 a downstream layer references the learned pretraining predictor's masking
 interface. The description must make that choice visible; the validator must not
 infer it from a name.
+
+## Prototype Decisions
+
+The first executable prototype makes three deliberately reversible choices:
+
+- Rust 2024 is the implementation language, using Cargo and the installed Rust
+	1.94 toolchain.
+- Indexed modality, time, and block-causal visibility expands into ordinary
+	addressed elements and directed connections before validation. No compact
+	indexed grammar is introduced yet.
+- Parameter states, deltas, checkpoints, and merges remain external lineage
+	artifacts or finalized values. They are not activation connections and do not
+	become new frozen element kinds.
+
+Each choice is paired with a fixture. A fixture may replace the choice when it
+shows that the current account cannot represent an empirical case without
+losing identity, locality, cut erasure, or the structural/finalization
+boundary.
 
 ## Architecture Decisions
 
