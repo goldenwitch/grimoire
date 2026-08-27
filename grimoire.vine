@@ -55,9 +55,17 @@ Accept: The complete current Rust suite passes; valid document forms parse and s
 @guidance text/markdown ./spec/grimoire.md
 @guidance text/markdown ./guidance/tools-validator.md
 ---
-[viz/design] Design with the user: visualization (notstarted)
-Visualization is specified separately and nothing exists yet. Views render reprojections; per-layer rendering is the open ground.
+[viz/design] Design with the user: visualization (reviewing)
+Artifact: proposals/visualization.md.
+Specify the first visualization boundary as a static HTML viewer over evaluated Grimoire reprojections. Make layer comparison with single-reprojection inspection the primary workflow, anchored by the V-JEPA 2 reference and checked secondarily against the cross-paper consumer fixture. Render addressed blocks, ports, connections, groups, and document context from the selected reprojection; compare by address; keep evaluator definition origins private; place finalized metadata and opt-in placement, cost, channel, measurement, provenance, precision, and lineage overlays in separate surfaces. Show exact, measured, posterior, opaque, deferred, unresolved, and absent states explicitly. Do not execute projections, training, sampling, recurrence, controllers, or network calls, and do not infer structure or analysis values from labels or topology.
+Accept: The proposal defines static input/output boundaries, structural rendering, address-based comparison, metadata and overlay semantics, keyboard-readable interaction, stable layout constraints, V-JEPA and cross-paper acceptance fixtures, opaque-data handling, empty/unresolved states, and explicit non-goals; no visualization-specific core element kind or runtime semantics is introduced.
 -> projlang/spec
+> 2026-08-27: The first visualization artifact is a design proposal; a later implementation may generate a static HTML viewer after the rendering contract is reviewed.
+> 2026-08-27: The primary workflow is layer comparison plus single-reprojection inspection, with V-JEPA 2 as the first acceptance case and cross-paper consumers as a secondary case.
+> 2026-08-27: Structure is rendered from evaluated reprojections and compared by address; private definition origins are not user-visible semantic identity.
+> 2026-08-27: Finalized decorations and opt-in placement, cost, channel, measurement, and provenance overlays remain separate from structural rendering.
+> 2026-08-27: Deferred, unresolved, opaque, absent, exact, measured, and posterior outcomes are explicit display states; the viewer never fills gaps by inference.
+@artifact text/markdown ./proposals/visualization.md
 ---
 [layers/info-flow] Information flow layer (reviewing)
 Files: crates/grimoire/tests/info_flow_layer.rs, crates/grimoire/tests/information_graph.rs, crates/grimoire/tests/information_targets.rs, and the information channel artifacts.
