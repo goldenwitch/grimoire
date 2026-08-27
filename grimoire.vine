@@ -104,13 +104,13 @@ Projection-language semantic decisions recorded; concrete selector and value syn
 [schemas/shapes] Design with the user: shapes schema (reviewing)
 Artifact: proposals/shape-schema.md.
 Define shape values as coarse layout plus ordered dimensions, where each dimension is a positive literal or a first-class axis reference. Keep topology and token correspondence explicit; do not infer spatial meaning from names or media type.
-@artifact text/markdown ./proposals/shape-schema.md
 -> extension-namespaces/minting
 -> schemas/axes
 -> schemas/meta
 > 2026-08-26: Shape values use layout enum(scalar,vector,sequence,grid,volume) plus ordered literal-or-axis-reference dimensions.
 > 2026-08-26: TiTok's latent is represented as a sequence and V-JEPA 2 frame features as a grid; layout does not infer spatial correspondence.
 > 2026-08-26: Shape compatibility is a narrow later check over explicit ports, not a new core graph primitive or implicit shape inference.
+@artifact text/markdown ./proposals/shape-schema.md
 @guidance text/markdown ./spec/grimoire.md
 ---
 [schemas/axes] Design with the user: axes schema (reviewing)
@@ -159,16 +159,22 @@ Your read of the grammar against the specification: every vocabulary term gradua
 -> grammar/build
 @guidance text/markdown ./spec/grimoire.md
 ---
-[grammar/build] Grammar of the format (notstarted)
-Formal productions for the whole data format: vocabulary graduated into grammar, addresses, core and layer documents, extension parameters, canonical serialization.
+[grammar/build] Grammar of the format (reviewing)
+Artifact: grammar/grimoire.md.
+Draft the concrete Grimoire grammar for bundled descriptions, standalone layers, schema documents, extensions, runtime values, and the ordered select/invert/decorate/check projection surface. Keep core vocabulary, layer ownership, locality, canonical serialization, and unknown-namespace preservation explicit; leave unresolved URI lexical and parameter-update questions visible for grammar review.
+@artifact text/markdown ./grammar/grimoire.md
 -> architecture/vocabulary
 -> core/vocab-review
 -> extension-namespaces/minting
 -> projlang/design
 -> schemas/inventory
 -> schemas/meta
-> Built autonomously by Claude to satisfy the specification; lands at grammar/review.
-> Gated on the vocabulary read-through rather than the full freeze, since productions graduate from vocabulary. Relax if wanted sooner.
+> 2026-08-26: A description explicitly declares its core spec version; the syntax header version remains the grammar version.
+> 2026-08-26: Blocks require human labels; port, connection, and group labels are optional because the core vocabulary does not require them.
+> 2026-08-26: Core graphs and layers are not extension-bearing elements; extensions attach only to addressed description, block, port, connection, or group elements.
+> 2026-08-26: Generated select definitions use ordinary element productions and the same global address and visibility checks as authored definitions.
+> 2026-08-26: Unknown extension parameter spans are opaque serializer exceptions; internal comments and whitespace are retained byte-for-byte while known values are canonicalized.
+> 2026-08-26: Projection syntax orders select and invert before decorate and checks; checks name only finalized decoration namespace and parameter values.
 @guidance text/markdown ./spec/grimoire.md
 ---
 [core/freeze] Stamp the core spec (complete) @dispatch(mechanical)
