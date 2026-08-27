@@ -12,19 +12,27 @@ The full vision: a frozen core specification satisfied by its grammar, projectio
 ---
 [example/reference] Reference worked description (notstarted)
 One synthetic whole-system description exercised end to end across every layer and validated by the reference tooling. Its purpose is to keep the language from overfitting before a real consumer exists.
+-> architecture/vocabulary
 -> consumers/golden-retriever
+-> example/validation
 -> layers/cost
+-> layers/fixtures
 -> layers/hyperparameters
 -> layers/info-flow
 -> layers/mode
 -> layers/placement
 -> layers/provenance
+-> schemas/instances
+-> schemas/inventory
 -> tools/validator
-> Candidate system: the V-JEPA self-distillation setup.
+> Candidate system: V-JEPA 2, including its action-free representation pretraining, action-conditioned world model, downstream probes, language alignment, and goal-conditioned planning boundary.
+@guidance text/markdown ./proposals/v-jepa-2-case-studies.md
+@guidance text/markdown ./proposals/frontier-architecture-case-studies.md
 ---
 [tools/validator] Reference validator and canonical serializer (notstarted) @dispatch(mechanical)
 Implements the constraints: addresses, scoping, locality, cuts, checks, canonical serialization. Conforms to the specification; never the definition.
 -> grammar/review
+-> tools/validator/conformance
 @guidance text/markdown ./spec/grimoire.md
 @guidance text/markdown ./guidance/tools-validator.md
 ---
@@ -118,9 +126,13 @@ Citations, stated assumptions, and novelty flags on groups.
 -> schemas/meta
 @guidance text/markdown ./spec/grimoire.md
 ---
-[schemas/meta] Design with the user: schema definition format (notstarted)
+[schemas/meta] Design with the user: schema definition format (reviewing)
 The format schemas themselves are written in: versioned and machine-checkable.
 -> core/freeze
+> 2026-07-21: The schema body is a closed Grimoire-native algebra. Its constructors, constraints, and validation behavior are specified by this format; it does not delegate arbitrary schema-body semantics to external dialects or extension keywords.
+> 2026-07-21: The closed initial algebra has scalar refinement, labeled product, homogeneous sequence, tagged alternative, first-class address reference, and explicit absent | present(T). A schema declares its allowed element kinds. Initial scalar refinements are finite scalar kind, positive integer, finite number, text, and closed enumeration.
+> 2026-07-21: The format provides the necessary bootstrap productions to describe and validate its own closed algebra. Bootstrap uses the same constructors and does not invoke a second schema language.
+@artifact text/markdown ./proposals/schema-format.md
 ---
 [grammar/review] Review the grammar (notstarted)
 Your read of the grammar against the specification: every vocabulary term graduated into a production, canonical serialization defined, nothing invented beyond the requirements.
@@ -129,9 +141,11 @@ Your read of the grammar against the specification: every vocabulary term gradua
 ---
 [grammar/build] Grammar of the format (notstarted)
 Formal productions for the whole data format: vocabulary graduated into grammar, addresses, core and layer documents, extension parameters, canonical serialization.
+-> architecture/vocabulary
 -> core/vocab-review
 -> extension-namespaces/minting
 -> projlang/design
+-> schemas/inventory
 -> schemas/meta
 > Built autonomously by Claude to satisfy the specification; lands at grammar/review.
 > Gated on the vocabulary read-through rather than the full freeze, since productions graduate from vocabulary. Relax if wanted sooner.
@@ -151,6 +165,114 @@ Your deliberate read of the Vocabulary section: the definitions that graduate in
 The core data-format specification: pure data, definition sites and scoping, locality, extension parameters, and requirements on the projection language and layers.
 @artifact text/markdown ./spec/grimoire.md
 ---
-[extension-namespaces/minting] Extension namespace minting (notstarted)
-How extension namespace identifiers are minted so independent authors cannot collide unknowingly.
+[extension-namespaces/minting] Extension namespace minting (reviewing)
+Artifact: proposals/extension-namespaces.md.
+Mint extension namespaces using author-controlled absolute https URIs with unique paths below the controlled origin. Keep namespace identity exact and offline; validate recognized schema versions fail-closed; preserve unknown namespace payloads byte-exactly through parse and serialize.
+@artifact text/markdown ./proposals/extension-namespaces.md
 -> core/freeze
+> 2026-08-26: Extension namespace collision resistance comes from an author-controlled absolute https URI and a unique path below that origin; no registry, dereference, redirect resolution, or alias normalization participates in validation.
+> 2026-08-26: Namespace identity is exact and offline; schema name and version are subordinate to the namespace and are not global bare names.
+> 2026-08-26: A consumer that does not recognize a namespace retains its complete payload as opaque bytes; canonical serialization applies only to recognized schema values.
+---
+[schemas/inventory] Minimal schema inventory (reviewing)
+Artifact: proposals/schema-inventory.md.
+The closed-algebra schema family that covers the empirical architecture cases without one schema per paper. Record allowed attachment kinds, candidate value bodies, coverage, minimality, and sized gaps. Preserve the boundary between finalized schema values and structural graph/projection semantics.
+Accept: Every case-family row maps to a schema or an explicit gap; no paper-specific primitive is introduced; all candidate bodies use only the settled schema constructors.
+-> extension-namespaces/minting
+-> schemas/meta
+---
+[architecture/vocabulary] Architecture vocabulary ledger (reviewing)
+Artifact: proposals/architecture-vocabulary.md.
+Map empirical architecture terms to existing blocks, ports, connections, groups, layers, projections, and schema values. Record decisions for shared addresses, local consumers, unified and decoupled backbones, runtime boundaries, parameter flow, and precision variants.
+Accept: The ledger names the existing account for every recurring paper term and records unresolved parameter-state and update relations without adding them to frozen core vocabulary.
+-> schemas/inventory
+---
+[schemas/instances] Concrete schema instances (notstarted)
+Files: concrete schema definitions and fixtures named at dispatch.
+Do: Translate the reviewed minimal inventory into versioned schema instances for axes, shapes, architecture, training, execution, precision, measurement, provenance, and the bounded lineage candidate. Assign minted extension namespaces and keep all value bodies inside the closed Grimoire algebra.
+Accept: Each schema declares its allowed element kinds; every valid value in the case-study coverage matrix has a schema account; unresolved topology, parameter-update, symbolic-cost, and lineage behavior fails visibly or remains explicitly deferred.
+-> grammar/review
+-> schemas/inventory
+---
+[schemas/conformance] Schema conformance fixtures (notstarted)
+Files: schema conformance fixtures named at dispatch.
+Do: Exercise valid and invalid values for every concrete schema instance, including symbolic axis references, ordered shapes, optional fields, finite measurements, provenance novelty states, execution regimes, precision combinations, and lineage candidates.
+Accept: Fixtures prove closed-algebra validation, address-reference validation, absent versus present values, domain failures, and preservation of unrecognized extension namespaces.
+-> schemas/instances
+---
+[tools/validator/parse] Parse reviewed descriptions (notstarted)
+Files: validator parser implementation and parser fixtures named at dispatch.
+Do: Implement the reviewed grammar exactly, with source locations on rejection and no recovery or accepted dialects. Preserve extension namespaces and values byte-exactly where the grammar requires it.
+Accept: Every reviewed production parses into one internal form; malformed input fails with a location and identifier where available; no parser behavior is invented locally.
+-> grammar/review
+---
+[tools/validator/structure] Validate structural invariants (notstarted)
+Files: validator structural checks and fixtures named at dispatch.
+Do: Implement address uniqueness, directed two-port connections, core-version declaration, one definition site, grammar conformance, reference scope, locality, legal unreferenced elements, layer-input DAG resolution, and extension-namespace preservation.
+Accept: Each failure names its check, location, and relevant identifier; valid ties are accepted without warnings; C1-C10 fixtures cover both success and failure.
+-> schemas/instances
+-> tools/validator/parse
+---
+[tools/validator/serialize] Serialize canonical descriptions (notstarted)
+Files: validator canonical serializer and round-trip fixtures named at dispatch.
+Do: Emit the grammar's canonical serialization with deterministic ordering and byte-preserving extension values. Assert parse(serialize(parse(x))) value preservation and serialize(parse(x)) fixpoint behavior over all valid fixtures.
+Accept: Both serializer properties hold for every valid fixture; serializer failures identify the source value or fixture that violates the property.
+-> grammar/review
+-> tools/validator/parse
+---
+[tools/validator/cuts] Validate cuts and erasure (notstarted)
+Files: validator cut extraction and resolution fixtures named at dispatch.
+Do: Extract downward-closed layer subsets as standalone descriptions, revalidate each erasure, and report a non-cut subset as unresolvable at the layers whose declared inputs are absent.
+Accept: C11 successful transformations and C12 visible unresolvable outcomes are fixtures; extraction never silently retains an absent input or crashes.
+-> tools/validator/structure
+---
+[tools/validator/conformance] Validator conformance suite (notstarted)
+Files: end-to-end validator conformance fixtures named at dispatch.
+Do: Combine parser, structural checks, canonical serialization, extension preservation, schema validation, cuts, and error-message assertions over the reviewed reference fixtures.
+Accept: The suite covers every validator requirement and both serializer properties; failures identify check, location, and identifier; no projection evaluation is introduced.
+-> schemas/conformance
+-> tools/validator/cuts
+-> tools/validator/serialize
+---
+[layers/fixtures] Layer and schema coverage fixtures (notstarted)
+Files: layer fixtures named at dispatch.
+Do: Encode the initial information-flow, hyperparameter, placement, cost, provenance, and mode layers against the concrete schema family and reviewed projection language. Include empty checks, coverage checks, symbolic axes, local elements, and cut boundaries.
+Accept: Every initial layer has one valid fixture and one relevant visible failure or empty outcome; decorations never feed structural selection; fixtures remain static and runtime-free.
+-> layers/cost
+-> layers/hyperparameters
+-> layers/info-flow
+-> layers/mode
+-> layers/placement
+-> layers/provenance
+-> projlang/spec
+-> schemas/conformance
+---
+[example/core-graph] Reference shared architecture graph (notstarted)
+Files: reference description core fixture named at dispatch.
+Do: Represent the shared V-JEPA 2 and frontier architecture elements using the architecture vocabulary ledger, concrete shapes and axes, and the reviewed grammar. Keep shared addresses limited to actual reuse within the description.
+Accept: The core graph is independently valid; encoder, tokenizer, bridge, predictor, latent, speech, and operator boundaries are addressable without paper-specific core primitives.
+-> architecture/vocabulary
+-> grammar/review
+-> schemas/instances
+---
+[example/pretraining-ac] Reference pretraining and dynamics views (notstarted)
+Files: V-JEPA 2 pretraining and action-conditioned reference layers named at dispatch.
+Do: Encode action-free mask-denoising pretraining, the EMA target boundary, the separate V-JEPA 2-AC predictor, action/state inputs, teacher forcing, rollout, and static planning inputs. Keep parameter-update and runtime-loop gaps visible.
+Accept: The pretraining and AC cuts validate independently; the two predictors remain distinct; the frozen encoder is shared by address; unresolved update and runtime semantics are reported rather than improvised.
+-> example/core-graph
+-> layers/fixtures
+---
+[example/consumers] Reference downstream consumers (notstarted)
+Files: downstream reference layers named at dispatch.
+Do: Add classification, action anticipation, video-language alignment, multimodal bridge, unified discrete, continuous latent, speech, tokenizer, low-bit, and parameter-lineage case consumers using the cross-paper architecture proposal.
+Accept: Each consumer owns its local blocks and values; shared addresses fold only where justified; bridge and unified-core accounts stay distinguishable; parameter merges do not become activation connections.
+-> example/pretraining-ac
+-> layers/fixtures
+---
+[example/validation] Validate reference cuts and properties (notstarted)
+Files: reference-description validation fixtures named at dispatch.
+Do: Run the complete reference description through the validator, projection conformance, schema conformance, canonical serializer, and cut extraction. Record the empirical source for architecture values and benchmark measurements.
+Accept: Minimal cuts erase and revalidate; non-cuts report absent declared inputs; serializer properties hold; all unresolved boundaries have explicit visible outcomes.
+-> example/consumers
+-> schemas/conformance
+-> tools/validator
