@@ -1,6 +1,6 @@
 # Minimal schema inventory for the case set
 
-Status: empirical proposal; in progress.
+Status: prototype inventory checkpoint with open relation gaps.
 
 This document instantiates the closed schema algebra from
 [schema-format.md](./schema-format.md) against the architecture cases in
@@ -15,9 +15,10 @@ primitives.
 
 The core authority remains [grimoire.md](../spec/grimoire.md). The schema body
 remains the closed Grimoire-native algebra already recorded in
-[schema-format.md](./schema-format.md). Extension namespace identifiers are
-still owned by namespace minting; the local names below are placeholders until
-that work assigns collision-resistant identifiers.
+[schema-format.md](./schema-format.md). The prototype uses the namespace root
+recorded in [extension-namespaces.md](./extension-namespaces.md); public
+ownership and compatibility policy remain publication and future-contract
+decisions.
 
 ## Value Notation
 
@@ -41,14 +42,14 @@ concrete grammar exists.
 
 | Schema | Attaches to | Purpose | Required by |
 | --- | --- | --- | --- |
-| `axes/1` | An element chosen by the anchoring convention | Names symbolic axes and carries their human description. | All tensor, token, video, speech, and schedule shapes. |
-| `shapes/1` | Primarily ports; exact allowed kinds await the anchoring fixture | Describes ordered dimensions and coarse layout without imposing a paper-specific topology. | Every encoder, tokenizer, latent, action, state, and output interface. |
+| `axes/1` | Ports in the current prototype | Names symbolic axes and carries their human description. | All tensor, token, video, speech, and schedule shapes. |
+| `shapes/1` | Ports in the current prototype | Describes ordered dimensions and coarse layout without imposing a paper-specific topology. | Every encoder, tokenizer, latent, action, state, and output interface. |
 | `architecture/1` | Blocks, ports, and groups | Records model family, scale, operator facts, attention regime, and interface references. | All architecture families, including low-bit variants. |
 | `training/1` | Blocks or groups representing training stages/objectives | Records objective, optimizer, phases, trainable targets, data references, and precision. | Pretraining, fine-tuning, distillation, flow, diffusion, speech, and continual adaptation. |
 | `execution/1` | Predictors, planners, streaming paths, or controllers | Makes the static versus streaming, recurrent, or closed-loop boundary explicit. | Speech systems, world models, planning, and autoregressive generation. |
 | `precision/1` | Operator blocks or relevant ports | Separates weight, activation, accumulation, optimizer-state, and sparsity facts. | BitNet family, quantized deployment, and cost views. |
 | `measurement/1` | The element whose attached value is measured | Carries a literal value, unit, and source record. | Benchmark scores, latency, memory, bandwidth, success rates, and profiled facts. |
-| `provenance/1` | Groups, and possibly other elements if a later layer requires it | Carries citations, assumptions, and novelty state. | Every architecture comparison and the provenance layer. |
+| `provenance/1` | Groups in the current prototype | Carries citations, assumptions, and novelty state. | Every architecture comparison and the provenance layer. |
 | `lineage/1` | A model block or future parameter-state artifact | Records parameter-state ancestry and merge operation without pretending it is activation flow. | DARE, TIES-Merging, continual adaptation, and checkpoint reproducibility. |
 | `placement/1` | Description, block, port, connection, or group | Records the authored deployment location of an addressed element. | Placement and bandwidth views, distributed bridges, and low-bit deployment variants. |
 
@@ -402,57 +403,70 @@ structural account.
 
 ## Sized Gaps
 
-### Axis anchoring
+### Axis anchoring beyond ports
 
-- Binds when: the first shape fixture attaches an axis declaration to a
-  definition site.
-- Cost of absence now: axis references can be named but the validator cannot
-  check the intended anchoring convention.
-- Candidate shape: attach `axes/1` to a port that owns the dimension; permit a
-  group-level declaration only if a fixture needs shared axes without a port.
-- Entry trigger: the first V-JEPA 2 shape fixture.
+- Prototype status: the first shape fixture anchors an axis declaration on the
+  port that owns the dimension, and the validator checks its address and
+  visibility.
+- Remaining gap: a group-level anchor is not available when several ports share
+  an axis before any one port is a natural owner.
+- Candidate shape: permit `axes/1` on a group while retaining the same value
+  body, but add it only when a concrete fixture requires that placement.
+- Entry trigger: a reference description with a shared axis and no natural
+  port owner.
 
 ### Parameter updates
 
-- Binds when: EMA, freeze, fine-tune, or delta application must be checked as a
-  relation rather than recorded as a training value.
-- Cost of absence now: activation flow and parameter flow remain distinguishable
-  only by convention.
-- Candidate shape: retain `training/1` target lists for v1 and add a structural
-  relation only after a fixture requires validator-level checking.
-- Entry trigger: the first fixture containing both an EMA target encoder and an
-  activation connection.
+- Prototype status: the V-JEPA 2 fixture exercises an EMA target encoder,
+  frozen targets, and activation connections while keeping the parameter
+  relationship outside activation flow.
+- Remaining gap: EMA, freeze, fine-tune, or delta application is not checked as
+  a first-class parameter relation.
+- Current account: `training/1` target lists and the bounded `lineage/1` value
+  record the available facts; a structural relation waits for a fixture that
+  requires validator-level checking.
+- Entry trigger: a reproducibility case that must validate parameter state
+  transitions rather than merely name their targets.
 
 ### Indexed visibility
 
-- Binds when: a fixture expands more than one time step, token, or modality.
-- Cost of absence now: block-causal attention and mixed multimodal visibility
-  cannot be checked at the level where the papers claim it matters.
+- Prototype status: the indexed-visibility fixture expands two time steps and
+  two modalities into ordinary addressed connections; block-causal and mixed
+  sets are distinct and validated.
+- Remaining gap: compact indexed syntax is not part of the grammar, so larger
+  cases must still be expanded before validation.
 - Candidate shape: generated ordinary connections or a grammar-defined indexed
   form that expands before validation.
-- Entry trigger: the first unified-multimodal or V-JEPA 2-AC fixture.
+- Entry trigger: a concrete case whose expanded representation is too large to
+  remain reviewable and whose compact form has a settled contract.
 
 ### Symbolic cost values
 
-- Binds when: the cost layer needs a value such as bytes or FLOPs as an
-  expression over declared axes rather than a measured literal.
-- Cost of absence now: `measurement/1` covers observed values but not symbolic
-  substitutions.
+- Prototype status: host-side `CostExpression` and placement helpers evaluate
+  explicit constants, addressed axes, sums, products, and tensor byte sizes
+  with caller-supplied inputs.
+- Remaining gap: symbolic arithmetic has no text-grammar or finalized-value
+  representation, so the current API is an analysis boundary rather than a
+  projection syntax.
 - Candidate shape: projection-language symbolic arithmetic over shape values,
   with a schema-governed result; do not add arithmetic constructors to the
-  schema body without a concrete expression fixture.
-- Entry trigger: the first bytes-on-wire or symbolic-cost fixture.
+  schema body without a concrete expression contract.
+- Entry trigger: a public description needs to serialize a symbolic cost
+  expression rather than supply it through the host API.
 
 ### Parameter-state elements
 
-- Binds when: a reproducibility cut must contain a base checkpoint, deltas, a
-  merge operation, and a result as first-class elements.
-- Cost of absence now: `lineage/1` can name the relationship only as a
-  candidate value or external artifact.
+- Prototype status: the lineage fixture carries base, delta, operation, and
+  result references as a bounded `lineage/1` value and keeps them out of
+  activation connections.
+- Remaining gap: a reproducibility cut cannot yet contain parameter states,
+  deltas, and merge operations as first-class artifacts with their own relation
+  semantics.
 - Candidate shape: a future artifact or element kind with explicit parameter
   lineage; no activation connection semantics.
-- Entry trigger: the first reference description that includes DARE or
-  TIES-Merging as a reproducible transformation.
+- Entry trigger: a public reproducibility description that must validate a
+  parameter transformation rather than preserve it as an external artifact or
+  value.
 
 ## Fixture Sequence
 

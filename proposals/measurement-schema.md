@@ -1,6 +1,6 @@
 # Measurement schema
 
-Status: empirical proposal; in progress.
+Status: prototype schema checkpoint with open unit-domain gaps.
 
 This proposal instantiates the sourced-literal part of the minimal schema
 inventory. It is for values measured outside the description, such as benchmark
@@ -69,10 +69,9 @@ The indexed papers provide several measurement classes:
 - LLaMA-Omni response latency; and
 - robot distance-to-goal and manipulation success.
 
-A measurement attaches to the block, port, group, or layer result whose value it
-describes. The exact allowed element kinds should follow the reviewed layer and
-schema definitions. A measured result does not define a new block and cannot
-change structural selection.
+A measurement attaches to the description, block, port, connection, or group
+whose value it describes in the current prototype. A measured result does not
+define a new block and cannot change structural selection.
 
 ## Relationship to Shannon channel claims
 

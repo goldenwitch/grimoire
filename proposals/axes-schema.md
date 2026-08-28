@@ -1,6 +1,6 @@
 # Axes schema
 
-Status: empirical proposal; in progress.
+Status: prototype schema checkpoint with open anchoring gaps.
 
 This proposal instantiates the symbolic-axis part of the minimal schema inventory
 for the architecture cases. It does not decide the concrete grammar or the
@@ -52,15 +52,15 @@ truth.
 
 ## Attachment Convention
 
-For the first fixture, an axis declaration attaches to the port that owns the
-dimension at its definition site. A shape on another port references that axis
-by address.
+In the prototype fixture, an axis declaration attaches to the port that owns
+the dimension at its definition site. A shape on another port references that
+axis by address.
 
 This is a fixture convention, not a frozen core rule. A group-level anchor may
 be needed if several ports share a symbolic axis before any one port is defined;
 that case remains a gap rather than an implicit exception.
 
-The first fixture should therefore contain:
+The prototype fixture therefore contains:
 
 - one port defining `frames`;
 - one port defining `features`;

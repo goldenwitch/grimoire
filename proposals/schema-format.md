@@ -1,6 +1,6 @@
 # Schema definition format
 
-Status: prototype contract; in progress.
+Status: prototype contract; implementation checkpoint with open compatibility gaps.
 
 ## Ruling
 

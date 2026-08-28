@@ -1,6 +1,6 @@
 # Placement and bandwidth layer
 
-Status: prototype contract; in progress.
+Status: prototype contract; implementation checkpoint with open network gaps.
 
 This proposal records the smallest placement view needed by the observed
 architecture cases. It uses finalized placement values on existing addressed
@@ -28,7 +28,7 @@ label such as `gpu-0`, `host-a`, or `robot-controller`; the prototype does not
 resolve devices, hosts, links, or topology from that spelling.
 
 An endpoint may receive a direct placement. When a port has no direct value,
-the prototype may use the placement on its owning block. This is an explicit
+the prototype uses the placement on its owning block. This is an explicit
 structural ownership lookup, not inference from the port label. Missing
 placement remains an error when a report needs the endpoint.
 

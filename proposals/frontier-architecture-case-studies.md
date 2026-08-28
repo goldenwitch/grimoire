@@ -1,6 +1,6 @@
 # Frontier architecture case studies
 
-Status: empirical proposal; in progress.
+Status: empirical case study; prototype checkpoint with open gaps.
 
 This document is a cross-paper consumption exercise for Grimoire. It asks
 whether the language can represent the major architecture families in the
@@ -17,9 +17,10 @@ The V-JEPA 2-specific case is in
 [v-jepa-2-case-studies.md](./v-jepa-2-case-studies.md).
 
 Nothing in this document changes the core vocabulary or makes a paper's
-terminology normative. Addresses, definition sites, layer names, and proposed
-ports are illustrative until a reviewed grammar and a concrete fixture settle
-their syntax.
+terminology normative. The executable consumer fixtures settle syntax for the
+represented subset. Addresses, definition sites, layer names, and proposed
+ports remain illustrative where no fixture has made them part of the current
+prototype.
 
 ## Why These Cases
 
@@ -754,16 +755,16 @@ runtime.
 
 ### Indexed modality streams and attention visibility
 
-- Binds when: a fixture expands a multimodal token sequence or an attention
-  pattern beyond an architecture-level summary.
-- Cost of absence now: Chameleon, Show-o, Janus, Transfusion, and speech cases
-  cannot state their modality-specific visibility and prediction paths as
-  checkable structure.
-- Candidate shapes and rough size: generated ordinary connections indexed by
-  token and modality; or a grammar-defined indexed form that expands before
-  validation. This is a grammar and projection surface plus fixture families.
-- Entry trigger: the first concrete unified-multimodal fixture with two
-  modalities and two objective paths.
+- Prototype status: the indexed-visibility fixture expands two time steps and
+  two modalities into ordinary addressed connections; block-causal and mixed
+  sets are distinct and validated.
+- Remaining gap: compact indexed syntax is not part of the grammar, so larger
+  cases must still be expanded before validation.
+- Candidate shape: generated ordinary connections indexed by token and
+  modality, or a grammar-defined indexed form that expands before validation.
+  This is a grammar and projection surface plus fixture families.
+- Entry trigger: a concrete case whose expanded representation is too large to
+  remain reviewable and whose compact form has a settled contract.
 
 ### Continuous and discrete representation contracts
 
@@ -780,29 +781,29 @@ runtime.
 
 ### Streaming and recurrent execution boundaries
 
-- Binds when: speech streaming or latent-dynamics cases are included in the
-  worked description.
-- Cost of absence now: static sequence structure can be described, but buffering,
-  recurrent state, horizon, and closed-loop execution remain easy to imply
-  without a checkable boundary.
-- Candidate shapes and rough size: static causal and recurrent graph plus an
-  explicit external-execution artifact; no runtime semantics in projections.
-  This is a scope clarification and acceptance fixture.
-- Entry trigger: the first fixture that distinguishes a static predictor graph
-  from a runtime rollout.
+- Prototype status: the execution fixture distinguishes streaming speech,
+  recurrent latent dynamics, and closed-loop planning through finalized values
+  and explicit structural state paths.
+- Remaining gap: runtime buffering, clocks, rollouts, and external execution
+  remain outside projections and have no package artifact contract.
+- Candidate shape: static causal and recurrent graph plus an explicit
+  external-execution artifact; no runtime semantics in projections.
+- Entry trigger: a public deployment description that must ship a reproducible
+  scheduler, controller, or rollout artifact.
 
 ### Parameter-state lineage
 
-- Binds when: DARE, TIES-Merging, or continual adaptation is represented as
-  more than provenance prose.
-- Cost of absence now: parameter composition is either omitted or falsely
-  rendered as activation flow; reproducibility of a merged state cannot be
-  checked.
-- Candidate shapes and rough size: a separate artifact relation for base state,
-  delta, merge, and result; or an explicit future vocabulary extension. This
-  requires a scope decision before grammar work.
-- Entry trigger: a reference description needs to represent a merged or
-  continually adapted checkpoint.
+- Prototype status: the consumer fixture represents base, delta, operation,
+  and result references with a bounded `lineage/1` value and keeps them out of
+  activation connections.
+- Remaining gap: parameter composition is not a first-class relation, so a
+  reproducibility cut cannot validate a merged or continually adapted state.
+- Candidate shape: a separate artifact relation for base state, delta, merge,
+  and result, or an explicit future vocabulary extension. This requires a
+  scope decision before grammar work.
+- Entry trigger: a public reproducibility description that must validate a
+  parameter transformation rather than preserve it as a value or external
+  artifact.
 
 ### Operator identity and quantization
 
@@ -818,15 +819,16 @@ runtime.
 
 ### Training-update relations
 
-- Binds when: the shared-representation, JEPA, low-bit, or continual-training
-  cases need to distinguish activation flow from parameter updates.
-- Cost of absence now: EMA, freeze, fine-tune, re-warming, and delta application
-  remain ambiguous even though they affect the represented training system.
-- Candidate shapes and rough size: a layer-local parameter relation over block
-  ports; or schema-governed values attached to parameter-state artifacts. This
-  is the same pressure identified by the V-JEPA 2 case study.
-- Entry trigger: the first end-to-end fixture that validates both an activation
-  connection and a parameter-update relation.
+- Prototype status: the reference fixtures validate activation connections and
+  training target lists while keeping EMA, freeze, fine-tune, re-warming, and
+  delta application out of activation flow.
+- Remaining gap: no end-to-end fixture validates a parameter-update relation as
+  structure or as a separately governed artifact.
+- Candidate shape: a layer-local parameter relation over block ports, or
+  schema-governed values attached to parameter-state artifacts. This is the
+  same pressure identified by the V-JEPA 2 case study.
+- Entry trigger: a fixture that must validate the update relation itself rather
+  than only its addressed targets.
 
 ## Coverage Map
 
@@ -864,10 +866,16 @@ the current grammar evaluates token generation, diffusion, streaming clocks,
 recurrent rollouts, or parameter merges. Those remain static structure plus
 finalized values or explicit external/deferred boundaries.
 
-## Next Consumption Step
+## Current Consumption Checkpoint
 
-The next artifact should be one complete reference description that composes
-the shared core, domain layers, pretraining and AC checkpoint, downstream
-consumer checkpoint, placement, cost, provenance, and cut/serializer
-validation. It should retain the paper-family distinctions already exercised
-here instead of collapsing them into one universal multimodal architecture.
+The complete reference description now composes the shared core, domain layers,
+pretraining and AC checkpoint, downstream consumer checkpoint, placement, cost,
+provenance, and cut/serializer validation. It retains the paper-family
+distinctions exercised here instead of collapsing them into one universal
+multimodal architecture.
+
+## Remaining Consumption Step
+
+A future case can deepen indexed generation, continuous/discrete contracts,
+runtime artifact packaging, operator identity, or parameter updates only after
+the missing boundary has a concrete contract and fixture.

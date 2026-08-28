@@ -1,6 +1,7 @@
 # Grimoire concrete grammar
 
-Status: draft for grammar/review.
+Status: draft for grammar/review; the executable prototype implements the
+currently reviewed subset.
 
 This document is the candidate concrete grammar for the Grimoire description
 format. The normative semantic source is [grimoire.md](../spec/grimoire.md).
@@ -11,8 +12,9 @@ are in [projection-language.md](../proposals/projection-language.md).
 
 The grammar is written as EBNF plus semantic constraints. A production is not a
 new semantic requirement: it is a spelling for a requirement already present in
-the source documents. This draft must be reviewed against those documents
-before the validator or a producer is implemented.
+the source documents. The prototype implements the currently reviewed subset;
+the review boundaries below distinguish remaining formal decisions from
+behavior already covered by executable fixtures.
 
 ## Design Boundary
 
@@ -171,8 +173,9 @@ must be a DAG and every named layer must exist.
 The `core-spec` value is declared by the enclosing description. The
 `projection-language` value is the version of the sibling projection language
 consumed by the layer. Schema uses name a namespace URI, local schema name, and
-schema version. The concrete separator in `schema-use` is provisional and must
-be checked against namespace URI grammar during review.
+schema version. The prototype uses the `/` and `@` separators shown in
+`schema-use`. URI lexical rules and schema-version compatibility remain formal
+review boundaries.
 
 A standalone layer document uses the following wrapper:
 
@@ -214,9 +217,10 @@ insignificant whitespace inside the span. This opaque-span exception is the
 only place where canonical serialization retains source formatting; it is a
 parser and serializer obligation in addition to the grammar production.
 
-The exact raw-byte boundary for an unknown parameter remains a review point:
-the current candidate boundary is the first `extension` keyword through its
-terminating semicolon, including all bytes between them.
+The prototype preserves an unknown parameter from its first `extension`
+keyword through its terminating semicolon, including all bytes between them.
+That raw span is the canonicalization exception; recognized values continue to
+use canonical serialization.
 
 ## Projection
 
@@ -399,14 +403,14 @@ The bootstrap schema is represented by the same productions. The validator
 loads the bootstrap contract before validating ordinary schema documents; it
 does not invoke a second schema language.
 
-The exact production and meaning of `finite-scalar` is a review gap inherited
-from the schema-format proposal. It must be resolved before a schema validator
-can claim complete bootstrap conformance.
+The prototype binds `finite-scalar` to the closed boolean values `true` and
+`false`, with bootstrap validation and round-trip fixtures. The scalar domain
+remains a provisional schema-format choice for any future public contract.
 
 ## Canonical Serialization
 
 Canonical serialization is part of the format, not an implementation preference.
-The following ordering is the candidate canonical order.
+The following ordering is the prototype canonical order.
 
 ### Documents
 
@@ -481,7 +485,7 @@ applies these constraints after parsing:
 A non-cut subset is not treated as an empty description. The validator reports
 which layer has an absent declared input and returns an unresolvable outcome.
 
-## Draft Decisions for Review
+## Prototype Decisions and Remaining Review Boundaries
 
 This grammar draft records these provisional architecture decisions:
 
@@ -516,17 +520,19 @@ layer loading remains a packaging boundary.
 
 ### Namespace URI production
 
-The namespace rule requires an absolute `https` URI, but the exact URI lexical
-production and the treatment of escaped string bytes must be fixed before
-unknown namespace preservation can be tested byte-for-byte.
+The prototype accepts an exact quoted ASCII string whose payload begins with
+`https://`, has a nonempty authority, and contains no whitespace or control
+characters. It does not normalize or dereference the URI. A future formal URI
+production and schema-version compatibility policy may refine this boundary;
+the current spelling and failure behavior are covered by executable fixtures.
 
 ### Indexed structural generation
 
 The draft supports explicit addresses and ordinary generated definitions. It
 does not yet provide a compact indexed form for V-JEPA 2-AC block-causal
 attention, Show-o mixed attention, dynamic visual tiles, or long token streams.
-The first fixture should expand a small instance into ordinary connections
-before a compact production is considered.
+The current indexed-visibility fixture expands a small instance into ordinary
+connections; a compact production still requires its own contract.
 
 ### Parameter-update relations
 
@@ -538,8 +544,9 @@ that demonstrates validator-level necessity.
 ### Symbolic values and cost
 
 The runtime value grammar contains literals and references but no symbolic
-arithmetic. Cost expressions over declared axes remain a projection-language
-and schema decision, not an unreviewed grammar addition.
+arithmetic. The prototype evaluates cost expressions over declared axes through
+a host-side analysis API; serializable symbolic cost values remain a separate
+projection-language and schema decision, not an unreviewed grammar addition.
 
 ### Shannon channel semantics
 
@@ -553,13 +560,14 @@ follow-up decisions.
 
 ### Finite scalar kind
 
-The schema-format proposal names `finite scalar kind`, but its exact value set
-is not defined by this draft. Bootstrap validation must stop at this discrepancy
-rather than silently treating it as an enum or boolean.
+The prototype binds `finite-scalar` to the closed boolean values `true` and
+`false`, with round-trip and rejection fixtures. This remains a provisional
+schema-format choice rather than an invitation to infer another scalar domain.
 
-## Initial Grammar Fixtures
+## Prototype and Review Fixtures
 
-The grammar review should begin with these small documents:
+The current fixture suite covers these small documents; they also define the
+remaining focused review surface:
 
 1. A minimal valid description with one addressed description, one block, two
    ports, one directed connection, one group, and no layers.

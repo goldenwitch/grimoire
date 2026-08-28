@@ -1,6 +1,6 @@
 # Cost layer
 
-Status: prototype contract; in progress.
+Status: prototype contract; host-side implementation checkpoint with open grammar gaps.
 
 This proposal records the smallest symbolic cost view needed by the observed
 architecture papers. It evaluates authored expressions over explicit axis

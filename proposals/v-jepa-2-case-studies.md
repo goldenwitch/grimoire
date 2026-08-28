@@ -1,6 +1,6 @@
 # V-JEPA 2 architecture case studies
 
-Status: empirical proposal; in progress.
+Status: empirical case study; prototype checkpoint with open gaps.
 
 This document is a consumption exercise for Grimoire. It asks whether the
 language can represent the structures and training views of V-JEPA 2 without
@@ -32,8 +32,10 @@ The paper's relevant sections are:
 - Section 7 and Appendix E: video question answering and language alignment.
 
 Facts in this document are marked as observations in prose. Address labels and
-site placements are proposed case-study choices, not concrete grammar syntax.
-No serialized Grimoire form is implied until the grammar is reviewed.
+site placements are proposed case-study choices unless the executable fixtures
+settle them. The repository now contains serialized prototype descriptions for
+the represented subset; this case study remains the empirical account and does
+not silently turn uncovered runtime or parameter relations into syntax.
 
 ## Observed System
 
@@ -390,18 +392,18 @@ not infer information quantities from architecture topology or training prose.
 
 ## Sized Gaps
 
-### Parameter update and freeze relations
+### Parameter update and freeze relations beyond values
 
-- Binds when: the first reviewed grammar fixture represents EMA targets or a
-  frozen encoder as more than prose.
-- Cost of absence now: the V-JEPA 2-AC and pretraining cases can be described,
-  but the distinction between data flow and parameter-update semantics remains
-  underspecified.
-- Candidate shapes and rough size: a layer-local directed relation over
-  parameter ports; or a schema-governed value attached to a block pair. This is
-  a small semantic decision plus one fixture family.
-- Entry trigger: grammar construction reaches training relations or the
-  validator needs to distinguish the two cases.
+- Prototype status: the V-JEPA 2 fixture represents EMA targets, frozen
+  targets, and activation connections while keeping the parameter relationship
+  outside activation flow.
+- Remaining gap: the distinction between data flow and parameter-update
+  semantics is not checked as a first-class relation.
+- Current account: `training/1` target lists and the bounded `lineage/1` value
+  record the available facts; a structural relation waits for a fixture that
+  requires validator-level checking.
+- Entry trigger: a reproducibility case that must validate parameter state
+  transitions rather than merely name their targets.
 
 ### Generated token-level attention structure
 
@@ -418,27 +420,26 @@ not infer information quantities from architecture topology or training prose.
 
 ### Static descriptions of runtime planning
 
-- Binds when: the worked description includes CEM, receding-horizon control, or
-  another loop that consumes observations at execution time.
-- Cost of absence now: the architecture can be recorded, but no claim can be
-  made that Grimoire represents or evaluates the deployed controller.
-- Candidate shapes and rough size: a static planner layer with an explicit
-  external-execution boundary; or a separate execution artifact attached to the
-  description but excluded from projections. This is a scope clarification and
-  an acceptance fixture, not a runtime-language expansion.
-- Entry trigger: planning is included in the first end-to-end worked
-  description.
+- Prototype status: the reference description includes a planning layer and a
+  closed-loop execution value while keeping controller execution external.
+- Remaining gap: the architecture can be recorded, but Grimoire does not
+  represent or evaluate the deployed controller, CEM, or receding-horizon run.
+- Current account: a static planner layer carries the external-execution
+  boundary; a separate execution artifact remains a future packaging option.
+- Entry trigger: a public deployment description requires a reproducible
+  controller or solver artifact alongside the static architecture.
 
 ### Schemas for model and robot facts
 
-- Binds when: the case study is converted into a machine-checked description.
-- Cost of absence now: shapes, 7D action/state semantics, schedules, freeze
-  status, and benchmark values can be named but not validated uniformly.
-- Candidate shapes and rough size: one architecture schema, one robot-state
-  schema, one training-schedule schema, and reuse of shapes, axes, measurement,
-  and provenance schemas. The exact extension namespaces and anchoring remain
-  design work.
-- Entry trigger: schema work begins for the reference description.
+- Prototype status: the reference fixtures validate axes, shapes, architecture,
+  training, execution, measurement, provenance, placement, precision, and
+  lineage values through the shared registry.
+- Remaining gap: paper-specific topology, parameter relations, and richer
+  empirical measurements still need their own reviewed contracts when required.
+- Current account: shared schema families carry the facts; no robot-specific
+  core primitive or schema is introduced.
+- Entry trigger: a concrete case requires a fact outside the current closed
+  schema algebra.
 
 ## Executable Representability Checkpoint
 
@@ -457,10 +458,17 @@ Those kernels demonstrate the claim interface only; they are not estimates of
 the continuous neural channels in the paper. A real estimate still needs an
 explicit estimator, data protocol, uncertainty record, and source distribution.
 
-## Next Consumption Step
+## Current Consumption Checkpoint
 
-The next artifact should extend the executable checkpoint to the downstream
-consumer surface: classification, human action anticipation, VidQA, and the
-static planning structure. It should preserve the independent pretraining and
-AC cuts while exposing any conditional-information, continuous-estimator, and
-runtime-loop boundaries as explicit deferred outcomes.
+The downstream consumer surface now lives in the whole-system reference
+fixture: anticipation, VidQA, planning, hyperparameters, provenance, placement,
+cost, mode, execution, information, precision, and lineage layers compose with
+the independent pretraining and AC views. The fixture exposes conditional-
+information, continuous-estimator, parameter-update, and runtime-loop
+boundaries as explicit deferred outcomes.
+
+## Remaining Consumption Step
+
+A future description can deepen one of those boundaries, but it should first
+provide the missing contract and fixture rather than silently promote a paper
+detail into core vocabulary.

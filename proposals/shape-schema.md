@@ -1,6 +1,6 @@
 # Shapes schema
 
-Status: empirical proposal; in progress.
+Status: prototype schema checkpoint with open topology gaps.
 
 This proposal instantiates the tensor and token shape contract for the indexed
 architecture cases. It depends on [axes-schema.md](./axes-schema.md),

@@ -1,6 +1,6 @@
 # Static execution boundary
 
-Status: empirical proposal; in progress.
+Status: prototype boundary checkpoint with open runtime gaps.
 
 This proposal defines the static account for execution regimes found in the
 indexed architecture cases. It is deliberately a boundary document: it says
@@ -245,15 +245,16 @@ This proposal records these decisions:
 
 ### State-transition relation
 
-- Binds when: a recurrent world model needs the validator to distinguish a
-  declared state port from a mere statement that the model is recurrent.
-- Cost of absence now: execution regime marks the boundary, but feedback
-  semantics remain in connections or prose.
+- Prototype status: the recurrent fixture distinguishes an explicit state
+  feedback connection from an `execution/1` regime value and keeps runtime
+  progression external.
+- Remaining gap: the validator does not check a state-transition relation
+  beyond the ordinary addressed connection.
 - Candidate shape and rough size: an ordinary directed state connection with a
   layer-local relation value; one two-step fixture. Do not add implicit
   recurrence to the execution schema.
-- Entry trigger: the first recurrent fixture whose state feedback must be
-  checked independently of runtime execution.
+- Entry trigger: a recurrent case whose state update must be validated
+  independently of runtime execution.
 
 ### Streaming chunk identity
 

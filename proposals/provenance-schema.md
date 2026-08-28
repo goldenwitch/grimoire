@@ -1,6 +1,6 @@
 # Provenance schema
 
-Status: empirical proposal; in progress.
+Status: prototype schema checkpoint with open granularity gaps.
 
 This proposal instantiates the citation, assumption, and novelty value used by
 the provenance layer and the architecture case studies. It does not make

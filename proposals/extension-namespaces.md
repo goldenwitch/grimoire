@@ -1,6 +1,6 @@
 # Extension namespace minting
 
-Status: prototype contract; in progress.
+Status: prototype contract; implementation checkpoint with open compatibility gaps.
 
 This proposal defines how an author names an extension namespace so independent
 authors do not collide unknowingly. It also records the preservation boundary
@@ -214,26 +214,29 @@ This proposal records these architecture and format decisions:
 
 ### URI grammar and canonical spelling
 
-- Binds when: grammar construction writes the namespace production.
-- Cost of absence now: the ownership rule is clear, but the exact accepted URI
-  character set and canonical spelling are not yet machine-checked.
-- Candidate shape and rough size: a restricted ASCII `https` URI production
-  with exact-string identity and serializer preservation. This is one grammar
-  production plus malformed-identifier fixtures.
-- Entry trigger: `grammar/build` reaches extension parameters.
+- Prototype status: the parser accepts a restricted ASCII `https` URI with
+  exact-string identity, and malformed-identifier fixtures cover the current
+  failure behavior.
+- Remaining gap: a public grammar may still need a fuller URI production and a
+  compatibility policy for escaped string bytes.
+- Candidate shape and rough size: a versioned URI production with exact-string
+  identity and serializer preservation. This is one grammar production plus
+  malformed-identifier fixtures.
+- Entry trigger: a public schema contract requires URI forms beyond the
+  current prototype restriction.
 
 ### Unknown-value byte boundary
 
-- Binds when: parser and serializer implement preservation for an unrecognized
-  namespace.
-- Cost of absence now: the core requirement says preserve unmodified, but the
-  exact bytes covered by "parameter" are not yet identified.
+- Prototype status: parser and serializer fixtures preserve the complete
+  unknown parameter span from `extension` through its terminating semicolon,
+  including internal comments and whitespace.
+- Remaining gap: the public contract may need to refine the exact source-span
+  boundary if a future grammar permits nested or streamed extension payloads.
 - Candidate shape and rough size: retain the raw source slice for the complete
-  unknown parameter payload, including its grammar delimiters where required;
-  serializer emits that slice without normalization. This is one parser value
-  type plus round-trip fixtures.
-- Entry trigger: `tools/validator/parse` and `tools/validator/serialize` reach
-  extension values.
+  unknown parameter payload and emit it without normalization. The current
+  parser value type and round-trip fixtures already implement this shape.
+- Entry trigger: a concrete grammar change makes the current raw-span boundary
+  insufficient.
 
 ### Schema version compatibility
 

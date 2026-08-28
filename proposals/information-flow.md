@@ -1,6 +1,6 @@
 # Shannon information flow and channel semantics
 
-Status: user-directed prototype contract; in progress.
+Status: user-directed prototype contract; finite implementation checkpoint with open claim gaps.
 
 This proposal realigns the information-flow work around a stronger goal:
 follow Shannon information from an addressed input variable to one or more
@@ -241,9 +241,9 @@ this channel contract.
 The exact claim serialization and registry boundary remain a design task. No
 new open-ended schema constructor is introduced to solve it.
 
-## First executable regime
+## Executable prototype regime
 
-The first reference implementation should provide:
+The current reference implementation provides:
 
 - finite discrete distributions with validated nonnegative probabilities;
 - finite stochastic channels and deterministic channels;
@@ -256,13 +256,13 @@ The first reference implementation should provide:
 - finite-horizon unrolled cycles; and
 - visible rejection of bare cyclic queries.
 
-The implementation should keep the mathematical channel core independent from
-the text grammar initially. A later graph adapter can map addressed ports and
-connections to the finite channel model after the laws are tested.
+The mathematical channel core remains independent from the text grammar. The
+graph adapter maps addressed ports and connections to the finite channel model
+after the laws are tested.
 
 ## Conformance laws
 
-The first fixture family should include:
+The current fixture family includes:
 
 - an identity channel with retention `1`;
 - a constant channel with mutual information `0`;

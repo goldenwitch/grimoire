@@ -1,6 +1,6 @@
 # Projection language design
 
-Status: in progress.
+Status: prototype semantic contract with open syntax and value gaps.
 
 This is the sibling language that defines a **layer** file's **projection**. One **layer** file is one human viewport. It is not a runtime language: it describes the represented system statically.
 
