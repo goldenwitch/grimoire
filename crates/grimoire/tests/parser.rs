@@ -1,4 +1,7 @@
-use grimoire::{Address, ParseError, parse_description};
+use grimoire::{ParseError, parse_description};
+
+mod common;
+use common::address;
 
 const MINIMAL: &str = r#"
 # The first complete core description.
@@ -83,10 +86,6 @@ fn reports_trailing_input() {
             .expect_err("trailing input should fail");
     assert!(error.offset > 0);
     assert!(error.message.contains("trailing input"));
-}
-
-fn address(value: &str) -> Address {
-    Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
 }
 
 fn _parse_error_is_public(_: ParseError) {}

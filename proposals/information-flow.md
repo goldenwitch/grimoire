@@ -1,7 +1,5 @@
 # Shannon information flow and channel semantics
 
-Status: user-directed prototype contract; finite implementation checkpoint with open claim gaps.
-
 This proposal realigns the information-flow work around a stronger goal:
 follow Shannon information from an addressed input variable to one or more
 explicit terminal variables through a composed channel model.
@@ -13,7 +11,7 @@ uncertainty of claims that cannot be computed exactly.
 
 ## Evidence
 
-The local Scry corpus contains the following indexed sources for this contract:
+The following public sources inform this contract:
 
 - [The Information Bottleneck Method](https://arxiv.org/abs/physics/0004057)
   frames relevant representation as compression of one variable for prediction
@@ -124,7 +122,7 @@ a Bayesian credible level, a bootstrap interval, and an expert assessment are
 not interchangeable. The claim records the method and level rather than
 collapsing them into one unexplained scalar.
 
-For downstream decisions, the prototype defaults to a Bayesian posterior over
+For downstream decisions, the implementation defaults to a Bayesian posterior over
 the uncertain source distribution and channel parameters when finite data are
 used. It reports a posterior estimate, a credible interval, and decision
 probabilities such as:
@@ -200,7 +198,7 @@ unique static joint distribution. Channel evaluation therefore requires one of:
 - an explicit fixed-point or equilibrium contract; or
 - an external execution artifact that supplies the joint process.
 
-The first executable prototype accepts finite acyclic channel graphs and finite
+The implementation accepts finite acyclic channel graphs and finite
 horizon unrollings. It reports a bare cyclic channel query as unresolved rather
 than silently choosing a fixed point.
 
@@ -241,9 +239,9 @@ this channel contract.
 The exact claim serialization and registry boundary remain a design task. No
 new open-ended schema constructor is introduced to solve it.
 
-## Executable prototype regime
+## Executable regime
 
-The current reference implementation provides:
+The reference implementation provides:
 
 - finite discrete distributions with validated nonnegative probabilities;
 - finite stochastic channels and deterministic channels;
@@ -284,7 +282,7 @@ sum meaningful.
 
 ## Decisions and gaps
 
-The current prototype decisions are:
+The implementation decisions are:
 
 - Shannon information is queried from an addressed source variable to explicit
   terminal variables.

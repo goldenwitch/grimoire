@@ -1,7 +1,10 @@
 use grimoire::{
     Address, Block, CoreGraph, Description, ElementKind, ExtensionParameter, ExtensionValue,
-    Namespace, Port, Version, parse_description, prototype_schemas, validate_description,
+    Namespace, Port, Version, parse_description, validate_description,
 };
+
+mod common;
+use common::schemas;
 
 const VALID: &str = r#"
     grimoire 1.0.0
@@ -26,10 +29,6 @@ const VALID: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<grimoire::Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 fn parsed(source: &str) -> Description {
     parse_description(source).unwrap_or_else(|error| panic!("{error}"))

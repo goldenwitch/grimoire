@@ -1,9 +1,10 @@
 use core::fmt;
 use std::collections::{BTreeMap, BTreeSet};
 
+use crate::schemas::is_prototype_namespace;
 use crate::{
     Address, Block, Connection, Description, ElementKind, ExtensionParameter, ExtensionValue,
-    Group, Layer, LayerInput, Namespace, PROTOTYPE_NAMESPACE_ROOT, Port, Schema, SelectItem, Value,
+    Group, Layer, LayerInput, Namespace, Port, Schema, SelectItem, Value,
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -776,12 +777,7 @@ impl<'description> Context<'description> {
             );
             return;
         }
-        let known_namespace = extension.namespace.as_str() == PROTOTYPE_NAMESPACE_ROOT
-            || extension
-                .namespace
-                .as_str()
-                .strip_prefix(PROTOTYPE_NAMESPACE_ROOT)
-                .is_some_and(|rest| rest.starts_with('/'));
+        let known_namespace = is_prototype_namespace(&extension.namespace);
         if !known_namespace {
             if !matches!(extension.value, ExtensionValue::Opaque(_)) {
                 self.error(

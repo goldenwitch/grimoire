@@ -1,6 +1,7 @@
-use grimoire::{
-    Schema, Value, evaluate_layer, parse_description, prototype_schemas, validate_description,
-};
+use grimoire::{Value, evaluate_layer, parse_description, validate_description};
+
+mod common;
+use common::schemas;
 
 const PROVENANCE_LAYER: &str = r#"
     grimoire 1.0.0
@@ -34,10 +35,6 @@ const PROVENANCE_LAYER: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 #[test]
 fn provenance_layer_validates_and_checks_finalized_group_data() {

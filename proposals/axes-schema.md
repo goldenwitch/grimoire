@@ -1,7 +1,5 @@
 # Axes schema
 
-Status: prototype schema checkpoint with open anchoring gaps.
-
 This proposal instantiates the symbolic-axis part of the minimal schema inventory
 for the architecture cases. It does not decide the concrete grammar or the
 final extension namespace identifier. The governing sources are
@@ -31,14 +29,7 @@ architecture or shape schema.
 
 ## Candidate Contract
 
-Candidate value body:
-
-```text
-product{
-  name: text,
-  description: optional(text)
-}
-```
+The `axes/1` value body is defined in the [schema inventory](./schema-inventory.md).
 
 The schema allows an empty description. A human name is required because an
 address without a readable label is difficult to audit, but the label is not a
@@ -52,7 +43,7 @@ truth.
 
 ## Attachment Convention
 
-In the prototype fixture, an axis declaration attaches to the port that owns
+In the reference fixture, an axis declaration attaches to the port that owns
 the dimension at its definition site. A shape on another port references that
 axis by address.
 
@@ -60,7 +51,7 @@ This is a fixture convention, not a frozen core rule. A group-level anchor may
 be needed if several ports share a symbolic axis before any one port is defined;
 that case remains a gap rather than an implicit exception.
 
-The prototype fixture therefore contains:
+The reference fixture therefore contains:
 
 - one port defining `frames`;
 - one port defining `features`;

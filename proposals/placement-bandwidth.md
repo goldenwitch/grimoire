@@ -1,7 +1,5 @@
 # Placement and bandwidth layer
 
-Status: prototype contract; implementation checkpoint with open network gaps.
-
 This proposal records the smallest placement view needed by the observed
 architecture cases. It uses finalized placement values on existing addressed
 elements, keeps communication collectives as ordinary addressed blocks, and
@@ -24,11 +22,11 @@ product{
 ```
 
 It is a finalized value attached by `decorate`. A location is an opaque author
-label such as `gpu-0`, `host-a`, or `robot-controller`; the prototype does not
+label such as `gpu-0`, `host-a`, or `robot-controller`; the implementation does not
 resolve devices, hosts, links, or topology from that spelling.
 
 An endpoint may receive a direct placement. When a port has no direct value,
-the prototype uses the placement on its owning block. This is an explicit
+the implementation uses the placement on its owning block. This is an explicit
 structural ownership lookup, not inference from the port label. Missing
 placement remains an error when a report needs the endpoint.
 
@@ -42,7 +40,7 @@ typed report record with:
 - the payload shape address; and
 - an explicit list of participant-to-participant transfers.
 
-The transfer list is intentional. The prototype does not infer all-reduce,
+The transfer list is intentional. The implementation does not infer all-reduce,
 all-gather, broadcast, topology, message fragmentation, or link contention
 from a name such as `all-reduce`. A future collective schema can add those
 semantics when an observed case requires them.
@@ -54,7 +52,7 @@ shape of the source port and records one transfer. A collective uses the same
 rule for each explicit cross-location transfer. Same-location relations add no
 wire traffic and therefore do not require a shape in the report.
 
-The prototype shape used by the report has ordered literal or addressed-axis
+The shape used by the report has ordered literal or addressed-axis
 dimensions and an explicit positive `bytes_per_element`. A literal dimension is
 multiplied directly; an axis dimension requires a supplied extent binding.
 Checked multiplication and addition make overflow visible. The existing
@@ -87,6 +85,6 @@ recorded elsewhere.
   not defined by `placement/1`.
 - Shape-to-wire accounting requires explicit element width and axis extents;
   no precision-to-byte mapping is inferred.
-- Placement decoration parsing is available in the Rust prototype, while the
+- Placement decoration parsing is available in the Rust implementation, while the
   report record is still a host-side analysis input rather than a new grammar
   production.

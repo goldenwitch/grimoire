@@ -1,7 +1,5 @@
 # Extension namespace minting
 
-Status: prototype contract; implementation checkpoint with open compatibility gaps.
-
 This proposal defines how an author names an extension namespace so independent
 authors do not collide unknowingly. It also records the preservation boundary
 needed by the parser and canonical serializer.
@@ -114,18 +112,15 @@ The record is provenance and documentation, not a runtime dependency. A
 validator does not fetch it. Its purpose is to make ownership and allocation
 human-auditable when two projects exchange descriptions.
 
-For this repository, the prototype namespace root is:
+The reference implementation uses this namespace root:
 
 ```text
 https://github.com/goldenwitch/grimoire/extension
 ```
 
 Schema families use paths below this root, for example
-`https://github.com/goldenwitch/grimoire/extension/shapes`. This root is a
-provisional authoring choice for the executable prototype because this checkout
-has no configured Git remote. It remains easy to replace before a public schema
-contract is released; concrete schema documents must use this exact root until
-then rather than mixing guessed alternatives.
+`https://github.com/goldenwitch/grimoire/extension/shapes`. A published schema
+contract should keep one owned root and must not mix alternate spellings.
 
 ## Collision Cases
 
@@ -196,7 +191,7 @@ This proposal records these architecture and format decisions:
 
 - Namespace collision resistance comes from an author-controlled absolute
   `https` URI and a unique path below that origin.
-- The prototype namespace root is
+- The reference implementation namespace root is
   `https://github.com/goldenwitch/grimoire/extension`; it is provisional until
   repository ownership is verified.
 - Namespace identity is exact and offline; no network lookup or alias
@@ -214,7 +209,7 @@ This proposal records these architecture and format decisions:
 
 ### URI grammar and canonical spelling
 
-- Prototype status: the parser accepts a restricted ASCII `https` URI with
+- Implementation boundary: the parser accepts a restricted ASCII `https` URI with
   exact-string identity, and malformed-identifier fixtures cover the current
   failure behavior.
 - Remaining gap: a public grammar may still need a fuller URI production and a
@@ -223,11 +218,11 @@ This proposal records these architecture and format decisions:
   identity and serializer preservation. This is one grammar production plus
   malformed-identifier fixtures.
 - Entry trigger: a public schema contract requires URI forms beyond the
-  current prototype restriction.
+  implementation restriction.
 
 ### Unknown-value byte boundary
 
-- Prototype status: parser and serializer fixtures preserve the complete
+- Implementation boundary: parser and serializer fixtures preserve the complete
   unknown parameter span from `extension` through its terminating semicolon,
   including internal comments and whitespace.
 - Remaining gap: the public contract may need to refine the exact source-span

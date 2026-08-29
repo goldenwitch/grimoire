@@ -21,7 +21,7 @@ Each term is defined once, in terms of primitives and other vocabulary. These de
 - **schema** — a versioned, machine-checkable definition of the structure and constraints of the **extension parameters** in one **extension namespace**.
 - **extension namespace** — a qualifier for **extension parameters**.
 - **extension parameter** — a structured value attached to an **element**, qualified by an **extension namespace** and governed by a **schema**.
-- **projection language** — the sibling specification defining how **projections** are written and evaluated; versioned in its own right.
+- **projection language** — the companion specification defining how **projections** are written and evaluated; versioned in its own right.
 - **projection** — a pure, static function from **description**-shaped input to **description**-shaped output, written in the **projection language**, which is specified separately.
 - **layer** — one file and human viewport in a **description**, with a name unique within that **description**, a set of declared inputs, the **schemas** and **projection language** version it consumes, and one **projection**.
 - **core graph** — the root **definition site** of a **description**: the **blocks**, **ports**, **connections**, and **groups** visible to every **layer**, with their **extension parameters**.
@@ -88,7 +88,7 @@ Structure is defined where it is needed. The **core graph** is the bottom of a *
 
 ## The projection language
 
-A **layer**'s **projection** is written in the **projection language** — a sibling specification, versioned in its own right. This document does not define that language; it requires the following of it:
+A **layer**'s **projection** is written in the **projection language** — a companion specification, versioned in its own right. This document does not define that language; it requires the following of it:
 
 - A **projection** MUST be pure and static: it MUST evaluate against its declared inputs alone. No binding to runs is defined.
 - The algebra MUST be closed: **description**-shaped input, **description**-shaped output, so **projections** compose.

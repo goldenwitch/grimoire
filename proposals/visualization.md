@@ -1,12 +1,11 @@
 # Visualization design
 
-Status: implementation checkpoint; static viewer exists.
-
 This proposal defines the first visualization boundary for Grimoire. It is a
 rendering contract, not a new core vocabulary or a runtime execution model.
-The first implementation target is a static HTML viewer. The current artifact
-is a self-contained implementation; a later generator may replace its frozen
-embedded view model without changing the rendering contract.
+The implementation is a static HTML viewer with a self-contained presentation
+model. Its data is a curated snapshot and is not a second executable source of
+structural truth; the rendering contract does not depend on how the snapshot is
+produced.
 
 The governing sources are [grimoire.md](../spec/grimoire.md),
 [projection-language.md](./projection-language.md), the reference fixture in
@@ -18,7 +17,7 @@ and [frontier-architecture-case-studies.md](./frontier-architecture-case-studies
 
 [`viz/index.html`](../viz/index.html) is the first browser-openable viewer. It
 contains the static view model for the V-JEPA 2 reference, the cross-paper
-consumer checkpoint, and the Fauxlden Retriever fixture. It requires no build
+consumer cases, and the Fauxlden Retriever fixture. It requires no build
 step, server, dependency, or network request. Open it directly from the
 workspace to inspect the views.
 
@@ -148,10 +147,10 @@ than changing node dimensions unpredictably or overlapping neighboring content.
 
 ## Acceptance fixtures
 
-The current implementation consumes a frozen view model derived from the
-existing static fixtures without introducing a visualization-specific input
-format. A later generator can produce the same view model from evaluated Rust
-reprojections. The acceptance cases are:
+The current implementation consumes a frozen, curated view model without
+introducing a visualization-specific input format. The Rust fixtures remain the
+executable validation source; the viewer is a presentation artifact over the
+same public cases. The acceptance cases are:
 
 1. V-JEPA 2: compare `pretraining`, `ac`, `vidqa`, and `planning` against the
    shared core. The encoder address remains common; the pretraining and AC

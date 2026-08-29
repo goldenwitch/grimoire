@@ -1,6 +1,7 @@
-use grimoire::{
-    Schema, evaluate_layer, parse_description, prototype_schemas, validate_description,
-};
+use grimoire::{evaluate_layer, parse_description, validate_description};
+
+mod common;
+use common::schemas;
 
 const HYPERPARAMETERS: &str = r#"
     grimoire 1.0.0
@@ -46,10 +47,6 @@ const HYPERPARAMETERS: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 #[test]
 fn hyperparameter_layer_validates_typed_training_values() {

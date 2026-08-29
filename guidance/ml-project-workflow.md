@@ -201,7 +201,7 @@ the structure or discard decorations.
 
 ## 5. Attach typed facts and evidence
 
-The current prototype has ten schema families for recurring planning facts:
+The schema inventory defines ten families for recurring planning facts:
 
 - `axes/1` and `shapes/1` for symbolic dimensions and coarse interfaces;
 - `architecture/1` for model and operator facts;
@@ -299,8 +299,8 @@ From the repository root, the focused executable baseline is:
 cargo test --workspace
 ```
 
-The tests under `crates/grimoire/tests/` are also the most precise examples of
-the current API. The whole-system reference is
+The tests under `crates/grimoire/tests/` are also precise examples of the API.
+The whole-system reference is
 [reference_validation.rs](../crates/grimoire/tests/reference_validation.rs).
 It composes shared structure with pretraining, action-conditioned, consumer,
 planning, mode, placement, cost, provenance, information, execution, precision,
@@ -384,8 +384,8 @@ Use an explicit channel interpretation for information claims: identify the
 source port, terminal ports, finite distributions, block kernels, quantity,
 method, and evidence context. Structural reach is not mutual information, and
 route percentages are not obtained by adding branch mutual informations. A
-continuous estimator, cyclic channel, causal intervention, or correlated
-internal source remains unresolved or deferred until its contract is supplied.
+continuous estimator, cyclic channel, causal intervention, or correlated source
+remains unresolved or deferred until its contract is supplied.
 
 ## 9. Inspect and compare views
 
@@ -402,8 +402,8 @@ and single-reprojection inspection:
 
 The viewer is a static artifact. It does not execute projections, training,
 sampling, recurrence, controllers, or network calls. Its current embedded
-model is derived from the reference fixtures; it is a way to inspect the
-workflow, not a replacement for validating the source description.
+model is a curated presentation snapshot; it is a way to inspect the workflow,
+not a replacement for validating a source description.
 
 ## 10. Use the V-JEPA 2 path as a worked pattern
 

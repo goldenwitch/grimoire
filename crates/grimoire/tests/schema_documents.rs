@@ -37,17 +37,14 @@ fn parses_the_shapes_schema_document() {
 }
 
 #[test]
-fn parsed_schema_has_the_same_identity_as_the_registry_entry() {
+fn parsed_schema_matches_the_registry_entry() {
     let parsed = parse_schema_document(SHAPES).unwrap_or_else(|error| panic!("{error}"));
     let registered = prototype_schemas()
         .unwrap_or_else(|error| panic!("{error}"))
         .into_iter()
         .find(|schema| schema.name == "shapes")
         .unwrap_or_else(|| panic!("missing registered shapes schema"));
-    assert_eq!(parsed.namespace, registered.namespace);
-    assert_eq!(parsed.name, registered.name);
-    assert_eq!(parsed.version, registered.version);
-    assert_eq!(parsed.allowed_elements, registered.allowed_elements);
+    assert_eq!(parsed, registered);
 }
 
 #[test]

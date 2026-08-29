@@ -1,8 +1,8 @@
 # Projection language design
 
-Status: prototype semantic contract with open syntax and value gaps.
-
-This is the sibling language that defines a **layer** file's **projection**. One **layer** file is one human viewport. It is not a runtime language: it describes the represented system statically.
+This is the companion language that defines a **layer** file's **projection**.
+One **layer** file is one human viewport. It is not a runtime language: it
+describes the represented system statically.
 
 ## Evaluation order
 
@@ -70,6 +70,6 @@ sampling run, estimate a neural distribution, or bind to runtime state.
 The following are not unresolved **projection language** semantics:
 
 - Concrete syntax for generated **select** forms belongs to grammar construction when a described example requires it.
-- The internal value shape and constraints of **decorate** values belong to the **schema** definition format and their consuming **schemas**.
+- The value shape and constraints of **decorate** values belong to the **schema** definition format and their consuming **schemas**.
 - Concrete symbolic-value syntax and aggregation notation wait for a described value example that requires them.
 - Channel kernels, source distributions, uncertainty claims, and cyclic channel semantics belong to the information-flow contract rather than to projection evaluation.

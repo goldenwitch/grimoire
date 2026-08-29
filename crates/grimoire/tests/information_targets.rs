@@ -1,36 +1,10 @@
 use grimoire::{
-    Channel, ChannelGraph, ChannelNode, ClaimEstimate, Distribution, JointSource, Schema,
-    evaluate_layer, extract_cut, parse_description, prototype_schemas, validate_description,
+    Channel, ChannelGraph, ClaimEstimate, Distribution, JointSource, evaluate_layer, extract_cut,
+    parse_description, validate_description,
 };
 
-fn address(value: &str) -> grimoire::Address {
-    grimoire::Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn node(
-    address_value: &str,
-    block: &str,
-    input_ports: &[&str],
-    output_port: &str,
-    channel: Channel,
-) -> ChannelNode {
-    ChannelNode::new(
-        address(address_value),
-        address(block),
-        input_ports.iter().map(|value| address(value)).collect(),
-        address(output_port),
-        channel,
-    )
-    .unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn binary_source() -> Distribution {
-    Distribution::uniform(2).unwrap_or_else(|error| panic!("{error}"))
-}
+mod common;
+use common::{address, binary_source, node, schemas};
 
 fn joint_robot_source() -> JointSource {
     JointSource::new(

@@ -1,7 +1,5 @@
 # Schema definition format
 
-Status: prototype contract; implementation checkpoint with open compatibility gaps.
-
 ## Ruling
 
 A **schema** body is a closed Grimoire-native algebra. Every constructor, constraint, and validation behavior is explicitly defined by the format. A **schema** body does not delegate arbitrary semantics to an external dialect or extension keyword.
@@ -57,7 +55,7 @@ The initial closed scalar refinements are:
 
 Richer constraints are expressed by composing these constructors inside an individual **schema**. They do not add meta-algebra features.
 
-For the first executable prototype, `finite scalar kind` is the closed boolean
+For the executable implementation, `finite scalar kind` is the closed boolean
 kind. This is a reversible engineering choice made to give the bootstrap
 validator one executable meaning for the previously undefined constructor. A
 fixture must reject non-boolean values and preserve boolean values through

@@ -5,13 +5,8 @@ use grimoire::{
     data_processing_holds,
 };
 
-fn binary_source() -> Distribution {
-    Distribution::uniform(2).unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn address(value: &str) -> grimoire::Address {
-    grimoire::Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
+mod common;
+use common::{address, binary_source};
 
 fn assert_close(actual: f64, expected: f64) {
     assert!((actual - expected).abs() < 1e-10, "{actual} != {expected}");

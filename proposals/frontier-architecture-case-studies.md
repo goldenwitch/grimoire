@@ -1,7 +1,5 @@
 # Frontier architecture case studies
 
-Status: empirical case study; prototype checkpoint with open gaps.
-
 This document is a cross-paper consumption exercise for Grimoire. It asks
 whether the language can represent the major architecture families in the
 indexed paper set while keeping three things separate:
@@ -19,8 +17,8 @@ The V-JEPA 2-specific case is in
 Nothing in this document changes the core vocabulary or makes a paper's
 terminology normative. The executable consumer fixtures settle syntax for the
 represented subset. Addresses, definition sites, layer names, and proposed
-ports remain illustrative where no fixture has made them part of the current
-prototype.
+ports remain illustrative where no fixture has made them part of the
+implementation.
 
 ## Why These Cases
 
@@ -45,9 +43,8 @@ measurement values unless the paper makes the distinction graph-bearing.
 
 ## Evidence Set
 
-The cases below draw from the indexed full-text papers. The links are the
-primary arXiv records; the local Scry corpus contains the full-text origins
-used for the empirical sweep.
+The cases below draw from the cited public papers. The links are their primary
+arXiv records.
 
 ### Representation learning
 
@@ -755,7 +752,7 @@ runtime.
 
 ### Indexed modality streams and attention visibility
 
-- Prototype status: the indexed-visibility fixture expands two time steps and
+- Implementation boundary: the indexed-visibility fixture expands two time steps and
   two modalities into ordinary addressed connections; block-causal and mixed
   sets are distinct and validated.
 - Remaining gap: compact indexed syntax is not part of the grammar, so larger
@@ -781,7 +778,7 @@ runtime.
 
 ### Streaming and recurrent execution boundaries
 
-- Prototype status: the execution fixture distinguishes streaming speech,
+- Implementation boundary: the execution fixture distinguishes streaming speech,
   recurrent latent dynamics, and closed-loop planning through finalized values
   and explicit structural state paths.
 - Remaining gap: runtime buffering, clocks, rollouts, and external execution
@@ -793,7 +790,7 @@ runtime.
 
 ### Parameter-state lineage
 
-- Prototype status: the consumer fixture represents base, delta, operation,
+- Implementation boundary: the consumer fixture represents base, delta, operation,
   and result references with a bounded `lineage/1` value and keeps them out of
   activation connections.
 - Remaining gap: parameter composition is not a first-class relation, so a
@@ -819,7 +816,7 @@ runtime.
 
 ### Training-update relations
 
-- Prototype status: the reference fixtures validate activation connections and
+- Implementation boundary: the reference fixtures validate activation connections and
   training target lists while keeping EMA, freeze, fine-tune, re-warming, and
   delta application out of activation flow.
 - Remaining gap: no end-to-end fixture validates a parameter-update relation as
@@ -844,16 +841,16 @@ The proposed cases consume the indexed papers as follows:
 - Compact one-dimensional tokenization: TiTok.
 - Streaming speech: LLaMA-Omni, Mini-Omni.
 - Latent predictive dynamics: MC-JEPA, Genie, DreamerV3, with V-JEPA 2 in
-  the sibling case-study document.
+  the V-JEPA 2 case-study document.
 - Low-bit operator variants: BitNet, BitNet b1.58, BitNet a4.8.
 - Parameter-space adaptation: Continual Pre-Training, DARE, TIES-Merging.
 
 This map is a coverage statement, not a ranking of the papers or a claim that
 every paper in one row has identical architecture.
 
-## Executable Consumer Checkpoint
+## Executable Consumer Coverage
 
-The current Rust fixture in
+The Rust fixture in
 [`consumer_targets.rs`](../crates/grimoire/tests/consumer_targets.rs) covers
 the cross-paper consumer boundary with independent bridge, unified-token,
 decoupled-frontend, continuous-latent, one-dimensional-tokenizer, streaming
@@ -861,15 +858,15 @@ speech, latent-dynamics, low-bit, and parameter-lineage layers. It validates
 their cuts, checks that only justified shared backbone addresses fold, and
 keeps precision and lineage facts out of activation structure.
 
-The fixture is intentionally a coverage checkpoint rather than a claim that
-the current grammar evaluates token generation, diffusion, streaming clocks,
+The fixture is intentionally a coverage statement rather than a claim that the
+grammar evaluates token generation, diffusion, streaming clocks,
 recurrent rollouts, or parameter merges. Those remain static structure plus
 finalized values or explicit external/deferred boundaries.
 
-## Current Consumption Checkpoint
+## Consumption Coverage
 
-The complete reference description now composes the shared core, domain layers,
-pretraining and AC checkpoint, downstream consumer checkpoint, placement, cost,
+The complete reference description composes the shared core, domain layers,
+pretraining and AC coverage, downstream consumer coverage, placement, cost,
 provenance, and cut/serializer validation. It retains the paper-family
 distinctions exercised here instead of collapsing them into one universal
 multimodal architecture.
