@@ -859,18 +859,17 @@
         const leftView = () => dataset().views[state.leftView];
         const rightView = () => state.rightView === "none" ? null : dataset().views[state.rightView];
         const nodeFor = (id) => dataset().elements[id];
-        const visibleSet = (activeView) => new Set(activeView.visible.filter((id) => nodeFor(id)));
-        const isCollapsed = (id) => state.collapsed.has(id);
+        const nodeForModel = (model, id) => model.elements[id];
 
-        function hiddenByGroup(id, activeView) {
+        function hiddenByGroup(model, uiState, id, activeView) {
             return activeView.visible.some((candidate) => {
-                const candidateNode = nodeFor(candidate);
-                return candidateNode && candidateNode.kind === "group" && isCollapsed(candidate) && candidateNode.members.includes(id);
+                const candidateNode = nodeForModel(model, candidate);
+                return candidateNode && candidateNode.kind === "group" && uiState.collapsed.has(candidate) && candidateNode.members.includes(id);
             });
         }
 
-        function displayIds(activeView) {
-            return activeView.visible.filter((id) => nodeFor(id) && !hiddenByGroup(id, activeView));
+        function displayIds(model, uiState, activeView) {
+            return activeView.visible.filter((id) => nodeForModel(model, id) && !hiddenByGroup(model, uiState, id, activeView));
         }
 
         function presence(id, otherView, side) {
@@ -880,10 +879,10 @@
             return side === "left" ? "left-only" : "right-only";
         }
 
-        function currentSearchMatches(node) {
-            if (!state.query) return true;
+        function searchMatches(node, query) {
+            if (!query) return true;
             const haystack = [node.id, node.label, ...(node.ports || []), ...(node.members || [])].join(" ").toLowerCase();
-            return haystack.includes(state.query.toLowerCase());
+            return haystack.includes(query.toLowerCase());
         }
 
         function positionFor(activeView, id, index) {
@@ -897,17 +896,18 @@
             return shared ? "common" : side === "left" ? "left-only" : "right-only";
         }
 
-        function renderNode(id, activeView, otherView, side, index) {
-            const node = nodeFor(id);
+        function renderNode(model, uiState, id, activeView, otherView, side, index) {
+            const node = nodeForModel(model, id);
             const relation = presence(id, otherView, side);
             const kindClass = `kind-${node.kind}`;
-            const selectedClass = state.selected === id ? "selected" : "";
-            const dimClass = currentSearchMatches(node) ? "" : "is-dim";
+            const selectedClass = uiState.selected === id ? "selected" : "";
+            const dimClass = searchMatches(node, uiState.query) ? "" : "is-dim";
             const position = positionFor(activeView, id, index);
             const ports = (node.ports || []).slice(0, 5).map((port) => `<span class="port-chip" title="${escapeHtml(port)}">${escapeHtml(shortAddress(port))}</span>`).join("");
             const members = (node.members || []).slice(0, 4).map((member) => `<span class="member-chip" title="${escapeHtml(member)}">${escapeHtml(shortAddress(member))}</span>`).join("");
-            const analysis = state.showAnalysis && node.analysis && (node.analysis.placement || node.analysis.cost) ? `<span class="analysis-chip">${escapeHtml(node.analysis.placement || node.analysis.cost)}</span>` : "";
-            const groupToggle = node.kind === "group" ? `<button class="group-toggle" type="button" data-collapse-id="${escapeHtml(id)}" aria-expanded="${!isCollapsed(id)}">${isCollapsed(id) ? "+ expand" : "- collapse"}</button>` : "";
+            const analysis = uiState.showAnalysis && node.analysis && (node.analysis.placement || node.analysis.cost) ? `<span class="analysis-chip">${escapeHtml(node.analysis.placement || node.analysis.cost)}</span>` : "";
+            const collapsed = uiState.collapsed.has(id);
+            const groupToggle = node.kind === "group" ? `<button class="group-toggle" type="button" data-collapse-id="${escapeHtml(id)}" aria-expanded="${!collapsed}">${collapsed ? "+ expand" : "- collapse"}</button>` : "";
             return `<div class="graph-node ${kindClass} presence-${relation} ${selectedClass} ${dimClass}" role="button" tabindex="0" aria-label="${escapeHtml(node.label)} ${escapeHtml(id)}" data-node-id="${escapeHtml(id)}" style="left:${position.x}%;top:${position.y / 6.2}%">
                 <div class="node-topline"><span class="kind-tag">${escapeHtml(node.kind)}</span><span class="presence-tag">${relation === "solo" ? "view" : relation}</span></div>
                 <div class="node-label">${escapeHtml(node.label)}</div>
@@ -919,24 +919,24 @@
             </div>`;
         }
 
-        function renderGraphPane(activeView, otherView, side) {
-            const ids = displayIds(activeView);
-            const visible = visibleSet(activeView);
+        function renderGraphPane(model, uiState, activeView, otherView, side) {
+            const ids = displayIds(model, uiState, activeView);
+            const visible = new Set(activeView.visible.filter((id) => nodeForModel(model, id)));
             const lines = activeView.edges.filter((item) => visible.has(item.source) && visible.has(item.target)).map((item) => {
                 const sourceIndex = ids.indexOf(item.source);
                 const targetIndex = ids.indexOf(item.target);
                 const source = positionFor(activeView, item.source, sourceIndex);
                 const target = positionFor(activeView, item.target, targetIndex);
                 const relation = edgeClass(item, otherView, side);
-                const opacity = state.query && (!currentSearchMatches(nodeFor(item.source)) || !currentSearchMatches(nodeFor(item.target))) ? "dimmed" : "";
+                const opacity = uiState.query && (!searchMatches(nodeForModel(model, item.source), uiState.query) || !searchMatches(nodeForModel(model, item.target), uiState.query)) ? "dimmed" : "";
                 return `<line class="edge ${relation} ${opacity}" x1="${source.x + 17.5}" y1="${source.y + 5.4}" x2="${target.x + 1}" y2="${target.y + 5.4}" marker-end="url(#arrow-${side})"><title>${escapeHtml(item.source)} -> ${escapeHtml(item.target)}${item.label ? ` / ${escapeHtml(item.label)}` : ""}</title></line>`;
             }).join("");
-            const nodes = ids.map((id, index) => renderNode(id, activeView, otherView, side, index)).join("");
+            const nodes = ids.map((id, index) => renderNode(model, uiState, id, activeView, otherView, side, index)).join("");
             return `<article class="graph-pane panel"><div class="graph-pane-head"><div><strong>${escapeHtml(activeView.label)}</strong><span>${escapeHtml(activeView.subtitle)}</span></div><span class="pane-side">${side === "left" ? "PRIMARY" : "COMPARE"}</span></div><div class="graph-scroll"><div class="graph-stage"><svg viewBox="0 0 100 620" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="arrow-${side}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="${side === "left" ? "#0d7d76" : "#2866bd"}"></path></marker></defs>${lines}</svg>${nodes}</div></div></article>`;
         }
 
-        function countStats(activeView) {
-            const nodes = activeView.visible.map(nodeFor).filter(Boolean);
+        function countStats(model, activeView) {
+            const nodes = activeView.visible.map((id) => nodeForModel(model, id)).filter(Boolean);
             return {
                 blocks: nodes.filter((node) => node.kind === "block").length,
                 ports: nodes.reduce((total, node) => total + (node.ports || []).length, 0),
@@ -945,46 +945,49 @@
             };
         }
 
-        function renderStats() {
-            const stats = countStats(leftView());
-            $("stats").innerHTML = [[stats.blocks, "blocks"], [stats.ports, "ports"], [stats.connections, "edges"], [stats.groups, "groups"]].map(([value, label]) => `<div class="stat"><span class="stat-value">${value}</span><span class="stat-label">${label}</span></div>`).join("");
+        function renderStatsMarkup(model, activeView) {
+            const stats = countStats(model, activeView);
+            return [[stats.blocks, "blocks"], [stats.ports, "ports"], [stats.connections, "edges"], [stats.groups, "groups"]].map(([value, label]) => `<div class="stat"><span class="stat-value">${value}</span><span class="stat-label">${label}</span></div>`).join("");
         }
 
-        function renderViewList() {
-            $("viewList").innerHTML = Object.entries(dataset().views).map(([id, activeView]) => `<button class="view-button ${id === state.leftView ? "active" : ""}" type="button" data-view-id="${escapeHtml(id)}" data-kind="${escapeHtml(activeView.kind)}"><span class="view-marker" aria-hidden="true"></span><span class="view-name">${escapeHtml(activeView.label)}</span><span class="view-kind">${escapeHtml(activeView.kind)}</span></button>`).join("");
+        function renderViewListMarkup(model, uiState) {
+            return Object.entries(model.views).map(([id, activeView]) => `<button class="view-button ${id === uiState.leftView ? "active" : ""}" type="button" data-view-id="${escapeHtml(id)}" data-kind="${escapeHtml(activeView.kind)}"><span class="view-marker" aria-hidden="true"></span><span class="view-name">${escapeHtml(activeView.label)}</span><span class="view-kind">${escapeHtml(activeView.kind)}</span></button>`).join("");
         }
 
-        function renderPresence() {
-            const leftIds = new Set(leftView().visible);
-            const rightIds = rightView() ? new Set(rightView().visible) : new Set();
+        function renderPresenceMarkup(primary, comparison) {
+            const leftIds = new Set(primary.visible);
+            const rightIds = comparison ? new Set(comparison.visible) : new Set();
             let common = 0;
             let primaryOnly = 0;
             let comparisonOnly = 0;
             leftIds.forEach((id) => rightIds.has(id) ? common += 1 : primaryOnly += 1);
             rightIds.forEach((id) => { if (!leftIds.has(id)) comparisonOnly += 1; });
-            const items = rightView() ? [[common, "common addresses", "legend-swatch"], [primaryOnly, "primary only", "legend-swatch left-only"], [comparisonOnly, "comparison only", "legend-swatch right-only"]] : [[leftIds.size, "addresses in view", "legend-swatch"]];
-            $("presenceCount").textContent = `${leftIds.size + rightIds.size} observed`;
-            $("presenceList").innerHTML = items.map(([value, label, swatch]) => `<div class="legend-item"><span class="${swatch}"></span><strong>${value}</strong> ${label}</div>`).join("");
+            const items = comparison ? [[common, "common addresses", "legend-swatch"], [primaryOnly, "primary only", "legend-swatch left-only"], [comparisonOnly, "comparison only", "legend-swatch right-only"]] : [[leftIds.size, "addresses in view", "legend-swatch"]];
+            return {
+                count: `${leftIds.size + rightIds.size} observed`,
+                markup: items.map(([value, label, swatch]) => `<div class="legend-item"><span class="${swatch}"></span><strong>${value}</strong> ${label}</div>`).join("")
+            };
         }
 
-        function renderLedger() {
-            const entries = [...(leftView().deferred || [])];
-            if (state.showAnalysis) entries.push(...(leftView().analysis || []));
-            $("ledgerCount").textContent = `${entries.length} record${entries.length === 1 ? "" : "s"}`;
-            $("ledgerList").innerHTML = entries.length ? entries.map((entry) => `<div class="ledger-item"><div class="ledger-status ${entry.status || "deferred"}">${escapeHtml(entry.status || "deferred")}</div><div><strong>${escapeHtml(entry.title)}</strong><span>${escapeHtml(entry.reason || entry.value || "")}</span></div></div>`).join("") : `<div class="empty-ledger">No unresolved boundary is attached to this view.</div>`;
+        function renderLedgerMarkup(activeView, uiState) {
+            const entries = [...(activeView.deferred || [])];
+            if (uiState.showAnalysis) entries.push(...(activeView.analysis || []));
+            return {
+                count: `${entries.length} record${entries.length === 1 ? "" : "s"}`,
+                markup: entries.length ? entries.map((entry) => `<div class="ledger-item"><div class="ledger-status ${entry.status || "deferred"}">${escapeHtml(entry.status || "deferred")}</div><div><strong>${escapeHtml(entry.title)}</strong><span>${escapeHtml(entry.reason || entry.value || "")}</span></div></div>`).join("") : `<div class="empty-ledger">No unresolved boundary is attached to this view.</div>`
+            };
         }
 
-        function renderInspector() {
-            const node = nodeFor(state.selected);
+        function renderInspectorMarkup(model, primary, comparison, uiState) {
+            const node = nodeForModel(model, uiState.selected);
             if (!node) {
-                $("inspector").innerHTML = `<div class="empty-inspector"><strong>Nothing selected</strong><span>Focus an addressed structure item.</span><code>keyboard and pointer focus are equivalent</code></div>`;
-                return;
+                return `<div class="empty-inspector"><strong>Nothing selected</strong><span>Focus an addressed structure item.</span><code>keyboard and pointer focus are equivalent</code></div>`;
             }
-            const inLeft = leftView().visible.includes(node.id);
-            const inRight = rightView() && rightView().visible.includes(node.id);
-            const relation = rightView() ? (inLeft && inRight ? "common" : inLeft ? "left-only" : "right-only") : "common";
-            const facts = state.showMetadata ? Object.entries(node.meta || {}).map(([key, value]) => `<div class="fact"><span class="fact-key">${escapeHtml(key)}</span><span class="fact-value">${escapeHtml(value)} <span class="fact-status">declared</span></span></div>`).join("") : "";
-            const analysisFacts = state.showAnalysis ? Object.entries(node.analysis || {}).map(([key, value]) => `<div class="fact"><span class="fact-key">${escapeHtml(key)}</span><span class="fact-value"><code>${escapeHtml(value)}</code> <span class="fact-status">analysis</span></span></div>`).join("") : "";
+            const inLeft = primary.visible.includes(node.id);
+            const inRight = comparison && comparison.visible.includes(node.id);
+            const relation = comparison ? (inLeft && inRight ? "common" : inLeft ? "left-only" : "right-only") : "common";
+            const facts = uiState.showMetadata ? Object.entries(node.meta || {}).map(([key, value]) => `<div class="fact"><span class="fact-key">${escapeHtml(key)}</span><span class="fact-value">${escapeHtml(value)} <span class="fact-status">declared</span></span></div>`).join("") : "";
+            const analysisFacts = uiState.showAnalysis ? Object.entries(node.analysis || {}).map(([key, value]) => `<div class="fact"><span class="fact-key">${escapeHtml(key)}</span><span class="fact-value"><code>${escapeHtml(value)}</code> <span class="fact-status">analysis</span></span></div>`).join("") : "";
             const ports = (node.ports || []).map((port) => `<div class="fact"><span class="fact-key">port</span><span class="fact-value"><code>${escapeHtml(port)}</code></span></div>`).join("");
             const members = (node.members || []).map((member) => `<div class="fact"><span class="fact-key">member</span><span class="fact-value"><code>${escapeHtml(member)}</code></span></div>`).join("");
             const status = node.meta && node.meta.state ? String(node.meta.state) : "exact";
@@ -993,36 +996,72 @@
                 ${analysisFacts ? `<section class="inspector-section"><h3>Opt-in analysis</h3><div class="fact-list">${analysisFacts}</div></section>` : ""}
                 ${ports ? `<section class="inspector-section"><h3>Ports</h3><div class="fact-list">${ports}</div></section>` : ""}
                 ${members ? `<section class="inspector-section"><h3>Members</h3><div class="fact-list">${members}</div></section>` : ""}
-                <section class="inspector-section"><h3>View context</h3><p class="inspector-note"><strong>${escapeHtml(leftView().label)}</strong> is the primary reprojection. ${rightView() ? `The comparison is <strong>${escapeHtml(rightView().label)}</strong>.` : "No comparison reprojection is selected."}</p></section>`;
+                <section class="inspector-section"><h3>View context</h3><p class="inspector-note"><strong>${escapeHtml(primary.label)}</strong> is the primary reprojection. ${comparison ? `The comparison is <strong>${escapeHtml(comparison.label)}</strong>.` : "No comparison reprojection is selected."}</p></section>`;
         }
 
-        function renderContext() {
-            $("datasetEyebrow").textContent = dataset().eyebrow;
-            $("datasetTitle").textContent = dataset().title;
-            $("datasetSummary").textContent = dataset().summary;
-            $("datasetCitation").textContent = dataset().citation;
-            $("datasetCitation").href = dataset().citationUrl;
-            $("compareBadge").textContent = rightView() ? `${leftView().label}  /  ${rightView().label}` : "single reprojection";
-            $("artifactState").textContent = `${Object.keys(dataset().views).length} views loaded`;
+        function renderContext(model, primary, comparison) {
+            return {
+                eyebrow: model.eyebrow,
+                title: model.title,
+                summary: model.summary,
+                citation: model.citation,
+                citationUrl: model.citationUrl,
+                compareBadge: comparison ? `${primary.label}  /  ${comparison.label}` : "single reprojection",
+                artifactState: `${Object.keys(model.views).length} views loaded`
+            };
         }
 
-        function renderSelects() {
-            const viewOptions = Object.entries(dataset().views).map(([id, activeView]) => `<option value="${escapeHtml(id)}">${escapeHtml(activeView.label)}</option>`).join("");
-            $("leftViewSelect").innerHTML = viewOptions;
-            $("rightViewSelect").innerHTML = `<option value="none">No comparison</option>${viewOptions}`;
-            $("leftViewSelect").value = state.leftView;
-            $("rightViewSelect").value = state.rightView;
+        function renderSelectsMarkup(model, uiState) {
+            const viewOptions = Object.entries(model.views).map(([id, activeView]) => `<option value="${escapeHtml(id)}">${escapeHtml(activeView.label)}</option>`).join("");
+            return {
+                left: viewOptions,
+                right: `<option value="none">No comparison</option>${viewOptions}`,
+                leftValue: uiState.leftView,
+                rightValue: uiState.rightView
+            };
+        }
+
+        function renderPresentation(model, uiState) {
+            const primary = model.views[uiState.leftView];
+            const comparison = uiState.rightView === "none" ? null : model.views[uiState.rightView];
+            const presence = renderPresenceMarkup(primary, comparison);
+            const ledger = renderLedgerMarkup(primary, uiState);
+            return {
+                context: renderContext(model, primary, comparison),
+                stats: renderStatsMarkup(model, primary),
+                selects: renderSelectsMarkup(model, uiState),
+                viewList: renderViewListMarkup(model, uiState),
+                presence,
+                ledger,
+                graphComparison: renderGraphPane(model, uiState, primary, comparison, "left") + (comparison ? renderGraphPane(model, uiState, comparison, primary, "right") : ""),
+                inspector: renderInspectorMarkup(model, primary, comparison, uiState)
+            };
+        }
+
+        function applyPresentation(presentation) {
+            $("datasetEyebrow").textContent = presentation.context.eyebrow;
+            $("datasetTitle").textContent = presentation.context.title;
+            $("datasetSummary").textContent = presentation.context.summary;
+            $("datasetCitation").textContent = presentation.context.citation;
+            $("datasetCitation").href = presentation.context.citationUrl;
+            $("compareBadge").textContent = presentation.context.compareBadge;
+            $("artifactState").textContent = presentation.context.artifactState;
+            $("stats").innerHTML = presentation.stats;
+            $("leftViewSelect").innerHTML = presentation.selects.left;
+            $("rightViewSelect").innerHTML = presentation.selects.right;
+            $("leftViewSelect").value = presentation.selects.leftValue;
+            $("rightViewSelect").value = presentation.selects.rightValue;
+            $("viewList").innerHTML = presentation.viewList;
+            $("presenceCount").textContent = presentation.presence.count;
+            $("presenceList").innerHTML = presentation.presence.markup;
+            $("ledgerCount").textContent = presentation.ledger.count;
+            $("ledgerList").innerHTML = presentation.ledger.markup;
+            $("graphComparison").innerHTML = presentation.graphComparison;
+            $("inspector").innerHTML = presentation.inspector;
         }
 
         function renderAll() {
-            renderContext();
-            renderStats();
-            renderSelects();
-            renderViewList();
-            renderPresence();
-            renderLedger();
-            $("graphComparison").innerHTML = renderGraphPane(leftView(), rightView(), "left") + (rightView() ? renderGraphPane(rightView(), leftView(), "right") : "");
-            renderInspector();
+            applyPresentation(renderPresentation(dataset(), state));
             document.querySelectorAll("[data-node-id]").forEach((nodeElement) => {
                 nodeElement.addEventListener("click", () => { state.selected = nodeElement.dataset.nodeId; renderAll(); });
                 nodeElement.addEventListener("keydown", (event) => {

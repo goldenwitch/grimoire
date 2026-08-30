@@ -1,0 +1,212 @@
+vine 1.2.0
+prefix: readiness
+title: Grimoire public release readiness
+---
+[readiness] Prepare Grimoire for public release (started)
+Files: public repository metadata, documentation, examples, CLI, Scry-grounded measurement fixtures, CI, the static viewer, and the Rust package.
+Do: Prepare the static Grimoire artifact for public publication without expanding its product boundary. Make the first-time experience workflow-first for two primary use cases: calculating and estimating costs and resources, and using a stable addressed substrate for computer-science architecture diagrams. Add a thin CLI as the machine-facing entry point and ground one public architecture sample with local Scry measurements. Keep the Grimoire MCP adapter deferred from this release; local Scry MCP remains development evidence only. Keep the specification, grammar, Rust implementation, executable fixtures, workflow guidance, and offline viewer mutually consistent. Keep runtime execution, continuous estimators, parameter updates, causal interventions, fixed points, compact indexed syntax, and richer network semantics as explicit boundaries.
+Accept: A fresh clone has a clear entry point into both workflows, a portable CLI validation path, an explicit Scry-grounded sample, an explicit Grimoire MCP deferral, settled publication metadata, a canonical public example, green automated checks, an offline viewer, and no unexplained generated or machine-specific artifact.
+-> readiness/handoff
+> The public front door prioritizes explicit cost/resource analysis and stable architecture-substrate diagrams.
+> The readiness plan is a local planning artifact; it is not itself a publication product or runtime dependency.
+> The CLI is a thin machine-facing layer over the Rust library; it does not become a second semantic authority.
+> The Grimoire MCP adapter is deferred from this release; local Scry MCP is development evidence only and is not a Grimoire runtime or publication dependency.
+> Resources are tracked as typed, mutually non-interchangeable flows; FLOPs, bytes, memory, bandwidth, latency, and other kinds are not collapsed into one scalar.
+> Probabilistic assumptions are explicit analysis inputs and qualified outputs; probabilities are not inferred from labels, topology, or hardware.
+> The static boundary remains explicit: documentation and tools do not imply runtime training, sampling, control, or continuous estimation.
+---
+[readiness/handoff] Complete the human publication handoff (notstarted)
+Files: repository settings and the selected remote.
+Do: After the release gate passes, confirm the public repository owner, name, remote, default branch, and release posture. Push only the reviewed branch and create a release or tag only when the selected release posture calls for one. Keep credentials and private configuration out of the repository.
+Accept: The public repository identity is explicit, the default branch renders the entry point, the selected license is visible, and the published tree contains only reviewed artifacts.
+-> readiness/verify
+---
+[readiness/verify] Run the public release gate (notstarted)
+Files: the tracked repository and the acceptance commands recorded here.
+Do: Run `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets --all-features -- -D warnings`, `cargo test --workspace`, `cargo metadata --locked --no-deps`, the selected package check, `git diff --check`, repository-relative link checks, and direct offline viewer and CLI smoke checks. Exercise both primary workflows from the public front door, confirm the Grimoire MCP adapter remains deferred, and record command results and any remaining deferred boundary.
+Accept: Every command passes; package metadata and contents are suitable for publication; both workflows are understandable from a fresh clone; CLI results agree with library results; the Grimoire MCP deferral is explicit; the viewer opens without a build step, server, dependency, or network request; no generated output, local database, credential, private path, or machine-specific artifact is tracked; and the final worktree contains only reviewed changes.
+-> readiness/architecture-substrate
+-> readiness/ci
+-> readiness/cli
+-> readiness/cost-resources
+-> readiness/docs
+-> readiness/example
+-> readiness/hygiene
+-> readiness/legal
+-> readiness/metadata
+-> readiness/readme
+-> readiness/resource-flow
+-> readiness/scope
+-> readiness/scry-example
+-> readiness/viewer
+> Release verification tests explicit resource analysis and probabilistic assumptions separately from structural architecture behavior.
+> CLI output is checked against the library/API results rather than accepted as an independent implementation.
+> The Grimoire MCP adapter is not part of this release gate; its deferral is checked as a publication boundary rather than by an adapter smoke test.
+> Unresolved runtime and continuous-analysis boundaries are recorded rather than hidden by a green presentation surface.
+---
+[readiness/scope] Set public identity and release posture (reviewing)
+Files: the publication decisions consumed by metadata, public documentation, the two primary workflows, and the tool detour.
+Do: Record the public project identity and release posture, and record the product focus agreed for this branch. Confirm the public project name, repository owner and name, remote URL, package version policy, pre-release wording, license choice, and supported Rust toolchain policy. Record the local-only status of this readiness plan, the CLI boundary, the MCP detour boundary, and the typed probabilistic resource direction. Record explicit human decisions where a value is not yet settled; downstream artifacts must not invent ownership, licensing, stability claims, or resource semantics.
+Accept: Each publication identity and release-posture field has one explicit decision or an explicit human gate, the two primary workflows are recorded as the product focus, and the CLI/MCP/resource boundaries are unambiguous.
+> The first-time user experience leads with cost/resource analysis and architecture-substrate diagrams.
+> The readiness VINE remains local planning material and need not be published.
+> The CLI is the primary machine-facing workflow surface and calls the library rather than duplicating semantics.
+> The Grimoire MCP adapter is deferred from this release; any future inclusion is a separate gate from core language semantics.
+> Resource kinds are mutually non-fungible and travel through the addressed graph as typed quantities or distributions; no universal exchange rate is assumed.
+> Cost calculations use explicit caller-supplied structure, shape, axis, placement, and width inputs; probabilistic resource assumptions are explicit and qualified rather than label-inferred.
+> The addressed graph and its layers are the source of architectural identity; diagrams are derived presentation views, not an alternate editable model.
+> Unsettled repository ownership, remote, license, version, release-posture, and viewer-data-production values remain explicit human gates; Grimoire MCP inclusion is explicitly deferred for this release.
+---
+[readiness/metadata] Align package metadata (notstarted)
+Files: `Cargo.toml` and `crates/grimoire/Cargo.toml`.
+Do: Apply the settled public identity, description, license expression, repository or homepage metadata, package version, and Rust toolchain policy. Keep workspace inheritance valid and avoid metadata that claims a stable language contract without a corresponding decision. Check package metadata and package contents with Cargo.
+Accept: Locked metadata reports the intended package identity; manifests contain no placeholder or private path; license and version match the settled posture; and the selected package check succeeds with the intended public files.
+-> readiness/scope
+---
+[readiness/legal] Add the public license surface (notstarted)
+Files: `LICENSE` and any narrowly required attribution file.
+Do: Add the exact license text selected by the scope decision. Add attribution only where the repository's authorship or included material requires it, using verified names and sources. Keep paper citations in provenance and documentation rather than making ownership claims in the license file.
+Accept: A fresh clone contains the complete selected license; manifests and README references agree with it; and no copyright holder or third-party permission is guessed.
+-> readiness/scope
+---
+[readiness/readme] Maintain the public front door and workflow guide (started)
+Files: `README.md` and `guidance/ml-project-workflow.md`.
+Do: Keep the shortest useful front door for a new reader and make the two primary workflows immediately discoverable. Provide a cost/resource path that distinguishes deterministic calculation from sourced or probabilistic estimation, and an architecture-substrate path that explains addressed structure, layers, validation, canonical serialization, cuts, and diagram views. Document the CLI as the machine-facing path and document Grimoire MCP as deferred; keep local Scry MCP as private development evidence. Link to detailed contracts instead of duplicating their vocabulary or decisions.
+Accept: A reader can choose either workflow, understand its inputs and boundaries, run the documented CLI checks, understand that Grimoire MCP is deferred without treating it as a core workflow, open the viewer locally, and navigate to authoritative documents, examples, fixtures, and license. Relative links resolve and the status wording matches the settled release posture.
+-> readiness/cli
+-> readiness/legal
+-> readiness/mcp-detour
+-> readiness/scope
+> The README is a workflow front door, not a marketing landing page or a second specification.
+> The two primary workflow paths are visible before secondary domain proposals.
+> The workflow guide explains exact calculations versus probabilistic resource assumptions and stable model substrate versus diagram presentation.
+> The CLI is documented as a thin library wrapper; Grimoire MCP is documented as deferred, while local Scry MCP remains development-only evidence with no independent Grimoire semantics.
+> Detailed semantics remain owned by the specification, grammar, proposals, and executable API.
+---
+[readiness/example] Publish one canonical description (reviewing)
+Files: `examples/reference.grimoire` and the reference fixture that validates it.
+Do: Expose one canonical public description using the reviewed grammar. Choose one source of truth for the public example and executable fixture, or make their generation relationship mechanically obvious. Use the example to show stable addressed structure plus explicit inputs for cost/resource analysis, preserving layers, schema values, analysis inputs, and deferred boundaries without adding paper-specific core kinds or runtime behavior.
+Accept: The public example parses, validates against the registry, evaluates its layers, round-trips through canonical serialization, and exercises a representative valid cut plus the visible non-cut failure. It provides a stable substrate for a diagram and a separate explicit-input analysis boundary. The example and test cannot silently diverge.
+-> readiness/scope
+> The canonical example demonstrates both primary workflows without making analysis values part of structural identity.
+> The example remains one addressed description with layers, not two disconnected diagrams.
+> Resource results use explicit analysis inputs and do not feed back into selection.
+> The public example file is the source consumed directly by its integration test; the larger reference fixture remains separate coverage rather than a second copy of this example.
+---
+[readiness/docs] Audit public documentation (notstarted)
+Files: `spec/`, `grammar/`, and `proposals/`.
+Do: Review links, terminology, code snippets, authority boundaries, and publication-facing claims. Keep the core specification authoritative, keep the grammar and proposals honest about unresolved behavior, and make the two primary workflows, typed resource-flow direction, CLI boundary, and MCP deferral agree with the implementation. Remove stale internal wording only when repository evidence supports the change; do not settle an open design gap by prose alone.
+Accept: Repository-relative links resolve; normative specification, grammar, design proposals, and workflow guidance are distinguishable; examples use the current API or grammar; resource kinds and probabilistic assumptions are not collapsed into unsupported scalar claims; and no document claims an unimplemented runtime or continuous-analysis contract.
+-> readiness/resource-flow
+-> readiness/scope
+> Workflow guidance owns the first-time path; detailed proposals own their domain contracts.
+> The docs audit checks that resource analysis never becomes hidden structural selection.
+> The docs audit checks that architecture diagrams never become a competing source of structural identity.
+> The docs audit checks that the CLI is the public adapter over the library and that the deferred MCP boundary introduces no parallel semantics.
+---
+[readiness/ci] Add a portable CI baseline (notstarted)
+Files: `.github/workflows/ci.yml`.
+Do: Add a small workflow for the settled Rust toolchain that runs formatting, strict Clippy, workspace tests, locked metadata, and the selected package check on pull requests and the default branch. Keep it independent of private paths, local caches, external services, and optional browser inspection.
+Accept: A fresh public runner can execute the workflow from the repository alone; required commands are explicit; failures are visible; and workflow commands match the local release gate.
+-> readiness/metadata
+-> readiness/scope
+---
+[readiness/viewer] Verify the static viewer artifact (notstarted)
+Files: `viz/index.html` and the viewer contract.
+Do: Inspect the viewer at desktop and narrow widths. Exercise corpus selection, primary and comparison views, address focus, group collapse, keyboard selection, metadata and analysis toggles, and clear-focus behavior. Confirm the embedded model remains static and the page makes no network requests or dependency calls. Verify that the viewer presents the addressed architecture substrate and keeps deterministic cost and probabilistic resource overlays separate from structural identity. Decide and record whether the embedded presentation payload is generated from the canonical description through the CLI or remains a curated release snapshot; the canonical description remains the structural source either way. Update only concrete issues found by this check.
+Accept: The viewer opens directly without a build step, server, dependency, or network request; the public cases and opaque/deferred states remain inspectable; controls work at desktop and mobile widths; page-level overflow and text overlap are absent; the viewer's relationship to the canonical description is explicit and tested; and no visualization-specific core kind or runtime semantics is introduced.
+-> readiness/scope
+> The viewer is a read-only presentation over addressed structure, not an architecture authoring surface.
+> Address comparison is structural identity; labels, layout, and overlays cannot create or merge elements.
+> Cost, placement, measurement, probabilistic resource, and other analysis surfaces remain opt-in views.
+> The canonical description remains the only structural source of truth; the production mechanism for the viewer payload is an explicit release gate.
+> The likely generated-payload path must preserve direct offline opening by committing or embedding generated presentation data rather than requiring a server.
+> The presentation function is pure with respect to its model and UI state: `renderPresentation(model, uiState)` returns presentation data, while DOM writes and event wiring remain outside it.
+---
+[readiness/hygiene] Remove publication hazards (notstarted)
+Files: `.gitignore` and the tracked-file inventory.
+Do: Audit the tracked tree for secrets, generated output, local databases, editor-only state, private paths, and machine-specific caches. Keep intended local outputs ignored and remove unexplained artifacts. Do not add repository configuration that depends on a developer machine or an external checkout.
+Accept: The tracked tree contains no generated build output, local database, credential, private path, or unexplained machine-specific artifact; ignore rules cover intended local outputs; and the repository can be checked from a fresh clone.
+-> readiness/scope
+---
+[readiness/cost-resources] Implement the cost and resource workflow (reviewing)
+Files: the typed resource-flow implementation and existing `crates/grimoire/src/cost.rs`, `crates/grimoire/src/placement.rs`, `crates/grimoire/tests/cost.rs`, `crates/grimoire/tests/placement.rs`, `proposals/cost-layer.md`, `proposals/placement-bandwidth.md`, `proposals/measurement-schema.md`, and the resource-flow contract.
+Do: Implement the cost and resource workflow after the resource-flow contract is explicit. Preserve deterministic cost expressions and bytes-on-wire calculations over evaluated addressed structure with caller-supplied axis extents, shapes, placements, and element widths. Add typed resource quantities that can travel, be consumed, transformed, or branch across the addressed graph without treating distinct resource kinds as fungible. Keep observed or estimated values in sourced records with units, protocols, assumptions, and qualified uncertainty. Make missing inputs, invalid probability assumptions, unsupported conversions, and overflow fail visibly; keep analysis values out of structural selection.
+Accept: A reader can distinguish exact calculation from probabilistic resource analysis and sourced measurement, follow explicit-input paths, obtain deterministic reports and qualified resource distributions, understand missing-input and invalid-assumption failures, and see that distinct resource kinds remain separate. An indexed-data/search pipeline fixture exercises at least multiple resource kinds and a branch or conditional assumption. No resource result is inferred from names, topology, precision labels, hardware, or runtime behavior.
+-> readiness/resource-flow
+-> readiness/scope
+> Deterministic calculations and probabilistic resource analysis are separate workflows and data accounts.
+> Resource kinds are typed and mutually non-interchangeable; no scalar total may add FLOPs, bytes, latency, or memory together.
+> Resource flows attach to addressed elements or relations and may be forwarded, consumed, transformed, or split only by explicit rules.
+> Probability semantics must distinguish route/workload likelihood from resource-amount variation and measurement uncertainty before implementation chooses a report statistic.
+> The existing CostModel and bytes_on_wire APIs remain deterministic analysis surfaces; they do not silently become the probabilistic resource semantics.
+> Hardware throughput, device topology, contention, runtime execution, and dtype inference remain outside this workflow.
+@artifact text/tsv ./examples/reference-resources.tsv
+---
+[readiness/architecture-substrate] Implement the architecture-substrate workflow (reviewing)
+Files: `proposals/visualization.md`, `viz/index.html`, `crates/grimoire/src/model.rs`, `crates/grimoire/src/parser.rs`, `crates/grimoire/src/validate.rs`, `crates/grimoire/src/serialize.rs`, `crates/grimoire/src/cut.rs`, `crates/grimoire/src/evaluate.rs`, and the focused architecture fixtures.
+Do: Make the second primary workflow usable as a stable substrate for computer-science architecture diagrams. Preserve exact addressed blocks, ports, connections, groups, layers, canonical serialization, validation, cuts, and evaluated views as the source model. Keep the diagram viewer read-only and compare reprojections by address; do not infer structure from labels, layout, overlays, or resource results and do not let the presentation become a competing authoring format. Coordinate with the CLI boundary so the same addressed model can be validated, canonicalized, evaluated, and consumed by tools.
+Accept: A reader can define or consume a stable addressed description, validate and canonicalize it, derive a layer view or cut, and inspect that view as a diagram without losing identity. Structural changes are visible through model validation and serialization, while metadata, deterministic costs, and probabilistic resource overlays remain separate. Runtime execution and diagram editing remain outside the substrate.
+-> readiness/scope
+> Exact addresses are the identity key; human labels and diagram coordinates are presentation only.
+> The core graph and layers are the portable model; diagrams are derived read-only views.
+> Canonical serialization and downward-closed cuts are part of portability and review.
+> The substrate represents static structure and finalized values, not runtime execution or training.
+> Resource and MCP/CLI outputs cannot create, merge, or reinterpret addressed elements.
+> The viewer's pure presentation function consumes explicit model and UI state and returns presentation data; DOM effects remain at the outer boundary.
+@artifact text/html ./viz/index.html
+@artifact text/rust ./crates/grimoire/tests/public_example.rs
+---
+[readiness/resource-flow] Define typed probabilistic resource flow (reviewing)
+Files: the resource-flow proposal, the Rust resource model, focused resource fixtures, and the existing cost, placement, and measurement boundaries.
+Do: Turn the resource direction into a bounded contract before expanding the implementation. Define machine-agnostic typed resources such as FLOP work, bytes, storage or memory, bandwidth, and latency as mutually non-interchangeable quantities. Define how resource quantities travel on addressed elements or relations, how nodes consume or transform them, how branches split them, and how explicit probabilistic assumptions qualify the resulting report. Keep route likelihood, workload distributions, resource-amount variation, and measurement uncertainty as distinct semantic roles rather than one generic probability field. Use an indexed-data/search pipeline as the motivating fixture without importing a neighboring project's private vocabulary or paths.
+Accept: The contract names resource identity, units, flow and transformation rules, branch semantics, probability normalization, assumption provenance, report shape, and visible failure modes for missing inputs, invalid assumptions, unsupported conversions, and overflow. A fixture exercises multiple resource kinds and at least one conditional or branching assumption. The contract keeps exact calculations, probabilistic analysis, sourced measurements, and structural selection distinct.
+-> readiness/scope
+> Resource kinds are typed and mutually non-interchangeable; no universal scalar exchange rate is introduced.
+> Resource flows are attached to addressed graph elements or relations and use explicit transformation/consumption rules.
+> Probabilistic assumptions are explicit inputs with qualified outputs; topology, labels, and hardware do not supply them.
+> Route likelihood, workload mix, resource-amount variation, and measurement uncertainty are distinct roles and cannot be collapsed into one probability field.
+> The first bounded regime is static, finite, and acyclic; runtime schedulers and hardware behavior remain deferred.
+> The indexed-data/search pipeline is a motivating fixture, not new core vocabulary.
+> The neighboring indexed-artifact pattern informs separate accounting for model, index, checkpoint, residual, access, and integrity work; it does not become a dependency or copied vocabulary.
+> The local Scry corpus is a development evidence source only; it is not a Grimoire runtime or publication dependency.
+@artifact text/rust ./crates/grimoire/src/resource.rs
+@artifact text/rust ./crates/grimoire/tests/resource_flow.rs
+@guidance text/markdown ./proposals/resource-flow.md
+---
+[readiness/cli] Add the thin CLI workflow surface (reviewing)
+Files: the Grimoire package manifest, CLI/library boundary, command tests, README, and workflow guide.
+Do: Add a small machine-facing CLI over the Rust library. Choose the minimum command surface needed to validate and canonicalize descriptions, inspect or evaluate addressed layers and cuts, and run deterministic and typed probabilistic resource reports with explicit inputs. Provide human-readable output for first-time use and stable machine-readable output for automation, generated viewer payloads, and any future adapter. Keep file or standard-input handling, exit failures, offline operation, and no-runtime semantics explicit.
+Accept: A fresh checkout can run both primary workflows through documented CLI commands; CLI results agree with direct library calls; malformed descriptions, missing layers, missing analysis inputs, invalid assumptions, and unsupported operations fail with stable visible errors; no CLI code duplicates parser, evaluator, serializer, cut, or resource semantics; and the CLI makes no network or runtime execution claims.
+-> readiness/architecture-substrate
+-> readiness/cost-resources
+> The CLI is a thin adapter over the library and is not a second semantic authority.
+> CLI input is a canonical or parseable Grimoire description plus explicit analysis inputs; labels and topology never supply resource assumptions.
+> Human-readable and machine-readable output share one result model and stable failure boundary.
+> The CLI remains offline and static; runtime training, sampling, controllers, and network operations are out of scope.
+> The initial command surface is `validate`, `canonicalize`, `evaluate`, `cut`, and `resources`; resource scenarios use an explicit tab-delimited sidecar file.
+> A CLI-produced viewer payload is preferred if the viewer generation gate chooses the generated path; direct opening remains a release requirement.
+@artifact text/rust ./crates/grimoire/src/bin/grimoire.rs
+@artifact text/rust ./crates/grimoire/tests/cli.rs
+---
+[readiness/mcp-detour] Defer the Grimoire MCP adapter (blocked)
+Files: the release posture and public workflow boundary.
+Do: Keep the Grimoire MCP adapter out of this release. Preserve the CLI and library as the only public machine-facing semantics, and keep the local Scry MCP integration private development evidence rather than adding an external service, dependency, configuration, or copied vocabulary to the repository.
+Accept: The release posture names the Grimoire MCP adapter as deferred; the public tree contains no Grimoire MCP adapter or private Scry configuration; the two core workflows remain usable offline through the CLI; and a future adapter has a clear re-entry point after CLI request/result parity is designed.
+-> readiness/cli
+> The Grimoire MCP adapter is deferred from the current release, not a partially implemented core workflow.
+> Any future adapter must reuse explicit description and analysis inputs rather than add a domain vocabulary.
+> The current release remains offline and has no adapter credentials, hidden state, runtime execution, or network semantics.
+> The deferred boundary is checked in release planning rather than by an adapter smoke test.
+> Local Scry MCP is workspace-only development evidence, not a Grimoire runtime dependency or public repository configuration.
+> Re-entry requires a stable CLI request/result contract and parity fixtures, without introducing a second semantic authority.
+---
+[readiness/scry-example] Ground a Scry architecture sample and CLI resource report (reviewing)
+Files: `examples/scry.grimoire`, `examples/scry-resources.tsv`, `crates/grimoire/tests/cli.rs`, and `proposals/resource-flow.md`.
+Do: Add a public, static Grimoire description of Scry's explicit-origin ingestion, slicing, embedding, persistent corpus, query/search, handle verification, neighbours, provenance, and outer MCP transport boundary. Add sourced measurement records and mutually non-fungible resource scenarios for ingestion and search, with explicit workload probabilities and no inferred hardware behavior. Run the description through the existing CLI commands and compare the resource report with the direct library model in an integration fixture.
+Accept: The Scry description validates, canonicalizes, evaluates, and cuts through the CLI; its resource sidecar reports componentwise expected FLOPs, bytes, memory, bandwidth, and latency where authored; scenario assumptions and public source/protocol context are visible; the CLI report agrees with direct `ResourceModel` results; and no Scry dependency, local path, corpus, cache, or MCP configuration enters the tracked Grimoire tree.
+-> readiness/cli
+-> readiness/resource-flow
+> Scry is a public architecture fixture and measurement source, not a Grimoire runtime dependency.
+> Scry's MCP server is an outer transport adapter in the sample; it does not become Grimoire's semantic authority.
+> Measured quantities and workload probabilities remain explicit analysis inputs; component names and topology do not infer resource values.
