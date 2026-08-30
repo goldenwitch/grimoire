@@ -1,7 +1,9 @@
 use grimoire::{
-    Address, Element, ExtensionValue, Schema, Value, evaluate_layer, parse_description,
-    prototype_schemas, validate_description,
+    Element, ExtensionValue, Value, evaluate_layer, parse_description, validate_description,
 };
+
+mod common;
+use common::{address, schemas};
 
 const INDEXED_VISIBILITY: &str = r#"
     grimoire 1.0.0
@@ -146,14 +148,6 @@ const INDEXED_VISIBILITY: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn address(value: &str) -> Address {
-    Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
 
 #[test]
 fn expanded_visibility_fixture_validates() {

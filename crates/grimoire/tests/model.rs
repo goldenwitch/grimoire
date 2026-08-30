@@ -5,9 +5,8 @@ use grimoire::{
     SchemaExprField, Value, Version,
 };
 
-fn address(value: &str) -> Address {
-    Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
+mod common;
+use common::address;
 
 fn namespace(value: &str) -> Namespace {
     Namespace::parse(value).unwrap_or_else(|error| panic!("{error}"))

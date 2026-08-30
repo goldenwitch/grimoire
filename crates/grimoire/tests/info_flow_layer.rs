@@ -1,7 +1,7 @@
-use grimoire::{
-    Address, Element, Schema, evaluate_layer, parse_description, prototype_schemas,
-    validate_description,
-};
+use grimoire::{Element, evaluate_layer, parse_description, validate_description};
+
+mod common;
+use common::{address, schemas};
 
 const INFO_FLOW: &str = r#"
     grimoire 1.0.0
@@ -48,14 +48,6 @@ const INFO_FLOW: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn address(value: &str) -> Address {
-    Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
 
 #[test]
 fn forward_and_backward_views_validate() {

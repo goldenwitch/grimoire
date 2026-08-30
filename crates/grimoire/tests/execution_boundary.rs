@@ -1,7 +1,7 @@
-use grimoire::{
-    Address, CutError, Schema, evaluate_layer, extract_cut, parse_description, prototype_schemas,
-    validate_description,
-};
+use grimoire::{CutError, evaluate_layer, extract_cut, parse_description, validate_description};
+
+mod common;
+use common::{address, schemas};
 
 const EXECUTION_BOUNDARY: &str = r#"
     grimoire 1.0.0
@@ -106,14 +106,6 @@ const EXECUTION_BOUNDARY: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn address(value: &str) -> Address {
-    Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
 
 #[test]
 fn execution_regimes_validate_as_static_metadata() {

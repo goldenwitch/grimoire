@@ -1,0 +1,41 @@
+# Scry implementation facts are carried as measurement/1 decorations in scry.grimoire.
+# Quantities below are explicit analysis inputs, not inferred hardware behavior or runtime traces.
+# The workload probabilities describe mutually exclusive complete cases.
+scenario	cold-ingest	0.20	one origin add with a cold pinned model cache; source: scry embed.rs and architecture.md; protocol: sequential add
+scenario	warm-ingest	0.20	one origin add with the pinned model already cached; source: scry architecture.md; protocol: sequential add
+scenario	indexed-search	0.45	one query against a held corpus with a full store scan and a returned handle; source: scry architecture.md; protocol: query embed then scan
+scenario	context-lookup	0.15	one verified handle widened to neighbours and provenance; source: scry neighbours.rs and provenance.rs; protocol: handle verification before lookup
+flow	cold-ingest	@scry/model-cache-to-passage-embed	@scry/model-cache/output	@scry/passage-embed/model	bytes	133806060
+flow	cold-ingest	@scry/origin-to-fetch	@scry/origin/output	@scry/fetch/input	bytes	8192
+flow	cold-ingest	@scry/fetch-to-slice	@scry/fetch/output	@scry/slice/input	bytes	8192
+flow	cold-ingest	@scry/slice-to-passage-embed	@scry/slice/output	@scry/passage-embed/input	bytes	8192
+flow	cold-ingest	@scry/passage-embed-to-corpus	@scry/passage-embed/output	@scry/corpus/input	bytes	1536
+charge	cold-ingest	@scry/passage-embed	flop-work	1000000
+charge	cold-ingest	@scry/passage-embed	memory-bytes	16384
+charge	cold-ingest	@scry/passage-embed	bandwidth-bytes-per-second	1000000000
+charge	cold-ingest	@scry/fetch	latency-nanoseconds	5000000
+flow	warm-ingest	@scry/origin-to-fetch	@scry/origin/output	@scry/fetch/input	bytes	8192
+flow	warm-ingest	@scry/fetch-to-slice	@scry/fetch/output	@scry/slice/input	bytes	8192
+flow	warm-ingest	@scry/slice-to-passage-embed	@scry/slice/output	@scry/passage-embed/input	bytes	8192
+flow	warm-ingest	@scry/passage-embed-to-corpus	@scry/passage-embed/output	@scry/corpus/input	bytes	1536
+charge	warm-ingest	@scry/passage-embed	flop-work	1000000
+charge	warm-ingest	@scry/passage-embed	memory-bytes	16384
+charge	warm-ingest	@scry/passage-embed	bandwidth-bytes-per-second	1000000000
+charge	warm-ingest	@scry/fetch	latency-nanoseconds	5000000
+flow	indexed-search	@scry/query-to-query-embed	@scry/query/output	@scry/query-embed/input	bytes	512
+flow	indexed-search	@scry/model-cache-to-query-embed	@scry/model-cache/output	@scry/query-embed/model	bytes	133806060
+flow	indexed-search	@scry/query-embed-to-search	@scry/query-embed/output	@scry/search/query	bytes	1536
+flow	indexed-search	@scry/corpus-to-search	@scry/corpus/output	@scry/search/corpus	bytes	1048576
+flow	indexed-search	@scry/search-to-handle	@scry/search/output	@scry/handle/input	bytes	1536
+charge	indexed-search	@scry/query-embed	flop-work	500000
+charge	indexed-search	@scry/search	memory-bytes	1048576
+charge	indexed-search	@scry/search	bandwidth-bytes-per-second	1000000000
+charge	indexed-search	@scry/search	latency-nanoseconds	10000000
+flow	context-lookup	@scry/handle-to-neighbours	@scry/handle/output	@scry/neighbours/input	bytes	3072
+flow	context-lookup	@scry/handle-to-provenance	@scry/handle/output	@scry/provenance/input	bytes	256
+flow	context-lookup	@scry/neighbours-to-mcp	@scry/neighbours/output	@scry/mcp/response	bytes	4096
+flow	context-lookup	@scry/provenance-to-mcp	@scry/provenance/output	@scry/mcp/response	bytes	256
+charge	context-lookup	@scry/neighbours	memory-bytes	4096
+charge	context-lookup	@scry/provenance	memory-bytes	256
+charge	context-lookup	@scry/neighbours	bandwidth-bytes-per-second	100000000
+charge	context-lookup	@scry/provenance	latency-nanoseconds	1000000

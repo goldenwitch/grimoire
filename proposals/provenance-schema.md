@@ -1,7 +1,5 @@
 # Provenance schema
 
-Status: prototype schema checkpoint with open granularity gaps.
-
 This proposal instantiates the citation, assumption, and novelty value used by
 the provenance layer and the architecture case studies. It does not make
 citations or novelty claims part of the frozen core graph.
@@ -23,15 +21,7 @@ structural result.
 
 ## Candidate Contract
 
-Candidate value body:
-
-```text
-product{
-  citations: seq(text),
-  assumptions: seq(text),
-  novelty: enum{novel, existing, adapted, unclassified}
-}
-```
+The `provenance/1` value body is defined in the [schema inventory](./schema-inventory.md).
 
 `citations` and `assumptions` are homogeneous sequences and may be empty. The
 schema does not impose a citation style. A citation may be an arXiv identifier,
@@ -129,7 +119,7 @@ This proposal records these decisions for concrete schema work:
 ### Citation identity
 
 - Binds when: two textual citations should be checked as the same source or a
-  source must be traced to a local Scry handle.
+  source must be traced to a stable source handle.
 - Cost of absence now: text preserves the citation but does not give it a
   machine-stable identity.
 - Candidate shape and rough size: replace or supplement citation text with an

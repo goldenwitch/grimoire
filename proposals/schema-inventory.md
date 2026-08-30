@@ -1,7 +1,5 @@
 # Minimal schema inventory for the case set
 
-Status: prototype inventory checkpoint with open relation gaps.
-
 This document instantiates the closed schema algebra from
 [schema-format.md](./schema-format.md) against the architecture cases in
 [v-jepa-2-case-studies.md](./v-jepa-2-case-studies.md) and
@@ -15,7 +13,7 @@ primitives.
 
 The core authority remains [grimoire.md](../spec/grimoire.md). The schema body
 remains the closed Grimoire-native algebra already recorded in
-[schema-format.md](./schema-format.md). The prototype uses the namespace root
+[schema-format.md](./schema-format.md). The implementation uses the namespace root
 recorded in [extension-namespaces.md](./extension-namespaces.md); public
 ownership and compatibility policy remain publication and future-contract
 decisions.
@@ -42,14 +40,14 @@ concrete grammar exists.
 
 | Schema | Attaches to | Purpose | Required by |
 | --- | --- | --- | --- |
-| `axes/1` | Ports in the current prototype | Names symbolic axes and carries their human description. | All tensor, token, video, speech, and schedule shapes. |
-| `shapes/1` | Ports in the current prototype | Describes ordered dimensions and coarse layout without imposing a paper-specific topology. | Every encoder, tokenizer, latent, action, state, and output interface. |
+| `axes/1` | Ports | Names symbolic axes and carries their human description. | All tensor, token, video, speech, and schedule shapes. |
+| `shapes/1` | Ports | Describes ordered dimensions and coarse layout without imposing a paper-specific topology. | Every encoder, tokenizer, latent, action, state, and output interface. |
 | `architecture/1` | Blocks, ports, and groups | Records model family, scale, operator facts, attention regime, and interface references. | All architecture families, including low-bit variants. |
 | `training/1` | Blocks or groups representing training stages/objectives | Records objective, optimizer, phases, trainable targets, data references, and precision. | Pretraining, fine-tuning, distillation, flow, diffusion, speech, and continual adaptation. |
 | `execution/1` | Predictors, planners, streaming paths, or controllers | Makes the static versus streaming, recurrent, or closed-loop boundary explicit. | Speech systems, world models, planning, and autoregressive generation. |
 | `precision/1` | Operator blocks or relevant ports | Separates weight, activation, accumulation, optimizer-state, and sparsity facts. | BitNet family, quantized deployment, and cost views. |
 | `measurement/1` | The element whose attached value is measured | Carries a literal value, unit, and source record. | Benchmark scores, latency, memory, bandwidth, success rates, and profiled facts. |
-| `provenance/1` | Groups in the current prototype | Carries citations, assumptions, and novelty state. | Every architecture comparison and the provenance layer. |
+| `provenance/1` | Groups | Carries citations, assumptions, and novelty state. | Every architecture comparison and the provenance layer. |
 | `lineage/1` | A model block or future parameter-state artifact | Records parameter-state ancestry and merge operation without pretending it is activation flow. | DARE, TIES-Merging, continual adaptation, and checkpoint reproducibility. |
 | `placement/1` | Description, block, port, connection, or group | Records the authored deployment location of an addressed element. | Placement and bandwidth views, distributed bridges, and low-bit deployment variants. |
 
@@ -76,6 +74,10 @@ fact look like an ordinary scalar decoration and would obscure branching and
 joint-information semantics.
 
 ## Schema Bodies
+
+These are the single prose value bodies for the registry families. The
+specialized schema proposals explain rationale, attachment rules, fixtures,
+and open boundaries without repeating these definitions.
 
 ### `axes/1`
 
@@ -405,7 +407,7 @@ structural account.
 
 ### Axis anchoring beyond ports
 
-- Prototype status: the first shape fixture anchors an axis declaration on the
+- Implementation boundary: the first shape fixture anchors an axis declaration on the
   port that owns the dimension, and the validator checks its address and
   visibility.
 - Remaining gap: a group-level anchor is not available when several ports share
@@ -417,7 +419,7 @@ structural account.
 
 ### Parameter updates
 
-- Prototype status: the V-JEPA 2 fixture exercises an EMA target encoder,
+- Implementation boundary: the V-JEPA 2 fixture exercises an EMA target encoder,
   frozen targets, and activation connections while keeping the parameter
   relationship outside activation flow.
 - Remaining gap: EMA, freeze, fine-tune, or delta application is not checked as
@@ -430,7 +432,7 @@ structural account.
 
 ### Indexed visibility
 
-- Prototype status: the indexed-visibility fixture expands two time steps and
+- Implementation boundary: the indexed-visibility fixture expands two time steps and
   two modalities into ordinary addressed connections; block-causal and mixed
   sets are distinct and validated.
 - Remaining gap: compact indexed syntax is not part of the grammar, so larger
@@ -442,11 +444,11 @@ structural account.
 
 ### Symbolic cost values
 
-- Prototype status: host-side `CostExpression` and placement helpers evaluate
+- Implementation boundary: host-side `CostExpression` and placement helpers evaluate
   explicit constants, addressed axes, sums, products, and tensor byte sizes
   with caller-supplied inputs.
 - Remaining gap: symbolic arithmetic has no text-grammar or finalized-value
-  representation, so the current API is an analysis boundary rather than a
+  representation, so the implementation API is an analysis boundary rather than a
   projection syntax.
 - Candidate shape: projection-language symbolic arithmetic over shape values,
   with a schema-governed result; do not add arithmetic constructors to the
@@ -456,7 +458,7 @@ structural account.
 
 ### Parameter-state elements
 
-- Prototype status: the lineage fixture carries base, delta, operation, and
+- Implementation boundary: the lineage fixture carries base, delta, operation, and
   result references as a bounded `lineage/1` value and keeps them out of
   activation connections.
 - Remaining gap: a reproducibility cut cannot yet contain parameter states,

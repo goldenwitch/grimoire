@@ -1,7 +1,5 @@
 # Cost layer
 
-Status: prototype contract; host-side implementation checkpoint with open grammar gaps.
-
 This proposal records the smallest symbolic cost view needed by the observed
 architecture papers. It evaluates authored expressions over explicit axis
 bindings and aggregates priced members through addressed groups. It does not
@@ -15,7 +13,7 @@ the observed cases in [frontier-architecture-case-studies.md](./frontier-archite
 
 ## Expression algebra
 
-The first Rust prototype exposes four constructors:
+The implementation exposes four constructors:
 
 ```text
 constant(n)
@@ -30,9 +28,9 @@ arithmetic is checked and overflow is an error. The expression result is a
 unitless authored cost until the caller names its interpretation, such as
 multiply-add count or a symbolic proxy for memory traffic.
 
-The prototype intentionally keeps this algebra separate from the current text
+The implementation intentionally keeps this algebra separate from the text
 grammar. Adding symbolic expressions to projection syntax would require a
-separate grammar and value contract; the current API is a reversible analysis
+separate grammar and value contract; the API is a reversible analysis
 boundary over an evaluated static reprojection.
 
 ## Group aggregation

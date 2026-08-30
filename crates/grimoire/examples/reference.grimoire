@@ -1,0 +1,67 @@
+grimoire 1.0.0
+description @example "Costed architecture substrate" {
+    core-spec 1.0.0;
+    core {
+        block @example/input "Input" {
+            port @example/input/output;
+        }
+        block @example/encoder "Encoder" {
+            port @example/encoder/input;
+            port @example/encoder/output extensions {
+                extension "https://github.com/goldenwitch/grimoire/extension/shapes" shape schema shapes @1.0.0 = {
+                    layout: vector,
+                    dimensions: [literal(4)]
+                };
+            };
+        }
+        block @example/head "Head" {
+            port @example/head/input;
+        }
+        connection @example/input-to-encoder @example/input/output -> @example/encoder/input;
+        connection @example/encoder-to-head @example/encoder/output -> @example/head/input;
+        group @example/model "Model" {
+            @example/input,
+            @example/encoder,
+            @example/head,
+            @example/input-to-encoder,
+            @example/encoder-to-head;
+        }
+    }
+    layer "architecture" {
+        inputs { core };
+        consumes { projection-language 1.0.0; schemas { } }
+        projection {
+            select { use @example/model; }
+        }
+    }
+    layer "deployment" {
+        inputs { core };
+        consumes {
+            projection-language 1.0.0;
+            schemas {
+                "https://github.com/goldenwitch/grimoire/extension/placement" / placement @1.0.0;
+                "https://github.com/goldenwitch/grimoire/extension/shapes" / shapes @1.0.0;
+            }
+        }
+        projection {
+            select {
+                use @example/encoder,
+                    @example/encoder/output,
+                    @example/head,
+                    @example/head/input,
+                    @example/encoder-to-head;
+            }
+            decorate {
+                on @example/encoder extension "https://github.com/goldenwitch/grimoire/extension/placement" placement schema placement @1.0.0 = { location: "gpu-0" };
+                on @example/head extension "https://github.com/goldenwitch/grimoire/extension/placement" placement schema placement @1.0.0 = { location: "gpu-1" };
+            }
+        }
+    }
+    layer "cost" {
+        inputs { core };
+        consumes { projection-language 1.0.0; schemas { } }
+        projection {
+            select { use @example/model; }
+        }
+    }
+}

@@ -1,7 +1,9 @@
 use grimoire::{
-    CutError, Schema, extract_cut, parse_description, prototype_schemas, serialize_description,
-    validate_description,
+    CutError, extract_cut, parse_description, serialize_description, validate_description,
 };
+
+mod common;
+use common::schemas;
 
 const DESCRIPTION: &str = r#"
     grimoire 1.0.0
@@ -22,10 +24,6 @@ const DESCRIPTION: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 #[test]
 fn downward_closed_cut_extracts_and_revalidates() {

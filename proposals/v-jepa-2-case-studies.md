@@ -1,7 +1,5 @@
 # V-JEPA 2 architecture case studies
 
-Status: empirical case study; prototype checkpoint with open gaps.
-
 This document is a consumption exercise for Grimoire. It asks whether the
 language can represent the structures and training views of V-JEPA 2 without
 turning the paper's vocabulary, metrics, or implementation choices into
@@ -33,7 +31,7 @@ The paper's relevant sections are:
 
 Facts in this document are marked as observations in prose. Address labels and
 site placements are proposed case-study choices unless the executable fixtures
-settle them. The repository now contains serialized prototype descriptions for
+settle them. The repository contains serialized descriptions for
 the represented subset; this case study remains the empirical account and does
 not silently turn uncovered runtime or parameter relations into syntax.
 
@@ -394,7 +392,7 @@ not infer information quantities from architecture topology or training prose.
 
 ### Parameter update and freeze relations beyond values
 
-- Prototype status: the V-JEPA 2 fixture represents EMA targets, frozen
+- Implementation boundary: the V-JEPA 2 fixture represents EMA targets, frozen
   targets, and activation connections while keeping the parameter relationship
   outside activation flow.
 - Remaining gap: the distinction between data flow and parameter-update
@@ -420,7 +418,7 @@ not infer information quantities from architecture topology or training prose.
 
 ### Static descriptions of runtime planning
 
-- Prototype status: the reference description includes a planning layer and a
+- Implementation boundary: the reference description includes a planning layer and a
   closed-loop execution value while keeping controller execution external.
 - Remaining gap: the architecture can be recorded, but Grimoire does not
   represent or evaluate the deployed controller, CEM, or receding-horizon run.
@@ -431,7 +429,7 @@ not infer information quantities from architecture topology or training prose.
 
 ### Schemas for model and robot facts
 
-- Prototype status: the reference fixtures validate axes, shapes, architecture,
+- Implementation boundary: the reference fixtures validate axes, shapes, architecture,
   training, execution, measurement, provenance, placement, precision, and
   lineage values through the shared registry.
 - Remaining gap: paper-specific topology, parameter relations, and richer
@@ -441,9 +439,9 @@ not infer information quantities from architecture topology or training prose.
 - Entry trigger: a concrete case requires a fact outside the current closed
   schema algebra.
 
-## Executable Representability Checkpoint
+## Executable Representability
 
-The current Rust fixture in
+The Rust fixture in
 [`information_targets.rs`](../crates/grimoire/tests/information_targets.rs)
 exercises this boundary with one shared encoder, local pretraining target and
 mask participants, a distinct pretraining predictor, a distinct
@@ -458,7 +456,7 @@ Those kernels demonstrate the claim interface only; they are not estimates of
 the continuous neural channels in the paper. A real estimate still needs an
 explicit estimator, data protocol, uncertainty record, and source distribution.
 
-## Current Consumption Checkpoint
+## Consumption Coverage
 
 The downstream consumer surface now lives in the whole-system reference
 fixture: anticipation, VidQA, planning, hyperparameters, provenance, placement,

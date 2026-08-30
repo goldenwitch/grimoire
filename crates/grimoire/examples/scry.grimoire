@@ -1,0 +1,203 @@
+grimoire 1.0.0
+description @scry "Persistent semantic corpus architecture" {
+    core-spec 1.0.0;
+    core {
+        block @scry/mcp "MCP transport adapter" {
+            port @scry/mcp/request;
+            port @scry/mcp/response;
+        }
+        block @scry/origin "Explicit origin" {
+            port @scry/origin/input;
+            port @scry/origin/output;
+        }
+        block @scry/fetch "Text fetch" {
+            port @scry/fetch/input;
+            port @scry/fetch/output;
+            extensions {
+                extension "https://github.com/goldenwitch/grimoire/extension/measurement" source-read-cap schema measurement @1.0.0 = {
+                    value: integer(67108864),
+                    unit: "bytes",
+                    source: {
+                        origin: "https://github.com/goldenwitch/scry/blob/main/crates/scry/src/fetch.rs",
+                        locator: present("64 MiB per-origin read cap"),
+                        protocol: present("implementation bound; not an observed payload")
+                    }
+                };
+            }
+        }
+        block @scry/slice "Token window slicer" {
+            port @scry/slice/input;
+            port @scry/slice/output;
+            extensions {
+                extension "https://github.com/goldenwitch/grimoire/extension/measurement" window-size schema measurement @1.0.0 = {
+                    value: integer(256),
+                    unit: "tokens",
+                    source: {
+                        origin: "https://github.com/goldenwitch/scry/blob/main/crates/scry/src/slice.rs",
+                        locator: present("WINDOW constant"),
+                        protocol: present("fixed token window; no sentence or paragraph boundary rule")
+                    }
+                };
+            }
+        }
+        block @scry/model-cache "Pinned embedding model cache" {
+            port @scry/model-cache/output;
+            extensions {
+                extension "https://github.com/goldenwitch/grimoire/extension/measurement" pinned-model-assets schema measurement @1.0.0 = {
+                    value: integer(133806060),
+                    unit: "bytes",
+                    source: {
+                        origin: "https://github.com/goldenwitch/scry/blob/main/crates/scry/src/embed.rs",
+                        locator: present("pinned ONNX, tokenizer, and configuration file constants"),
+                        protocol: present("sum of declared file sizes at the pinned model revision")
+                    }
+                };
+            }
+        }
+        block @scry/passage-embed "Passage embedding" {
+            port @scry/passage-embed/input;
+            port @scry/passage-embed/model;
+            port @scry/passage-embed/output;
+            extensions {
+                extension "https://github.com/goldenwitch/grimoire/extension/measurement" vector-dimension schema measurement @1.0.0 = {
+                    value: integer(384),
+                    unit: "dimensions",
+                    source: {
+                        origin: "https://github.com/goldenwitch/scry/blob/main/crates/scry/src/embed.rs",
+                        locator: present("DIMENSION constant"),
+                        protocol: present("pinned bge-small-en-v1.5 embedding shape")
+                    }
+                };
+            }
+        }
+        block @scry/corpus "Persistent redb corpus" {
+            port @scry/corpus/input;
+            port @scry/corpus/query;
+            port @scry/corpus/output;
+        }
+        block @scry/query "Search query" {
+            port @scry/query/input;
+            port @scry/query/output;
+        }
+        block @scry/query-embed "Query embedding" {
+            port @scry/query-embed/input;
+            port @scry/query-embed/model;
+            port @scry/query-embed/output;
+        }
+        block @scry/search "Corpus search" {
+            port @scry/search/query;
+            port @scry/search/corpus;
+            port @scry/search/output;
+            extensions {
+                extension "https://github.com/goldenwitch/grimoire/extension/measurement" corpus-scan schema measurement @1.0.0 = {
+                    value: integer(1),
+                    unit: "full-corpus-scans-per-search",
+                    source: {
+                        origin: "https://github.com/goldenwitch/scry/blob/main/docs/product-planning/architecture.md",
+                        locator: present("Flows: search"),
+                        protocol: present("one store scan for each search operation")
+                    }
+                };
+            }
+        }
+        block @scry/handle "Verified passage handle" {
+            port @scry/handle/input;
+            port @scry/handle/output;
+        }
+        block @scry/neighbours "Neighbour passages" {
+            port @scry/neighbours/input;
+            port @scry/neighbours/output;
+        }
+        block @scry/provenance "Passage provenance" {
+            port @scry/provenance/input;
+            port @scry/provenance/output;
+        }
+        connection @scry/mcp-request-to-origin @scry/mcp/request -> @scry/origin/input;
+        connection @scry/mcp-request-to-query @scry/mcp/request -> @scry/query/input;
+        connection @scry/origin-to-fetch @scry/origin/output -> @scry/fetch/input;
+        connection @scry/fetch-to-slice @scry/fetch/output -> @scry/slice/input;
+        connection @scry/slice-to-passage-embed @scry/slice/output -> @scry/passage-embed/input;
+        connection @scry/model-cache-to-passage-embed @scry/model-cache/output -> @scry/passage-embed/model;
+        connection @scry/passage-embed-to-corpus @scry/passage-embed/output -> @scry/corpus/input;
+        connection @scry/query-to-query-embed @scry/query/output -> @scry/query-embed/input;
+        connection @scry/model-cache-to-query-embed @scry/model-cache/output -> @scry/query-embed/model;
+        connection @scry/query-embed-to-search @scry/query-embed/output -> @scry/search/query;
+        connection @scry/corpus-to-search @scry/corpus/output -> @scry/search/corpus;
+        connection @scry/search-to-handle @scry/search/output -> @scry/handle/input;
+        connection @scry/handle-to-neighbours @scry/handle/output -> @scry/neighbours/input;
+        connection @scry/handle-to-provenance @scry/handle/output -> @scry/provenance/input;
+        connection @scry/handle-to-mcp @scry/handle/output -> @scry/mcp/response;
+        connection @scry/neighbours-to-mcp @scry/neighbours/output -> @scry/mcp/response;
+        connection @scry/provenance-to-mcp @scry/provenance/output -> @scry/mcp/response;
+        group @scry/system "Scry corpus and outer MCP transport" {
+            @scry/mcp,
+            @scry/origin,
+            @scry/fetch,
+            @scry/slice,
+            @scry/model-cache,
+            @scry/passage-embed,
+            @scry/corpus,
+            @scry/query,
+            @scry/query-embed,
+            @scry/search,
+            @scry/handle,
+            @scry/neighbours,
+            @scry/provenance,
+            @scry/mcp-request-to-origin,
+            @scry/mcp-request-to-query,
+            @scry/origin-to-fetch,
+            @scry/fetch-to-slice,
+            @scry/slice-to-passage-embed,
+            @scry/model-cache-to-passage-embed,
+            @scry/passage-embed-to-corpus,
+            @scry/query-to-query-embed,
+            @scry/model-cache-to-query-embed,
+            @scry/query-embed-to-search,
+            @scry/corpus-to-search,
+            @scry/search-to-handle,
+            @scry/handle-to-neighbours,
+            @scry/handle-to-provenance,
+            @scry/handle-to-mcp,
+            @scry/neighbours-to-mcp,
+            @scry/provenance-to-mcp;
+        }
+    }
+    layer "architecture" {
+        inputs { core };
+        consumes {
+            projection-language 1.0.0;
+            schemas {
+                "https://github.com/goldenwitch/grimoire/extension/measurement" / measurement @1.0.0;
+            }
+        }
+        projection {
+            select { use @scry/system; }
+        }
+    }
+    layer "deployment" {
+        inputs { core };
+        consumes {
+            projection-language 1.0.0;
+            schemas {
+                "https://github.com/goldenwitch/grimoire/extension/measurement" / measurement @1.0.0;
+            }
+        }
+        projection {
+            select {
+                use @scry/system;
+            }
+        }
+    }
+    layer "cost" {
+        inputs { core };
+        consumes {
+            projection-language 1.0.0;
+            schemas {
+                "https://github.com/goldenwitch/grimoire/extension/measurement" / measurement @1.0.0;
+            }
+        }
+        projection {
+            select { use @scry/system; }
+        }
+    }
+}

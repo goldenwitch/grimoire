@@ -1,4 +1,7 @@
-use grimoire::{Schema, parse_description, prototype_schemas, validate_description};
+use grimoire::{parse_description, validate_description};
+
+mod common;
+use common::schemas;
 
 const REFERENCE_CORE: &str = r#"
     grimoire 1.0.0
@@ -115,10 +118,6 @@ const REFERENCE_CORE: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 #[test]
 fn parses_the_shared_reference_core() {

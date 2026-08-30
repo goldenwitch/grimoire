@@ -1,7 +1,10 @@
 use grimoire::{
-    Element, ExtensionValue, Placement, Schema, evaluate_layer, parse_description,
-    prototype_schemas, serialize_description, validate_description,
+    Element, ExtensionValue, Placement, evaluate_layer, parse_description, serialize_description,
+    validate_description,
 };
+
+mod common;
+use common::{address, schemas};
 
 const FAUXLDEN_RETRIEVER: &str = r#"
     grimoire 1.0.0
@@ -212,14 +215,6 @@ const FAUXLDEN_RETRIEVER: &str = r#"
         }
     }
 "#;
-
-fn address(value: &str) -> grimoire::Address {
-    grimoire::Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 fn parsed() -> grimoire::Description {
     parse_description(FAUXLDEN_RETRIEVER).unwrap_or_else(|error| panic!("{error}"))

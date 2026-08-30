@@ -7,8 +7,6 @@ use crate::{
     SchemaUse, SelectItem, Value, Version,
 };
 
-const PROTOTYPE_NAMESPACE_ROOT: &str = "https://github.com/goldenwitch/grimoire/extension";
-
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ParseError {
     pub offset: usize,
@@ -1096,11 +1094,7 @@ fn is_identifier(value: &str) -> bool {
 }
 
 fn is_known_namespace(namespace: &Namespace) -> bool {
-    namespace.as_str() == PROTOTYPE_NAMESPACE_ROOT
-        || namespace
-            .as_str()
-            .strip_prefix(PROTOTYPE_NAMESPACE_ROOT)
-            .is_some_and(|rest| rest.starts_with('/'))
+    crate::schemas::is_prototype_namespace(namespace)
 }
 
 fn ensure_unique_addresses(description: &Description) -> Result<(), ParseError> {

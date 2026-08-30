@@ -1,7 +1,5 @@
 # Static execution boundary
 
-Status: prototype boundary checkpoint with open runtime gaps.
-
 This proposal defines the static account for execution regimes found in the
 indexed architecture cases. It is deliberately a boundary document: it says
 what a Grimoire description can represent and what remains an external
@@ -35,16 +33,7 @@ run the model.
 
 ## Candidate Contract
 
-Candidate `execution/1` value body:
-
-```text
-product{
-  regime: enum{static, streaming, recurrent, closed-loop},
-  horizon: optional(positive-int),
-  rate: optional(finite-number),
-  external_consumer: enum{yes, no}
-}
-```
+The `execution/1` value body is defined in the [schema inventory](./schema-inventory.md).
 
 `regime` is required. `horizon` records a finite context or planning horizon
 when the paper or deployment protocol gives one. `rate` records a frame,
@@ -245,7 +234,7 @@ This proposal records these decisions:
 
 ### State-transition relation
 
-- Prototype status: the recurrent fixture distinguishes an explicit state
+- Implementation boundary: the recurrent fixture distinguishes an explicit state
   feedback connection from an `execution/1` regime value and keeps runtime
   progression external.
 - Remaining gap: the validator does not check a state-transition relation

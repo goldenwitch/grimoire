@@ -1,11 +1,7 @@
-use grimoire::{
-    Address, ElementKind, ExtensionParameter, ExtensionValue, Schema, Value, Version,
-    prototype_schemas,
-};
+use grimoire::{Address, ElementKind, ExtensionParameter, ExtensionValue, Schema, Value, Version};
 
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
+mod common;
+use common::schemas;
 
 fn schema<'schemas>(schemas: &'schemas [Schema], name: &str) -> &'schemas Schema {
     schemas

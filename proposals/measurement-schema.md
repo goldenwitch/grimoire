@@ -1,7 +1,5 @@
 # Measurement schema
 
-Status: prototype schema checkpoint with open unit-domain gaps.
-
 This proposal instantiates the sourced-literal part of the minimal schema
 inventory. It is for values measured outside the description, such as benchmark
 scores, latency, memory, bandwidth, or robot success rates. It does not define
@@ -24,22 +22,7 @@ spelled alike.
 
 ## Candidate Contract
 
-Candidate value body:
-
-```text
-product{
-  value: alt{
-    integer: positive-int,
-    number: finite-number
-  },
-  unit: text,
-  source: product{
-    origin: text,
-    locator: optional(text),
-    protocol: optional(text)
-  }
-}
-```
+The `measurement/1` value body is defined in the [schema inventory](./schema-inventory.md).
 
 `origin` is a required text field. It may be a paper URI, repository path,
 experiment record, or other source identifier. `locator` names a section,
@@ -70,7 +53,7 @@ The indexed papers provide several measurement classes:
 - robot distance-to-goal and manipulation success.
 
 A measurement attaches to the description, block, port, connection, or group
-whose value it describes in the current prototype. A measured result does not
+whose value it describes in the implementation. A measured result does not
 define a new block and cannot change structural selection.
 
 ## Relationship to Shannon channel claims

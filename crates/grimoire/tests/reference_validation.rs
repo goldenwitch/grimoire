@@ -1,10 +1,12 @@
 use std::collections::BTreeMap;
 
 use grimoire::{
-    Address, CostExpression, CostModel, CutError, Placement, Schema, ShapeDimension, TensorShape,
-    bytes_on_wire, evaluate_layer, extract_cut, parse_description, prototype_schemas,
-    serialize_description, validate_description,
+    CostExpression, CostModel, CutError, Placement, ShapeDimension, TensorShape, bytes_on_wire,
+    evaluate_layer, extract_cut, parse_description, serialize_description, validate_description,
 };
+
+mod common;
+use common::{address, schemas};
 
 const REFERENCE_DESCRIPTION: &str = r#"
     grimoire 1.0.0
@@ -507,14 +509,6 @@ const REFERENCE_DESCRIPTION: &str = r#"
         }
     }
 "#;
-
-fn address(value: &str) -> Address {
-    Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 fn parsed() -> grimoire::Description {
     parse_description(REFERENCE_DESCRIPTION).unwrap_or_else(|error| panic!("{error}"))

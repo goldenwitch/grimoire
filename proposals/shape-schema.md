@@ -1,7 +1,5 @@
 # Shapes schema
 
-Status: prototype schema checkpoint with open topology gaps.
-
 This proposal instantiates the tensor and token shape contract for the indexed
 architecture cases. It depends on [axes-schema.md](./axes-schema.md),
 [schema-format.md](./schema-format.md), and
@@ -13,19 +11,7 @@ name.
 
 ## Candidate Contract
 
-Candidate value body:
-
-```text
-product{
-  layout: enum{scalar, vector, sequence, grid, volume},
-  dimensions: seq(
-    alt{
-      literal: positive-int,
-      symbolic: ref(address)
-    }
-  )
-}
-```
+The `shapes/1` value body is defined in the [schema inventory](./schema-inventory.md).
 
 `dimensions` is ordered. A literal dimension is a positive integer. A symbolic
 dimension is a first-class address reference to an axis declaration. A shape

@@ -1,9 +1,11 @@
 use std::collections::BTreeMap;
 
 use grimoire::{
-    Address, CostError, CostExpression, CostModel, Schema, evaluate_layer, parse_description,
-    prototype_schemas, validate_description,
+    CostError, CostExpression, CostModel, evaluate_layer, parse_description, validate_description,
 };
+
+mod common;
+use common::{address, schemas};
 
 const COST_DESCRIPTION: &str = r#"
     grimoire 1.0.0
@@ -22,14 +24,6 @@ const COST_DESCRIPTION: &str = r#"
         }
     }
 "#;
-
-fn address(value: &str) -> Address {
-    Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 #[test]
 fn symbolic_cost_evaluates_from_explicit_axis_bindings() {

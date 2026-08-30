@@ -8,6 +8,7 @@ mod namespace;
 mod parser;
 mod placement;
 mod projection;
+mod resource;
 mod schema;
 mod schemas;
 mod validate;
@@ -40,6 +41,10 @@ pub use placement::{
 pub use projection::{
     Check, Decoration, ExpectedCardinality, Layer, LayerFile, LayerInput, Projection, SchemaUse,
     SelectItem,
+};
+pub use resource::{
+    ResourceBundle, ResourceCharge, ResourceError, ResourceEstimate, ResourceFlow, ResourceKind,
+    ResourceModel, ResourceReport, ResourceScenario,
 };
 pub use schema::{ElementKind, Schema, SchemaError, SchemaExpr, SchemaExprArm, SchemaExprField};
 mod serialize;

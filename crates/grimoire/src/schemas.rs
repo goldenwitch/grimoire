@@ -7,6 +7,14 @@ use crate::{
 
 pub const PROTOTYPE_NAMESPACE_ROOT: &str = "https://github.com/goldenwitch/grimoire/extension";
 
+pub(crate) fn is_prototype_namespace(namespace: &Namespace) -> bool {
+    namespace.as_str() == PROTOTYPE_NAMESPACE_ROOT
+        || namespace
+            .as_str()
+            .strip_prefix(PROTOTYPE_NAMESPACE_ROOT)
+            .is_some_and(|rest| rest.starts_with('/'))
+}
+
 pub fn prototype_schemas() -> Result<Vec<Schema>, NamespaceError> {
     let version = Version::new(1, 0, 0);
     Ok(vec![
@@ -234,6 +242,16 @@ pub fn prototype_schemas() -> Result<Vec<Schema>, NamespaceError> {
             ]),
         },
     ])
+}
+
+pub(crate) fn prototype_schema(
+    namespace: &Namespace,
+    name: &str,
+    version: Version,
+) -> Option<Schema> {
+    prototype_schemas().ok()?.into_iter().find(|schema| {
+        schema.namespace == *namespace && schema.name == name && schema.version == version
+    })
 }
 
 fn namespace(name: &str) -> Result<Namespace, NamespaceError> {

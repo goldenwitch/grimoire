@@ -1,39 +1,10 @@
 use grimoire::{
-    Channel, ChannelGraph, ChannelLink, ChannelNode, ClaimEstimate, Distribution, InformationError,
-    JointSource, evaluate_layer, parse_description, prototype_schemas, validate_description,
+    Channel, ChannelGraph, ClaimEstimate, Distribution, InformationError, JointSource,
+    evaluate_layer, parse_description, validate_description,
 };
 
-fn address(value: &str) -> grimoire::Address {
-    grimoire::Address::parse(value).unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn binary_source() -> Distribution {
-    Distribution::uniform(2).unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn node(
-    address_value: &str,
-    block: &str,
-    input_ports: &[&str],
-    output_port: &str,
-    channel: Channel,
-) -> ChannelNode {
-    ChannelNode::new(
-        address(address_value),
-        address(block),
-        input_ports.iter().map(|value| address(value)).collect(),
-        address(output_port),
-        channel,
-    )
-    .unwrap_or_else(|error| panic!("{error}"))
-}
-
-fn link(source: &str, destination: &str) -> ChannelLink {
-    ChannelLink {
-        source: address(source),
-        destination: address(destination),
-    }
-}
+mod common;
+use common::{address, binary_source, link, node, schemas};
 
 const DESCRIPTION: &str = r#"
     grimoire 1.0.0
@@ -98,11 +69,8 @@ fn addressed_dag_composes_channels_to_a_terminal() {
 #[test]
 fn evaluated_grimoire_reprojection_supplies_channel_wiring() {
     let description = parse_description(DESCRIPTION).unwrap_or_else(|error| panic!("{error}"));
-    validate_description(
-        &description,
-        &prototype_schemas().unwrap_or_else(|error| panic!("{error}")),
-    )
-    .unwrap_or_else(|errors| panic!("validation errors: {errors:?}"));
+    validate_description(&description, &schemas())
+        .unwrap_or_else(|errors| panic!("validation errors: {errors:?}"));
     let reprojection = evaluate_layer(&description, "forward")
         .unwrap_or_else(|error| panic!("{error}"))
         .structural;

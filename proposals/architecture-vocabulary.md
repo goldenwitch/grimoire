@@ -1,17 +1,15 @@
 # Architecture vocabulary and decisions
 
-Status: prototype contract; implementation checkpoint with open gaps.
-
 This ledger records how the architecture terms found in the indexed papers map
 to the existing Grimoire vocabulary. It is deliberately conservative: a paper
 term becomes a new Grimoire vocabulary term only when the existing primitives
-cannot represent its identity, scope, or structural relation. The current
-prototype and its fixtures cover the settled mappings below; the remaining
+cannot represent its identity, scope, or structural relation. The implementation
+and its fixtures cover the settled mappings below; the remaining
 parameter-state questions are kept as explicit gaps.
 
 The core specification remains frozen in [grimoire.md](../spec/grimoire.md).
 This document does not change that vocabulary. It records the mappings used by
-the prototype and identifies decisions that still need a future contract.
+the implementation and identifies decisions that still need a future contract.
 
 ## Existing Vocabulary Is Enough for Most Architecture
 
@@ -38,12 +36,11 @@ a downstream layer references the learned pretraining predictor's masking
 interface. The description must make that choice visible; the validator must not
 infer it from a name.
 
-## Prototype Decisions
+## Implementation Decisions
 
-The first executable prototype makes three deliberately reversible choices:
+The implementation makes three deliberately bounded choices:
 
-- Rust 2024 is the implementation language, using Cargo and the installed Rust
-	1.94 toolchain.
+- Rust 2024 is the implementation language, using Cargo.
 - Indexed modality, time, and block-causal visibility expands into ordinary
 	addressed elements and directed connections before validation. No compact
 	indexed grammar is introduced yet.

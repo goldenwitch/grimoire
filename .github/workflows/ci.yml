@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.94.0
+        with:
+          components: rustfmt, clippy
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+      - name: Run tests
+        run: cargo test --workspace --locked
+      - name: Check locked metadata
+        run: cargo metadata --locked --no-deps
+      - name: Check package
+        run: cargo check -p grimoire --locked
+      - name: Verify package archive
+        run: cargo package -p grimoire --locked
+      - name: Test packaged crate
+        shell: bash
+        run: |
+          archive="$(find target/package -maxdepth 1 -name 'grimoire-*.crate' -print -quit)"
+          test -n "$archive"
+          mkdir -p target/package/extracted
+          tar -xzf "$archive" -C target/package/extracted
+          manifest="$(find target/package/extracted -mindepth 2 -maxdepth 2 -name Cargo.toml -print -quit)"
+          test -n "$manifest"
+          package_root="$(dirname "$manifest")"
+          ! grep -Eq 'crates/grimoire|\.\./' "$package_root/README.md"
+          grep -q 'examples/reference.grimoire' "$package_root/README.md"
+          cargo test --manifest-path "$manifest" --locked

@@ -1,8 +1,7 @@
-use grimoire::{Schema, parse_description, prototype_schemas, validate_description};
+use grimoire::{parse_description, validate_description};
 
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
+mod common;
+use common::schemas;
 
 fn errors(source: &str) -> Vec<String> {
     let description = parse_description(source).unwrap_or_else(|error| panic!("{error}"));

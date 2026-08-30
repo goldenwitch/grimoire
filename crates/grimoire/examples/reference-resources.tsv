@@ -1,0 +1,8 @@
+# Explicit resource events for reference.grimoire
+scenario	indexed-hit	0.75	query resolves in the index
+scenario	fallback-scan	0.25	query misses the index
+flow	indexed-hit	@example/encoder-to-head	@example/encoder/output	@example/head/input	bytes	4096
+flow	fallback-scan	@example/encoder-to-head	@example/encoder/output	@example/head/input	bytes	2048
+charge	indexed-hit	@example/encoder	flop-work	1000000
+charge	fallback-scan	@example/encoder	flop-work	2000000
+charge	indexed-hit	@example/encoder	memory-bytes	8192

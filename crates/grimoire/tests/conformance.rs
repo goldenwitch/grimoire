@@ -1,7 +1,9 @@
 use grimoire::{
-    CutError, Schema, extract_cut, parse_description, prototype_schemas, serialize_description,
-    validate_description,
+    CutError, extract_cut, parse_description, serialize_description, validate_description,
 };
+
+mod common;
+use common::schemas;
 
 const VALID_DESCRIPTION: &str = r#"
     grimoire 1.0.0
@@ -28,10 +30,6 @@ const VALID_DESCRIPTION: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 #[test]
 fn valid_reference_fixture_composes_parse_validate_serialize_and_cut() {

@@ -1,8 +1,5 @@
 # Grimoire concrete grammar
 
-Status: draft for grammar/review; the executable prototype implements the
-currently reviewed subset.
-
 This document is the candidate concrete grammar for the Grimoire description
 format. The normative semantic source is [grimoire.md](../spec/grimoire.md).
 The schema-body decisions are in [schema-format.md](../proposals/schema-format.md)
@@ -12,9 +9,9 @@ are in [projection-language.md](../proposals/projection-language.md).
 
 The grammar is written as EBNF plus semantic constraints. A production is not a
 new semantic requirement: it is a spelling for a requirement already present in
-the source documents. The prototype implements the currently reviewed subset;
-the review boundaries below distinguish remaining formal decisions from
-behavior already covered by executable fixtures.
+the source documents. The implementation covers the reviewed subset; the
+review boundaries below distinguish remaining formal decisions from behavior
+already covered by executable fixtures.
 
 ## Design Boundary
 
@@ -171,9 +168,9 @@ the core graph and other layers; duplicate inputs are invalid. The input graph
 must be a DAG and every named layer must exist.
 
 The `core-spec` value is declared by the enclosing description. The
-`projection-language` value is the version of the sibling projection language
+`projection-language` value is the version of the companion projection language
 consumed by the layer. Schema uses name a namespace URI, local schema name, and
-schema version. The prototype uses the `/` and `@` separators shown in
+schema version. The implementation uses the `/` and `@` separators shown in
 `schema-use`. URI lexical rules and schema-version compatibility remain formal
 review boundaries.
 
@@ -204,7 +201,8 @@ extension block. A layer is not an element, so the bundled layer wrapper does
 not acquire extension parameters through this production.
 
 The namespace URI is an exact identifier. It is validated as an absolute
-`https` URI by the namespace rule, but it is not dereferenced. In the prototype,
+`https` URI by the namespace rule, but it is not dereferenced. In the
+implementation,
 the string payload must begin with `https://`, contain a nonempty authority,
 and contain no whitespace or control characters. Schema name and version are
 subordinate to the namespace and are not global names.
@@ -217,7 +215,7 @@ insignificant whitespace inside the span. This opaque-span exception is the
 only place where canonical serialization retains source formatting; it is a
 parser and serializer obligation in addition to the grammar production.
 
-The prototype preserves an unknown parameter from its first `extension`
+The implementation preserves an unknown parameter from its first `extension`
 keyword through its terminating semicolon, including all bytes between them.
 That raw span is the canonicalization exception; recognized values continue to
 use canonical serialization.
@@ -403,14 +401,14 @@ The bootstrap schema is represented by the same productions. The validator
 loads the bootstrap contract before validating ordinary schema documents; it
 does not invoke a second schema language.
 
-The prototype binds `finite-scalar` to the closed boolean values `true` and
+The implementation binds `finite-scalar` to the closed boolean values `true` and
 `false`, with bootstrap validation and round-trip fixtures. The scalar domain
 remains a provisional schema-format choice for any future public contract.
 
 ## Canonical Serialization
 
 Canonical serialization is part of the format, not an implementation preference.
-The following ordering is the prototype canonical order.
+The following ordering is the canonical order.
 
 ### Documents
 
@@ -485,7 +483,7 @@ applies these constraints after parsing:
 A non-cut subset is not treated as an empty description. The validator reports
 which layer has an absent declared input and returns an unresolvable outcome.
 
-## Prototype Decisions and Remaining Review Boundaries
+## Implementation Decisions and Remaining Review Boundaries
 
 This grammar draft records these provisional architecture decisions:
 
@@ -520,7 +518,7 @@ layer loading remains a packaging boundary.
 
 ### Namespace URI production
 
-The prototype accepts an exact quoted ASCII string whose payload begins with
+The implementation accepts an exact quoted ASCII string whose payload begins with
 `https://`, has a nonempty authority, and contains no whitespace or control
 characters. It does not normalize or dereference the URI. A future formal URI
 production and schema-version compatibility policy may refine this boundary;
@@ -544,7 +542,7 @@ that demonstrates validator-level necessity.
 ### Symbolic values and cost
 
 The runtime value grammar contains literals and references but no symbolic
-arithmetic. The prototype evaluates cost expressions over declared axes through
+arithmetic. The implementation evaluates cost expressions over declared axes through
 a host-side analysis API; serializable symbolic cost values remain a separate
 projection-language and schema decision, not an unreviewed grammar addition.
 
@@ -560,11 +558,11 @@ follow-up decisions.
 
 ### Finite scalar kind
 
-The prototype binds `finite-scalar` to the closed boolean values `true` and
+The implementation binds `finite-scalar` to the closed boolean values `true` and
 `false`, with round-trip and rejection fixtures. This remains a provisional
 schema-format choice rather than an invitation to infer another scalar domain.
 
-## Prototype and Review Fixtures
+## Implementation and Review Fixtures
 
 The current fixture suite covers these small documents; they also define the
 remaining focused review surface:

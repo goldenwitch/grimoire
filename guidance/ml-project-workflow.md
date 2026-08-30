@@ -29,6 +29,78 @@ The shortest useful loop is:
 The result is a set of related views over one structure, not a collection of
 independent model diagrams.
 
+## Two primary workflows
+
+The front door presents two workflows. They share one addressed description but
+answer different questions:
+
+1. **Cost and resource analysis** calculates or estimates what the described
+    system requires.
+2. **Architecture substrate and diagrams** preserves and communicates what the
+    system is.
+
+Keep the workflows connected through shared addresses, but do not make a
+resource result part of structural identity or make a diagram a second model.
+
+### Cost and resource analysis
+
+Use this workflow when the question is how much computation, memory, bandwidth,
+or another resource a described structure uses or is expected to use.
+
+1. Define the structure and evaluate the layer or cut being analyzed.
+2. For a deterministic calculation, provide explicit cost expressions, axis
+    extents, shapes, placements, and element widths as required by the analysis.
+3. For an observed or estimated value, record its unit, source, protocol,
+    assumptions, and uncertainty context when available.
+4. Report missing inputs and unsupported inference visibly. Do not derive
+    hardware throughput, device topology, contention, dtype width, or runtime
+    behavior from names, labels, or graph topology.
+
+The [typed resource-flow proposal](../proposals/resource-flow.md),
+[cost-layer proposal](../proposals/cost-layer.md),
+[placement and bandwidth proposal](../proposals/placement-bandwidth.md), and
+[measurement schema](../proposals/measurement-schema.md) define the relevant
+boundaries. The implementation's `CostModel` and `bytes_on_wire` APIs provide
+the deterministic calculation path. The [reference example](../crates/grimoire/examples/reference.grimoire)
+provides a small addressed description with separate `cost` and `deployment`
+layers to use as a starting point. Its [resource events](../crates/grimoire/examples/reference-resources.tsv)
+file shows the explicit scenario input format for the probabilistic report.
+
+The [Scry architecture example](../crates/grimoire/examples/scry.grimoire) exercises the same
+workflow against a persistent semantic corpus and search substrate. Its
+[resource events](../crates/grimoire/examples/scry-resources.tsv) distinguish cold and warm
+ingestion from indexed search and handle lookup, while keeping model-cache,
+source, corpus, memory, bandwidth, and latency quantities separate. The
+fixture's measurements cite public Scry implementation facts; its event
+quantities are explicit analysis inputs rather than runtime traces or inferred
+hardware behavior.
+
+### Architecture substrate and diagrams
+
+Use this workflow when the question is how to preserve, compare, or communicate
+a computer-science architecture over time.
+
+1. Put stable shared structure in the core graph with exact addressed blocks,
+    ports, connections, and groups.
+2. Add layers for distinct consumers, objectives, modes, or review questions.
+3. Validate definitions, references, visibility, and layer inputs; then use
+    canonical serialization to make the model portable and reviewable.
+4. Extract downward-closed cuts when a review needs a self-contained slice.
+5. Inspect evaluated layers in the read-only viewer, comparing structure by
+    address and keeping finalized values and resource overlays separate.
+
+The [core specification](../spec/grimoire.md) and
+[concrete grammar](../grammar/grimoire.md) define the substrate. The
+[visualization boundary](../proposals/visualization.md) defines the diagram
+surface. Diagram coordinates, labels, and overlays are presentation data; they
+cannot create, merge, or reinterpret addressed elements. The [reference
+example](../crates/grimoire/examples/reference.grimoire) provides a compact model to validate,
+canonicalize, cut, and inspect.
+
+The Scry example is another static substrate, not a runtime integration. Its
+MCP block is modeled as an outer transport boundary; the current Grimoire
+release does not ship an MCP adapter.
+
 ## 1. Start with the planning question
 
 Write down what the project needs to decide before writing blocks. Examples:
@@ -201,7 +273,7 @@ the structure or discard decorations.
 
 ## 5. Attach typed facts and evidence
 
-The current prototype has ten schema families for recurring planning facts:
+The schema inventory defines ten families for recurring planning facts:
 
 - `axes/1` and `shapes/1` for symbolic dimensions and coarse interfaces;
 - `architecture/1` for model and operator facts;
@@ -296,11 +368,11 @@ with their stage and relevant identifier.
 From the repository root, the focused executable baseline is:
 
 ```text
-cargo test --workspace
+cargo test --workspace --locked
 ```
 
-The tests under `crates/grimoire/tests/` are also the most precise examples of
-the current API. The whole-system reference is
+The tests under `crates/grimoire/tests/` are also precise examples of the API.
+The whole-system reference is
 [reference_validation.rs](../crates/grimoire/tests/reference_validation.rs).
 It composes shared structure with pretraining, action-conditioned, consumer,
 planning, mode, placement, cost, provenance, information, execution, precision,
@@ -358,15 +430,15 @@ use std::collections::BTreeMap;
 
 let model = CostModel::new(vec![
     (
-        Address::new("@demo/encoder")?,
+        Address::parse("@demo/encoder")?,
         CostExpression::product(vec![
-            CostExpression::axis(Address::new("@demo/frames")?),
+            CostExpression::axis(Address::parse("@demo/frames")?),
             CostExpression::constant(1408),
         ]),
     ),
 ])?;
 let mut axes = BTreeMap::new();
-axes.insert(Address::new("@demo/frames")?, 16);
+    axes.insert(Address::parse("@demo/frames")?, 16);
 let report = model.evaluate(&reprojection.structural, &axes)?;
 ```
 
@@ -384,8 +456,8 @@ Use an explicit channel interpretation for information claims: identify the
 source port, terminal ports, finite distributions, block kernels, quantity,
 method, and evidence context. Structural reach is not mutual information, and
 route percentages are not obtained by adding branch mutual informations. A
-continuous estimator, cyclic channel, causal intervention, or correlated
-internal source remains unresolved or deferred until its contract is supplied.
+continuous estimator, cyclic channel, causal intervention, or correlated source
+remains unresolved or deferred until its contract is supplied.
 
 ## 9. Inspect and compare views
 
@@ -402,8 +474,13 @@ and single-reprojection inspection:
 
 The viewer is a static artifact. It does not execute projections, training,
 sampling, recurrence, controllers, or network calls. Its current embedded
-model is derived from the reference fixtures; it is a way to inspect the
-workflow, not a replacement for validating the source description.
+model is a curated presentation snapshot; it is a way to inspect the workflow,
+not a replacement for validating a source description.
+
+The viewer's pure presentation step has the shape
+`renderPresentation(model, uiState) -> presentation`. It reads no DOM or global
+state; DOM updates and event handlers apply its returned presentation outside
+the pure step.
 
 ## 10. Use the V-JEPA 2 path as a worked pattern
 

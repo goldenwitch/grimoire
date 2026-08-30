@@ -1,7 +1,9 @@
 use grimoire::{
-    Element, ExtensionValue, Schema, evaluate_layer, extract_cut, parse_description,
-    prototype_schemas, validate_description,
+    Element, ExtensionValue, evaluate_layer, extract_cut, parse_description, validate_description,
 };
+
+mod common;
+use common::schemas;
 
 const CONSUMERS: &str = r#"
     grimoire 1.0.0
@@ -320,10 +322,6 @@ const CONSUMERS: &str = r#"
         }
     }
 "#;
-
-fn schemas() -> Vec<Schema> {
-    prototype_schemas().unwrap_or_else(|error| panic!("{error}"))
-}
 
 fn parsed() -> grimoire::Description {
     parse_description(CONSUMERS).unwrap_or_else(|error| panic!("{error}"))

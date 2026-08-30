@@ -469,13 +469,11 @@ fn write_extension_parameter(
             output.push_str(" @");
             output.push_str(&extension.version.to_string());
             output.push_str(" = ");
-            let schema = crate::prototype_schemas().ok().and_then(|schemas| {
-                schemas.into_iter().find(|schema| {
-                    schema.namespace == extension.namespace
-                        && schema.name == extension.schema
-                        && schema.version == extension.version
-                })
-            });
+            let schema = crate::schemas::prototype_schema(
+                &extension.namespace,
+                &extension.schema,
+                extension.version,
+            );
             write_value_with_schema(output, value, schema.as_ref().map(|schema| &schema.value))?;
             output.push(';');
         }
