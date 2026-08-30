@@ -1,3 +1,4 @@
 *.redb
 target/
 .vscode/mcp.json
+readiness.vine

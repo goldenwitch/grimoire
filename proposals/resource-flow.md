@@ -188,13 +188,17 @@ MCP configuration are not inputs to the public fixture.
 
 ## Report and failure shape
 
-A report includes:
+A caller pairs the report with the evaluated description or layer identity. A
+report includes:
 
-- the evaluated description or layer identity supplied by the caller;
 - the scenario names and normalized probabilities;
 - expected flow quantities by resource kind;
 - expected charge quantities by resource kind; and
-- the explicit assumptions or source records supplied by the caller.
+- the explicit scenario assumptions supplied by the caller.
+
+Source and protocol context for measured constants remains on the attached
+`measurement/1` values when present. The resource report does not silently
+merge those description decorations into its sidecar event assumptions.
 
 Failures identify the responsible boundary and relevant address or scenario:
 missing elements, non-connection flow relations, endpoint mismatches, duplicate

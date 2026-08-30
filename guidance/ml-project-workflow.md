@@ -368,7 +368,7 @@ with their stage and relevant identifier.
 From the repository root, the focused executable baseline is:
 
 ```text
-cargo test --workspace
+cargo test --workspace --locked
 ```
 
 The tests under `crates/grimoire/tests/` are also precise examples of the API.

@@ -13,7 +13,7 @@ operations.
 ## Quick start
 
 ```text
-cargo test --workspace
+cargo test --workspace --locked
 ```
 
 Open [viz/index.html](viz/index.html) directly to inspect the static viewer.
@@ -32,10 +32,10 @@ values from names or topology.
 The command-line path is intentionally thin:
 
 ```text
-cargo run --package grimoire -- validate examples/reference.grimoire
-cargo run --package grimoire -- canonicalize examples/reference.grimoire
-cargo run --package grimoire -- evaluate examples/reference.grimoire architecture
-cargo run --package grimoire -- resources examples/reference.grimoire cost examples/reference-resources.tsv
+cargo run --locked --package grimoire -- validate examples/reference.grimoire
+cargo run --locked --package grimoire -- canonicalize examples/reference.grimoire
+cargo run --locked --package grimoire -- evaluate examples/reference.grimoire architecture
+cargo run --locked --package grimoire -- resources examples/reference.grimoire cost examples/reference-resources.tsv
 ```
 
 The resource events file is an explicit analysis input. FLOP work, bytes, and
@@ -46,9 +46,9 @@ For a grounded architecture sample, run the same path against the public Scry
 fixture:
 
 ```text
-cargo run --package grimoire -- validate examples/scry.grimoire
-cargo run --package grimoire -- evaluate examples/scry.grimoire architecture
-cargo run --package grimoire -- resources examples/scry.grimoire cost examples/scry-resources.tsv
+cargo run --locked --package grimoire -- validate examples/scry.grimoire
+cargo run --locked --package grimoire -- evaluate examples/scry.grimoire architecture
+cargo run --locked --package grimoire -- resources examples/scry.grimoire cost examples/scry-resources.tsv
 ```
 
 The Scry fixture uses public implementation facts as sourced measurements and
