@@ -22,12 +22,22 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
       - name: Run Clippy
-        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+        run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
       - name: Run tests
-        run: cargo test --workspace
+        run: cargo test --workspace --locked
       - name: Check locked metadata
         run: cargo metadata --locked --no-deps
       - name: Check package
         run: cargo check -p grimoire --locked
       - name: Verify package archive
         run: cargo package -p grimoire --locked
+      - name: Test packaged crate
+        shell: bash
+        run: |
+          archive="$(find target/package -maxdepth 1 -name 'grimoire-*.crate' -print -quit)"
+          test -n "$archive"
+          mkdir -p target/package/extracted
+          tar -xzf "$archive" -C target/package/extracted
+          manifest="$(find target/package/extracted -mindepth 2 -maxdepth 2 -name Cargo.toml -print -quit)"
+          test -n "$manifest"
+          cargo test --manifest-path "$manifest" --locked

@@ -8,7 +8,7 @@ use grimoire::{
 mod common;
 use common::{address, schemas};
 
-const EXAMPLE: &str = include_str!("../../../examples/reference.grimoire");
+const EXAMPLE: &str = include_str!("../examples/reference.grimoire");
 
 #[test]
 fn public_example_covers_both_primary_workflows() {

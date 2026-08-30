@@ -9,15 +9,15 @@ use grimoire::{
 };
 
 fn example() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../examples/reference.grimoire")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples/reference.grimoire")
 }
 
 fn scry_example() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../examples/scry.grimoire")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples/scry.grimoire")
 }
 
 fn scry_events() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../examples/scry-resources.tsv")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples/scry-resources.tsv")
 }
 
 fn run(arguments: &[&str]) -> std::process::Output {
@@ -80,7 +80,7 @@ fn cli_reports_typed_resource_scenarios_from_explicit_events() {
         .to_str()
         .unwrap_or_else(|| panic!("example path is not UTF-8"));
     let events_path =
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../examples/reference-resources.tsv");
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples/reference-resources.tsv");
     let events_path = events_path
         .to_str()
         .unwrap_or_else(|| panic!("events path is not UTF-8"));

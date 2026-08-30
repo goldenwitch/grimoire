@@ -255,6 +255,60 @@ fn invalid_probabilities_and_graph_flows_fail_visibly() {
 }
 
 #[test]
+fn scenario_permutations_produce_the_same_report() {
+    let description = parse_description(INDEXED_SEARCH).unwrap_or_else(|error| panic!("{error}"));
+    validate_description(&description, &schemas())
+        .unwrap_or_else(|errors| panic!("validation errors: {errors:?}"));
+    let reprojection = evaluate_layer(&description, "search")
+        .unwrap_or_else(|error| panic!("{error}"))
+        .structural;
+    let first = ResourceScenario::new(
+        "a",
+        0.1,
+        "first deterministic case",
+        Vec::new(),
+        vec![charge(
+            "@search/encoder",
+            bundle(vec![(ResourceKind::FlopWork, 9_007_199_254_740_992)]),
+        )],
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    let second = ResourceScenario::new(
+        "b",
+        0.2,
+        "second deterministic case",
+        Vec::new(),
+        vec![charge(
+            "@search/encoder",
+            bundle(vec![(ResourceKind::FlopWork, 9_007_199_254_740_992)]),
+        )],
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+    let third = ResourceScenario::new(
+        "c",
+        0.7,
+        "third deterministic case",
+        Vec::new(),
+        vec![charge(
+            "@search/encoder",
+            bundle(vec![(ResourceKind::FlopWork, 9_007_199_254_740_992)]),
+        )],
+    )
+    .unwrap_or_else(|error| panic!("{error}"));
+
+    let forward = ResourceModel::new(vec![first.clone(), second.clone(), third.clone()])
+        .unwrap_or_else(|error| panic!("{error}"))
+        .evaluate(&reprojection)
+        .unwrap_or_else(|error| panic!("{error}"));
+    let reverse = ResourceModel::new(vec![third, second, first])
+        .unwrap_or_else(|error| panic!("{error}"))
+        .evaluate(&reprojection)
+        .unwrap_or_else(|error| panic!("{error}"));
+
+    assert_eq!(forward, reverse);
+}
+
+#[test]
 fn vjepa_and_frontier_cases_keep_resource_kinds_componentwise() {
     let description = parse_description(VJEPA_FRONTIERS).unwrap_or_else(|error| panic!("{error}"));
     validate_description(&description, &schemas())

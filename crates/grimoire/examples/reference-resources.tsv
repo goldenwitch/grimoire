@@ -1,4 +1,4 @@
-# Explicit resource events for examples/reference.grimoire
+# Explicit resource events for reference.grimoire
 scenario	indexed-hit	0.75	query resolves in the index
 scenario	fallback-scan	0.25	query misses the index
 flow	indexed-hit	@example/encoder-to-head	@example/encoder/output	@example/head/input	bytes	4096

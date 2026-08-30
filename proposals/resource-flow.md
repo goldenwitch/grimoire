@@ -176,8 +176,8 @@ The architecture proposals own the observed structural distinctions. This
 proposal supplies a common analysis account for their explicit resource facts;
 it does not make any paper family a core vocabulary term.
 
-The public [Scry architecture fixture](../examples/scry.grimoire) and its
-[resource sidecar](../examples/scry-resources.tsv) exercise this row. Their
+The public [Scry architecture fixture](../crates/grimoire/examples/scry.grimoire) and its
+[resource sidecar](../crates/grimoire/examples/scry-resources.tsv) exercise this row. Their
 measurement decorations cite Scry's public implementation and architecture
 records for the model assets, token window, embedding dimension, source-read
 bound, and corpus-scan behavior. The fixture shares the indexed-artifact

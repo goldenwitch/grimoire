@@ -52,10 +52,10 @@ values from names or topology.
 The command-line path is intentionally thin:
 
 ```text
-cargo run --locked --package grimoire -- validate examples/reference.grimoire
-cargo run --locked --package grimoire -- canonicalize examples/reference.grimoire
-cargo run --locked --package grimoire -- evaluate examples/reference.grimoire architecture
-cargo run --locked --package grimoire -- resources examples/reference.grimoire cost examples/reference-resources.tsv
+cargo run --locked --package grimoire -- validate crates/grimoire/examples/reference.grimoire
+cargo run --locked --package grimoire -- canonicalize crates/grimoire/examples/reference.grimoire
+cargo run --locked --package grimoire -- evaluate crates/grimoire/examples/reference.grimoire architecture
+cargo run --locked --package grimoire -- resources crates/grimoire/examples/reference.grimoire cost crates/grimoire/examples/reference-resources.tsv
 ```
 
 The resource events file is an explicit analysis input. FLOP work, bytes, and
@@ -66,9 +66,9 @@ For a grounded architecture sample, run the same path against the public Scry
 fixture:
 
 ```text
-cargo run --locked --package grimoire -- validate examples/scry.grimoire
-cargo run --locked --package grimoire -- evaluate examples/scry.grimoire architecture
-cargo run --locked --package grimoire -- resources examples/scry.grimoire cost examples/scry-resources.tsv
+cargo run --locked --package grimoire -- validate crates/grimoire/examples/scry.grimoire
+cargo run --locked --package grimoire -- evaluate crates/grimoire/examples/scry.grimoire architecture
+cargo run --locked --package grimoire -- resources crates/grimoire/examples/scry.grimoire cost crates/grimoire/examples/scry-resources.tsv
 ```
 
 The Scry fixture uses public implementation facts as sourced measurements and
@@ -93,13 +93,13 @@ writes and interaction wiring are effects outside that function.
 - [Concrete grammar](grammar/grimoire.md): document syntax and serialization.
 - [ML project workflow](guidance/ml-project-workflow.md): a practical modeling
   workflow.
-- [Reference example](examples/reference.grimoire): a compact description that
+- [Reference example](crates/grimoire/examples/reference.grimoire): a compact description that
   demonstrates both primary workflows.
-- [Resource events](examples/reference-resources.tsv): explicit workload and
+- [Resource events](crates/grimoire/examples/reference-resources.tsv): explicit workload and
   typed-resource inputs for the reference example.
-- [Scry architecture example](examples/scry.grimoire): a public addressed
+- [Scry architecture example](crates/grimoire/examples/scry.grimoire): a public addressed
   ingestion, search, handle, and transport substrate.
-- [Scry resource events](examples/scry-resources.tsv): explicit workload and
+- [Scry resource events](crates/grimoire/examples/scry-resources.tsv): explicit workload and
   typed-resource inputs for the Scry example.
 - [Resource-flow contract](proposals/resource-flow.md): typed, probabilistic,
   machine-agnostic resource accounting.

@@ -189,10 +189,16 @@ pub struct ResourceModel {
 }
 
 impl ResourceModel {
+    /// Creates a model with scenarios in canonical name order.
+    ///
+    /// Canonical storage order makes floating-point aggregation reproducible
+    /// when callers provide the same named scenarios in different orders.
     pub fn new(scenarios: Vec<ResourceScenario>) -> Result<Self, ResourceError> {
         if scenarios.is_empty() {
             return Err(ResourceError::EmptyResourceModel);
         }
+        let mut scenarios = scenarios;
+        scenarios.sort_by(|left, right| left.name.cmp(&right.name));
         let mut names = BTreeSet::new();
         let mut probability_total = 0.0;
         for scenario in &scenarios {
@@ -210,6 +216,7 @@ impl ResourceModel {
         Ok(Self { scenarios })
     }
 
+    /// The scenarios in canonical name order.
     #[must_use]
     pub fn scenarios(&self) -> &[ResourceScenario] {
         &self.scenarios

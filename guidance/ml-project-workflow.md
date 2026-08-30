@@ -61,14 +61,14 @@ The [typed resource-flow proposal](../proposals/resource-flow.md),
 [placement and bandwidth proposal](../proposals/placement-bandwidth.md), and
 [measurement schema](../proposals/measurement-schema.md) define the relevant
 boundaries. The implementation's `CostModel` and `bytes_on_wire` APIs provide
-the deterministic calculation path. The [reference example](../examples/reference.grimoire)
+the deterministic calculation path. The [reference example](../crates/grimoire/examples/reference.grimoire)
 provides a small addressed description with separate `cost` and `deployment`
-layers to use as a starting point. Its [resource events](../examples/reference-resources.tsv)
+layers to use as a starting point. Its [resource events](../crates/grimoire/examples/reference-resources.tsv)
 file shows the explicit scenario input format for the probabilistic report.
 
-The [Scry architecture example](../examples/scry.grimoire) exercises the same
+The [Scry architecture example](../crates/grimoire/examples/scry.grimoire) exercises the same
 workflow against a persistent semantic corpus and search substrate. Its
-[resource events](../examples/scry-resources.tsv) distinguish cold and warm
+[resource events](../crates/grimoire/examples/scry-resources.tsv) distinguish cold and warm
 ingestion from indexed search and handle lookup, while keeping model-cache,
 source, corpus, memory, bandwidth, and latency quantities separate. The
 fixture's measurements cite public Scry implementation facts; its event
@@ -94,7 +94,7 @@ The [core specification](../spec/grimoire.md) and
 [visualization boundary](../proposals/visualization.md) defines the diagram
 surface. Diagram coordinates, labels, and overlays are presentation data; they
 cannot create, merge, or reinterpret addressed elements. The [reference
-example](../examples/reference.grimoire) provides a compact model to validate,
+example](../crates/grimoire/examples/reference.grimoire) provides a compact model to validate,
 canonicalize, cut, and inspect.
 
 The Scry example is another static substrate, not a runtime integration. Its
