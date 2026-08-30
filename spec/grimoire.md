@@ -1,6 +1,6 @@
 # Grimoire — a layered description language for ML systems
 
-*Grimoire is a pre-release codename. This document records design intent — current best guesses, not settled fact. Version 1.0.0.*
+*Grimoire is the project name. This document records design intent — current best guesses, not settled fact. Version 1.0.0.*
 
 ## Conventions
 
