@@ -101,6 +101,8 @@ writes and interaction wiring are effects outside that function.
   ingestion, search, handle, and transport substrate.
 - [Scry resource events](crates/grimoire/examples/scry-resources.tsv): explicit workload and
   typed-resource inputs for the Scry example.
+- [Published crate README](crates/grimoire/README.md): package-relative
+  installation and example commands.
 - [Resource-flow contract](proposals/resource-flow.md): typed, probabilistic,
   machine-agnostic resource accounting.
 - [Schema inventory](proposals/schema-inventory.md): the shared schema family

@@ -40,4 +40,7 @@ jobs:
           tar -xzf "$archive" -C target/package/extracted
           manifest="$(find target/package/extracted -mindepth 2 -maxdepth 2 -name Cargo.toml -print -quit)"
           test -n "$manifest"
+          package_root="$(dirname "$manifest")"
+          ! grep -Eq 'crates/grimoire|\.\./' "$package_root/README.md"
+          grep -q 'examples/reference.grimoire' "$package_root/README.md"
           cargo test --manifest-path "$manifest" --locked
