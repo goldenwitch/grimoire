@@ -29,3 +29,5 @@ jobs:
         run: cargo metadata --locked --no-deps
       - name: Check package
         run: cargo check -p grimoire --locked
+      - name: Verify package archive
+        run: cargo package -p grimoire --locked

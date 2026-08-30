@@ -16,6 +16,26 @@ operations.
 cargo test --workspace --locked
 ```
 
+Install the command-line tool from a checkout:
+
+```text
+cargo install --path crates/grimoire --locked
+grimoire --help
+```
+
+After publication, install the same CLI by version:
+
+```text
+cargo install grimoire --version 1.0.0
+```
+
+Consume the Rust library after the 1.0.0 package is published:
+
+```toml
+[dependencies]
+grimoire = "1.0.0"
+```
+
 Open [viz/index.html](viz/index.html) directly to inspect the static viewer.
 
 ## Choose a workflow
@@ -89,6 +109,7 @@ writes and interaction wiring are effects outside that function.
   from recurring architecture concepts to Grimoire primitives.
 - [Case studies](proposals/v-jepa-2-case-studies.md): the primary worked system.
 - [Visualization boundary](proposals/visualization.md): the viewer contract.
+- [License](LICENSE): MIT license for the repository and published crate.
 
 The remaining proposals record focused contracts and explicit boundaries for
 projection, schemas, information flow, placement, cost, provenance, execution,
