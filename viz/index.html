@@ -861,10 +861,18 @@
         const nodeFor = (id) => dataset().elements[id];
         const nodeForModel = (model, id) => model.elements[id];
 
+        function groupContains(model, groupId, targetId, visited = new Set()) {
+            if (visited.has(groupId)) return false;
+            visited.add(groupId);
+            const groupNode = nodeForModel(model, groupId);
+            if (!groupNode || groupNode.kind !== "group") return false;
+            return groupNode.members.includes(targetId) || groupNode.members.some((member) => groupContains(model, member, targetId, visited));
+        }
+
         function hiddenByGroup(model, uiState, id, activeView) {
             return activeView.visible.some((candidate) => {
                 const candidateNode = nodeForModel(model, candidate);
-                return candidateNode && candidateNode.kind === "group" && uiState.collapsed.has(candidate) && candidateNode.members.includes(id);
+                return candidateNode && candidateNode.kind === "group" && uiState.collapsed.has(candidate) && groupContains(model, candidate, id);
             });
         }
 
@@ -921,7 +929,7 @@
 
         function renderGraphPane(model, uiState, activeView, otherView, side) {
             const ids = displayIds(model, uiState, activeView);
-            const visible = new Set(activeView.visible.filter((id) => nodeForModel(model, id)));
+            const visible = new Set(ids);
             const lines = activeView.edges.filter((item) => visible.has(item.source) && visible.has(item.target)).map((item) => {
                 const sourceIndex = ids.indexOf(item.source);
                 const targetIndex = ids.indexOf(item.target);
@@ -991,7 +999,7 @@
             const ports = (node.ports || []).map((port) => `<div class="fact"><span class="fact-key">port</span><span class="fact-value"><code>${escapeHtml(port)}</code></span></div>`).join("");
             const members = (node.members || []).map((member) => `<div class="fact"><span class="fact-key">member</span><span class="fact-value"><code>${escapeHtml(member)}</code></span></div>`).join("");
             const status = node.meta && node.meta.state ? String(node.meta.state) : "exact";
-            $("inspector").innerHTML = `<div class="inspector-kicker">Selected ${escapeHtml(node.kind)}</div><h2>${escapeHtml(node.label)}</h2><code class="inspector-address">${escapeHtml(node.id)}</code><div class="inspector-state"><span class="state-pill ${relation}">${relation}</span><span class="state-pill">${escapeHtml(status)}</span></div>
+            return `<div class="inspector-kicker">Selected ${escapeHtml(node.kind)}</div><h2>${escapeHtml(node.label)}</h2><code class="inspector-address">${escapeHtml(node.id)}</code><div class="inspector-state"><span class="state-pill ${relation}">${relation}</span><span class="state-pill">${escapeHtml(status)}</span></div>
                 ${facts ? `<section class="inspector-section"><h3>Finalized metadata</h3><div class="fact-list">${facts}</div></section>` : ""}
                 ${analysisFacts ? `<section class="inspector-section"><h3>Opt-in analysis</h3><div class="fact-list">${analysisFacts}</div></section>` : ""}
                 ${ports ? `<section class="inspector-section"><h3>Ports</h3><div class="fact-list">${ports}</div></section>` : ""}
@@ -1105,7 +1113,19 @@
         $("datasetSelect").addEventListener("change", (event) => setDataset(event.target.value));
         $("leftViewSelect").addEventListener("change", (event) => { state.leftView = event.target.value; state.selected = leftView().visible.find((id) => nodeFor(id)) || null; state.collapsed.clear(); renderAll(); });
         $("rightViewSelect").addEventListener("change", (event) => { state.rightView = event.target.value; renderAll(); });
-        $("addressSearch").addEventListener("input", (event) => { state.query = event.target.value.trim(); renderAll(); });
+        $("addressSearch").addEventListener("input", (event) => {
+            state.query = event.target.value.trim();
+            if (state.query) {
+                const visible = leftView().visible;
+                const query = state.query.toLowerCase();
+                const match = visible.find((id) => id.toLowerCase() === query) || visible.find((id) => {
+                    const node = nodeFor(id);
+                    return node && searchMatches(node, state.query);
+                });
+                if (match) state.selected = match;
+            }
+            renderAll();
+        });
         $("addressSearch").addEventListener("keydown", (event) => { if (event.key === "Escape") { state.query = ""; event.target.value = ""; renderAll(); } });
         $("clearFocus").addEventListener("click", () => { state.query = ""; $("addressSearch").value = ""; state.selected = leftView().visible.find((id) => nodeFor(id)) || null; renderAll(); });
         $("metadataToggle").addEventListener("click", () => setToggle($("metadataToggle"), "showMetadata"));

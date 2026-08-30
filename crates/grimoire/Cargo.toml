@@ -1,6 +1,10 @@
 [package]
 name = "grimoire"
 version = "0.1.0"
+description = "A layered description language and Rust reference implementation for static ML architecture analysis."
+repository = "https://github.com/goldenwitch/grimoire"
+readme = "../../README.md"
+keywords = ["machine-learning", "architecture", "graph"]
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true

@@ -45,8 +45,8 @@ Accept: Every command passes; package metadata and contents are suitable for pub
 > Unresolved runtime and continuous-analysis boundaries are recorded rather than hidden by a green presentation surface.
 ---
 [readiness/scope] Set public identity and release posture (reviewing)
-Files: the publication decisions consumed by metadata, public documentation, the two primary workflows, and the tool detour.
-Do: Record the public project identity and release posture, and record the product focus agreed for this branch. Confirm the public project name, repository owner and name, remote URL, package version policy, pre-release wording, license choice, and supported Rust toolchain policy. Record the local-only status of this readiness plan, the CLI boundary, the MCP detour boundary, and the typed probabilistic resource direction. Record explicit human decisions where a value is not yet settled; downstream artifacts must not invent ownership, licensing, stability claims, or resource semantics.
+Files: the publication decisions consumed by metadata, public documentation, the two primary workflows, and the deferred adapter boundary.
+Do: Record the public project identity and release posture, and record the product focus agreed for this branch. Confirm the public project name, repository owner and name, remote URL, package version policy, pre-release wording, license choice, and supported Rust toolchain policy. Record the local-only status of this readiness plan, the CLI boundary, the MCP deferral boundary, and the typed probabilistic resource direction. Record explicit human decisions where a value is not yet settled; downstream artifacts must not invent ownership, licensing, stability claims, or resource semantics.
 Accept: Each publication identity and release-posture field has one explicit decision or an explicit human gate, the two primary workflows are recorded as the product focus, and the CLI/MCP/resource boundaries are unambiguous.
 > The first-time user experience leads with cost/resource analysis and architecture-substrate diagrams.
 > The readiness VINE remains local planning material and need not be published.
@@ -57,7 +57,7 @@ Accept: Each publication identity and release-posture field has one explicit dec
 > The addressed graph and its layers are the source of architectural identity; diagrams are derived presentation views, not an alternate editable model.
 > Unsettled repository ownership, remote, license, version, release-posture, and viewer-data-production values remain explicit human gates; Grimoire MCP inclusion is explicitly deferred for this release.
 ---
-[readiness/metadata] Align package metadata (notstarted)
+[readiness/metadata] Align package metadata (reviewing)
 Files: `Cargo.toml` and `crates/grimoire/Cargo.toml`.
 Do: Apply the settled public identity, description, license expression, repository or homepage metadata, package version, and Rust toolchain policy. Keep workspace inheritance valid and avoid metadata that claims a stable language contract without a corresponding decision. Check package metadata and package contents with Cargo.
 Accept: Locked metadata reports the intended package identity; manifests contain no placeholder or private path; license and version match the settled posture; and the selected package check succeeds with the intended public files.
@@ -104,14 +104,14 @@ Accept: Repository-relative links resolve; normative specification, grammar, des
 > The docs audit checks that architecture diagrams never become a competing source of structural identity.
 > The docs audit checks that the CLI is the public adapter over the library and that the deferred MCP boundary introduces no parallel semantics.
 ---
-[readiness/ci] Add a portable CI baseline (notstarted)
+[readiness/ci] Add a portable CI baseline (reviewing)
 Files: `.github/workflows/ci.yml`.
 Do: Add a small workflow for the settled Rust toolchain that runs formatting, strict Clippy, workspace tests, locked metadata, and the selected package check on pull requests and the default branch. Keep it independent of private paths, local caches, external services, and optional browser inspection.
 Accept: A fresh public runner can execute the workflow from the repository alone; required commands are explicit; failures are visible; and workflow commands match the local release gate.
 -> readiness/metadata
 -> readiness/scope
 ---
-[readiness/viewer] Verify the static viewer artifact (notstarted)
+[readiness/viewer] Verify the static viewer artifact (reviewing)
 Files: `viz/index.html` and the viewer contract.
 Do: Inspect the viewer at desktop and narrow widths. Exercise corpus selection, primary and comparison views, address focus, group collapse, keyboard selection, metadata and analysis toggles, and clear-focus behavior. Confirm the embedded model remains static and the page makes no network requests or dependency calls. Verify that the viewer presents the addressed architecture substrate and keeps deterministic cost and probabilistic resource overlays separate from structural identity. Decide and record whether the embedded presentation payload is generated from the canonical description through the CLI or remains a curated release snapshot; the canonical description remains the structural source either way. Update only concrete issues found by this check.
 Accept: The viewer opens directly without a build step, server, dependency, or network request; the public cases and opaque/deferred states remain inspectable; controls work at desktop and mobile widths; page-level overflow and text overlap are absent; the viewer's relationship to the canonical description is explicit and tested; and no visualization-specific core kind or runtime semantics is introduced.
@@ -119,11 +119,11 @@ Accept: The viewer opens directly without a build step, server, dependency, or n
 > The viewer is a read-only presentation over addressed structure, not an architecture authoring surface.
 > Address comparison is structural identity; labels, layout, and overlays cannot create or merge elements.
 > Cost, placement, measurement, probabilistic resource, and other analysis surfaces remain opt-in views.
-> The canonical description remains the only structural source of truth; the production mechanism for the viewer payload is an explicit release gate.
-> The likely generated-payload path must preserve direct offline opening by committing or embedding generated presentation data rather than requiring a server.
+> The canonical description remains the only structural source of truth; this release keeps the embedded presentation payload as a curated snapshot assembled from the public case-study fixtures.
+> Direct opening is a release requirement; any future generated-payload path must commit or embed presentation data rather than require a server.
 > The presentation function is pure with respect to its model and UI state: `renderPresentation(model, uiState)` returns presentation data, while DOM writes and event wiring remain outside it.
 ---
-[readiness/hygiene] Remove publication hazards (notstarted)
+[readiness/hygiene] Remove publication hazards (reviewing)
 Files: `.gitignore` and the tracked-file inventory.
 Do: Audit the tracked tree for secrets, generated output, local databases, editor-only state, private paths, and machine-specific caches. Keep intended local outputs ignored and remove unexplained artifacts. Do not add repository configuration that depends on a developer machine or an external checkout.
 Accept: The tracked tree contains no generated build output, local database, credential, private path, or unexplained machine-specific artifact; ignore rules cover intended local outputs; and the repository can be checked from a fresh clone.

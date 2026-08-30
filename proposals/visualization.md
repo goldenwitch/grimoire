@@ -3,9 +3,10 @@
 This proposal defines the first visualization boundary for Grimoire. It is a
 rendering contract, not a new core vocabulary or a runtime execution model.
 The implementation is a static HTML viewer with a self-contained presentation
-model. Its data is a curated snapshot and is not a second executable source of
-structural truth; the rendering contract does not depend on how the snapshot is
-produced.
+model. Its data is an intentionally curated release snapshot assembled from
+the public V-JEPA 2 and cross-paper case-study fixtures; it is not a second
+executable source of structural truth. The rendering contract does not depend
+on how the snapshot is produced.
 
 The governing sources are [grimoire.md](../spec/grimoire.md),
 [projection-language.md](./projection-language.md), the reference fixture in
